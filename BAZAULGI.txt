@@ -1,0 +1,34 @@
+users{
+    id,
+    username,
+    first_name,
+    middle_name,
+    last_name
+    password,
+    phone,
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------STANDARTLAR--------------------------------------
+1)Har so`z orasi _ tag chiziq bilan ajratiladi,
+2)relationlarda id ustun nomi oxirida tag chiziq bilan beriladi(user_id)
