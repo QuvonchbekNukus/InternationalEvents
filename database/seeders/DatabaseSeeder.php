@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Department;
+use App\Models\Rank;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,11 +17,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            DepartmentSeeder::class,
+            RankSeeder::class,
+            RoleSeeder::class,
         ]);
+
+        User::query()->updateOrCreate(
+            ['phone' => '998996822712'],
+            [
+                'first_name' => 'Test',
+                'middle_name' => 'Testlovich',
+                'last_name' => 'User',
+                'password' => bcrypt('password'),
+                'department_id' => Department::query()->where('code', 'XAB')->value('id'),
+                'rank_id' => Rank::query()->where('name_uz', 'Leytenant')->value('id') ?? 1,
+                'is_active' => true,
+            ]
+        );
     }
 }
