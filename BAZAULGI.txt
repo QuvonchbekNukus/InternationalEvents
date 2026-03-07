@@ -1,28 +1,277 @@
-users{
-    id,
-    username,
-    first_name,
-    middle_name,
-    last_name
-    password,
-    phone,
-}
+users
+- id
+- first_name
+- middle_name
+- last_name
+- phone UNIQUE
+- password
+- position_ru NULL              -- lavozimi
+- position_uz NULL              -- lavozimi
+- position_cryl NULL            -- lavozimi
+- department_id NULL
+- rank_id
+- avatar NULL
+- last_login_at NULL
+- is_active BOOLEAN DEFAULT 1
+- created_at
+- updated_at
+
+ranks
+- id
+- name_ru
+- name_uz
+- name_cryl
+
+
+departments(tashkilotimiz ichidagi bo`limlar)
+- id
+- name_ru
+- name_uz
+- name_cryl
+- code NULL(bo`lim uchun qisqartma)
+- description NULL
+- created_at
+- updated_at
+
+countries(hamkorlikdagi davlatlar)
+- id
+- name_ru
+- name_uz NULL
+- name_cryl NULL
+- iso2 NULL (davlatlarni qisqartma nomlari uz,ru)
+- iso3 NULL (davlatlarni qisqartma nomlari uzb,rus)
+- region_ru NULL                -- Yevropa, Osiyo va hokazo
+- region_uz NULL                -- Yevropa, Osiyo va hokazo
+- region_cryl NULL              -- Yevropa, Osiyo va hokazo
+- latitude NULL
+- longitude NULL
+- default_zoom NULL
+- cooperation_status ENUM('active','planned','completed') DEFAULT 'active'
+- boundary_geojson_path NULL
+- flag_path NULL
+- notes TEXT NULL
+- created_at
+- updated_at
 
 
 
+partner_organizations
+- id
+- country_id
+- name_ru
+- name_uz
+- name_cryl
+- short_name NULL
+- organization_type_ru NULL     -- vazirlik, elchixona, kompaniya, universitet...
+- organization_type_uz NULL     -- vazirlik, elchixona, kompaniya, universitet...
+- organization_type_cryl NULL     -- vazirlik, elchixona, kompaniya, universitet...
+- address NULL
+- city NULL
+- website NULL
+- status ENUM('active','planned','completed') DEFAULT 'active'
+- notes TEXT NULL
+- created_at
+- updated_at
+
+organization_types
+- id
+- name_ru
+- name_uz
+- name_cryl
+- created_at
+- updated_at
 
 
+partner_contacts
+- id
+- partner_organization_id
+- full_name_ru
+- full_name_uz
+- full_name_cryl
+- position_ru NULL
+- position_uz NULL
+- position_cryl NULL
+- email NULL                 -- encrypt qilsa bo‘ladi
+- phone NULL                 -- encrypt qilsa bo‘ladi
+- notes TEXT NULL
+- is_primary BOOLEAN DEFAULT 0
+- created_at
+- updated_at
+
+>>>>>>>>>>>>>   KELISHUVLAR   <<<<<<<<<<<<<<<<<<<<<
+
+agreement_types(memorandum,bitim,shartnoma,protokol)
+- id
+- name_ru
+- name_uz
+- name_CRYL
+- created_at
+- updated_at
 
 
+agreement_directions(Hamkorlik yo‘nalishlari:texnologiya,xavfsizlik)
+
+- id
+- name_ru
+- name_uz
+- name_cryl
+- created_at
+- updated_at
+
+agreements
+- id
+- agreement_number(shartnoma raqami) NULL,UNIQUE
+- title_ru
+- title_uz
+- title_cryl
+- short_title_ru NULL
+- short_title_uz NULL
+- short_title_cryl NULL
+- country_id
+- partner_organization_id NULL
+- agreement_type_id NULL
+- agreement_direction_id NULL
+- signed_date NULL
+- start_date NULL
+- end_date NULL
+- status ENUM('draft','active','expired','terminated','completed') DEFAULT 'draft'
+- responsible_user_id(users dan olinadi bizdan kim javbgar shu shartnomaga shuni belgilaydi) NULL
+- responsible_department_id NULL
+- description NULL
+- created_by NULL
+- updated_by NULL
+- created_at
+- updated_at
+
+>>>>>>>>>>>>>   TASHRIFLAR   <<<<<<<<<<<<<<<<<<<<<
+
+visit_types
+- id
+- name_ru
+- name_uz
+- name_cryl
+- created_at
+- updated_at
 
 
+visits
+- id
+- title_ru
+- title_uz
+- title_cryl
+- visit_type_id NULL
+- country_id
+- partner_organization_id NULL
+- city NULL
+- address NULL
+- latitude NULL
+- longitude NULL
+- start_date
+- end_date NULL
+- direction ENUM('incoming','outgoing') NULL
+- status ENUM('planned','ongoing','completed','cancelled') DEFAULT 'planned'
+- responsible_user_id NULL
+- responsible_department_id NULL
+- purpose_ru NULL (tashrif maqsadi)
+- purpose_uz NULL (tashrif maqsadi)
+- purpose_cryl NULL (tashrif maqsadi)
+- result_summary_ru TEXT NULL (tashrifdan olingan natija)
+- result_summary_uz TEXT NULL (tashrifdan olingan natija)
+- result_summary_cryl TEXT NULL (tashrifdan olingan natija)
+- description NULL(qo`shimcha ma`lumot)
+- created_by NULL
+- updated_by NULL
+- created_at
+- updated_at
+
+>>>>>>>>>>>>>   TADBIRLAR   <<<<<<<<<<<<<<<<<<<<<
+
+event_types
+- id
+- name_ru
+- name_uz
+- name_cryl
+- created_at
+- updated_at
+
+events
+- id
+- title_ru
+- title_uz
+- title_cryl
+- event_type_id NULL
+- country_id
+- partner_organization_id NULL
+- agreement_id NULL
+- city NULL
+- address NULL
+- latitude NULL
+- longitude NULL
+- start_datetime
+- end_datetime NULL
+- format ENUM('offline','online','gibrid') DEFAULT 'offline'
+- status ENUM('rejada','hozirda','tugatilgan','bekorlangan') DEFAULT 'rejada'
+- responsible_user_id NULL
+- responsible_department_id NULL
+- description NULL
+- result_summary_ru TEXT NULL (tashrifdan olingan natija)
+- result_summary_uz TEXT NULL (tashrifdan olingan natija)
+- result_summary_cryl TEXT NULL (tashrifdan olingan natija)
+- control_due_date NULL
+- created_by NULL
+- updated_by NULL
+- created_at
+- updated_at
 
 
+>>>>>>>>>>>>>   HUJJATLAR   <<<<<<<<<<<<<<<<<<<<<
+
+document_types
+- id
+- name_ru
+- name_uz
+- name_CRYL
+- created_at
+- updated_at
 
 
+documents
+- id
+- title_ru
+- title_uz
+- title_cryl
+- document_number NULL
+- document_type_id NULL
+- file_name
+- file_path
+- file_ext NULL
+- file_size NULL
+- mime_type NULL
+- country_id NULL
+- partner_organization_id NULL
+- agreement_id NULL
+- visit_id NULL
+- event_id NULL
+- uploaded_by
+- status ENUM('qoralama','faol','nazoratda','arxivlangan') DEFAULT 'faol'
+- is_confidential BOOLEAN DEFAULT 0(maxfiymi yo`qmi)
+- description NULL
+- created_at
+- updated_at
 
+>>>>>>>>>>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
+notifications
+- id
+- user_id
+- title
+- message
+- type NULL                  -- info, warning, success, danger
+- is_read BOOLEAN DEFAULT 0
+- related_type NULL
+- related_id NULL
+- created_at
+- updated_at
 
 
 
@@ -32,3 +281,7 @@ users{
 -------------------------STANDARTLAR--------------------------------------
 1)Har so`z orasi _ tag chiziq bilan ajratiladi,
 2)relationlarda id ustun nomi oxirida tag chiziq bilan beriladi(user_id)
+3) Tillarni boshqarish
+    -  _ru    ruscha nom
+    -  _uz    uzbekcha nomi
+    -  _cryl  uzbekcha krill
