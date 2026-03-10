@@ -46,10 +46,10 @@ countries(hamkorlikdagi davlatlar)
 - latitude NULL
 - longitude NULL
 - default_zoom NULL
-- cooperation_status ENUM('active','planned','completed') DEFAULT 'active'
+- cooperation_status ENUM('faol','rejada','tugallangan') DEFAULT 'active'
 - boundary_geojson_path NULL
 - flag_path NULL
-- notes TEXT NULL
+- description TEXT NULL
 - created_at
 - updated_at
 
@@ -66,8 +66,8 @@ partner_organizations
 - address NULL
 - city NULL
 - website NULL
-- status ENUM('active','planned','completed') DEFAULT 'active'
-- notes TEXT NULL
+- status ENUM('faol','rejada','tugallangan') DEFAULT 'faol'
+- description TEXT NULL
 - created_at
 - updated_at
 
@@ -91,7 +91,7 @@ partner_contacts
 - position_cryl NULL
 - email NULL                 -- encrypt qilsa bo‘ladi
 - phone NULL                 -- encrypt qilsa bo‘ladi
-- notes TEXT NULL
+- description TEXT NULL
 - is_primary BOOLEAN DEFAULT 0
 - created_at
 - updated_at

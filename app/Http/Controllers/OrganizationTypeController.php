@@ -78,6 +78,10 @@ class OrganizationTypeController extends Controller implements HasMiddleware
 
     public function destroy(OrganizationType $organizationType): RedirectResponse
     {
+        if ($organizationType->partnerOrganizations()->exists()) {
+            return back()->with('error', "Tashkilot turiga hamkor tashkilotlar biriktirilgan. Avval ularni boshqa turga o'tkazing yoki turini bo'shating.");
+        }
+
         $organizationTypeName = $organizationType->name_uz;
         $organizationType->delete();
 

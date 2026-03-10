@@ -21,9 +21,16 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             RankSeeder::class,
             CountrySeeder::class,
+            AgreementDirectionSeeder::class,
+            AgreementTypeSeeder::class,
+            OrganizationTypeSeeder::class,
+            VisitTypeSeeder::class,
+            PartnerOrganizationSeeder::class,
+            PartnerContactSeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
+            VisitSeeder::class,
         ]);
 
         $user = User::query()->updateOrCreate(

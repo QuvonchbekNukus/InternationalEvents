@@ -43,6 +43,33 @@
                 'action' => "Davlatlarni ko'rish",
             ],
             [
+                'permission' => 'view agreements',
+                'title' => 'Barcha kelishuvlar',
+                'count' => \App\Models\Agreement::count(),
+                'description' => 'Davlat, tur, yo\'nalish va javobgarlar bilan biriktirilgan kelishuvlar.',
+                'icon' => 'feed',
+                'route' => route('agreements.index'),
+                'action' => "Kelishuvlarni ko'rish",
+            ],
+            [
+                'permission' => 'view agreement types',
+                'title' => 'Kelishuv turlari',
+                'count' => \App\Models\AgreementType::count(),
+                'description' => 'Memorandum, bitim, shartnoma va boshqa hujjat turlari.',
+                'icon' => 'description',
+                'route' => route('agreement-types.index'),
+                'action' => "Turlarni ko'rish",
+            ],
+            [
+                'permission' => 'view agreement directions',
+                'title' => "Kelishuv yo'nalishlari",
+                'count' => \App\Models\AgreementDirection::count(),
+                'description' => "Texnologiya, xavfsizlik va boshqa hamkorlik yo'nalishlari.",
+                'icon' => 'alt_route',
+                'route' => route('agreement-directions.index'),
+                'action' => "Yo'nalishlarni ko'rish",
+            ],
+            [
                 'permission' => 'view organization types',
                 'title' => 'Tashkilot turlari',
                 'count' => \App\Models\OrganizationType::count(),
@@ -50,6 +77,24 @@
                 'icon' => 'domain',
                 'route' => route('organization-types.index'),
                 'action' => "Turlarni ko'rish",
+            ],
+            [
+                'permission' => 'view partner organizations',
+                'title' => 'Hamkor tashkilotlar',
+                'count' => \App\Models\PartnerOrganization::count(),
+                'description' => "Davlat va tur kesimidagi hamkor tashkilotlar bazasi.",
+                'icon' => 'business',
+                'route' => route('partner-organizations.index'),
+                'action' => "Tashkilotlarni ko'rish",
+            ],
+            [
+                'permission' => 'view partner contacts',
+                'title' => 'Hamkor kontaktlar',
+                'count' => \App\Models\PartnerContact::count(),
+                'description' => "Hamkor tashkilotlarga biriktirilgan mas'ul shaxslar bazasi.",
+                'icon' => 'contact_phone',
+                'route' => route('partner-contacts.index'),
+                'action' => "Kontaktlarni ko'rish",
             ],
         ];
     @endphp
@@ -60,7 +105,7 @@
                 <p class="eyebrow">Bosh sahifa</p>
                 <h1 class="page-title">Boshqaruv paneli</h1>
                 <p class="page-subtitle">
-                    Foydalanuvchilar, bo'limlar, unvonlar, davlatlar va tashkilot turlari modullari bitta kabinet ichida boshqariladi.
+                    Foydalanuvchilar, bo'limlar, unvonlar, davlatlar, barcha kelishuvlar, kelishuv turlari, kelishuv yo'nalishlari, tashkilot turlari, hamkor tashkilotlar va kontaktlar modullari bitta kabinet ichida boshqariladi.
                 </p>
             </div>
 
@@ -106,12 +151,12 @@
 
                     <article class="stack-list__item">
                         <strong>Admin</strong>
-                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim, unvon, davlat va tashkilot turlarini to'liq boshqaradi.</span>
+                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim, unvon, davlat, barcha kelishuvlar, kelishuv turlari, kelishuv yo'nalishlari, tashkilot turlari, hamkor tashkilotlar va kontaktlarni to'liq boshqaradi.</span>
                     </article>
 
                     <article class="stack-list__item">
                         <strong>Operator</strong>
-                        <span>Users, departments, ranks, countries va organization types jadvallarini faqat ko'rish huquqiga ega.</span>
+                        <span>Users, departments, ranks, countries, agreements, agreement types, agreement directions, organization types, partner organizations va partner contacts jadvallarini faqat ko'rish huquqiga ega.</span>
                     </article>
                 </div>
             </section>

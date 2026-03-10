@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\AgreementController;
+use App\Http\Controllers\AgreementDirectionController;
+use App\Http\Controllers\AgreementTypeController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\OrganizationTypeController;
+use App\Http\Controllers\PartnerContactController;
+use App\Http\Controllers\PartnerOrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RankController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VisitController;
+use App\Http\Controllers\VisitTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,7 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('ranks', RankController::class)->except(['show']);
     Route::resource('countries', CountryController::class)->except(['show']);
+    Route::resource('agreements', AgreementController::class)->except(['show']);
+    Route::resource('agreement-directions', AgreementDirectionController::class)->except(['show']);
+    Route::resource('agreement-types', AgreementTypeController::class)->except(['show']);
     Route::resource('organization-types', OrganizationTypeController::class)->except(['show']);
+    Route::resource('partner-organizations', PartnerOrganizationController::class)->except(['show']);
+    Route::resource('partner-contacts', PartnerContactController::class)->except(['show']);
+    Route::resource('visits', VisitController::class)->except(['show']);
+    Route::resource('visit-types', VisitTypeController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

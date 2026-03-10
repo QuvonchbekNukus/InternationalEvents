@@ -1,5 +1,7 @@
 @php
-    $managementOpen = request()->routeIs('dashboard', 'users.*', 'departments.*', 'ranks.*', 'countries.*', 'organization-types.*');
+    $managementOpen = request()->routeIs('dashboard', 'users.*', 'departments.*', 'ranks.*', 'countries.*', 'organization-types.*', 'partner-organizations.*', 'partner-contacts.*');
+    $agreementsOpen = request()->routeIs('agreements.*', 'agreement-types.*', 'agreement-directions.*');
+    $visitsOpen = request()->routeIs('visits.*', 'visit-types.*');
     $settingsActive = request()->routeIs('profile.edit');
 @endphp
 
@@ -56,7 +58,7 @@
                 <p class="ie-sidebar__section-title">MAIN</p>
 
                 <nav class="ie-sidebar__nav" aria-label="Asosiy menyu">
-                    <div class="ie-sidebar__nav-group">
+                    <div class="ie-sidebar__nav-group" data-submenu-group="asosiy">
                         <button
                             class="ie-sidebar__item {{ $managementOpen ? 'is-active' : '' }}"
                             type="button"
@@ -83,42 +85,104 @@
                             </span>
                         </button>
 
-                        <div class="ie-sidebar__submenu {{ $managementOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu" data-inline-submenu>
-                            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-submenu-item="dashboard">
+                        <div class="ie-sidebar__submenu {{ $managementOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu" data-inline-submenu="asosiy">
+                            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-parent-group="asosiy" data-submenu-item="dashboard">
                                 Dashboard
                             </a>
 
                             @can('view users')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-submenu-item="users">
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="asosiy" data-submenu-item="users">
                                     Foydalanuvchilar
                                 </a>
                             @endcan
 
                             @can('view departments')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-submenu-item="departments">
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="asosiy" data-submenu-item="departments">
                                     Bo'limlar
                                 </a>
                             @endcan
 
                             @can('view ranks')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-submenu-item="ranks">
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="asosiy" data-submenu-item="ranks">
                                     Unvonlar
                                 </a>
                             @endcan
 
                             @can('view countries')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-submenu-item="countries">
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="asosiy" data-submenu-item="countries">
                                     Davlatlar
                                 </a>
                             @endcan
 
                             @can('view organization types')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-submenu-item="organization-types">
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="asosiy" data-submenu-item="organization-types">
                                     Tashkilot turlari
+                                </a>
+                            @endcan
+
+                            @can('view partner organizations')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="asosiy" data-submenu-item="partner-organizations">
+                                    Hamkor tashkilotlar
+                                </a>
+                            @endcan
+
+                            @can('view partner contacts')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="asosiy" data-submenu-item="partner-contacts">
+                                    Hamkor kontaktlar
                                 </a>
                             @endcan
                         </div>
                     </div>
+
+                    @canany(['view agreements', 'view agreement types', 'view agreement directions'])
+                        <div class="ie-sidebar__nav-group" data-submenu-group="agreements">
+                            <button
+                                class="ie-sidebar__item {{ $agreementsOpen ? 'is-active' : '' }}"
+                                type="button"
+                                data-sidebar-item="agreements"
+                                data-submenu-trigger
+                                aria-expanded="{{ $agreementsOpen ? 'true' : 'false' }}"
+                                aria-haspopup="true"
+                                aria-controls="ie-sidebar-inline-submenu-agreements"
+                            >
+                                <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M7 4.5h7.5L19 9v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-12.5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                        <path d="M14.5 4.5V9H19" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                        <path d="M8.5 13h7M8.5 16.5h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <span class="ie-sidebar__item-copy">
+                                    <span class="ie-sidebar__item-title">Kelishuvlar</span>
+                                </span>
+                                <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <div class="ie-sidebar__submenu {{ $agreementsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-agreements" data-inline-submenu="agreements">
+                                @can('view agreements')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreements.*') ? 'is-active' : '' }}" href="{{ route('agreements.index') }}" data-parent-group="agreements" data-submenu-item="agreements">
+                                        Barcha kelishuvlar
+                                    </a>
+                                @endcan
+
+                                @can('view agreement types')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-types.*') ? 'is-active' : '' }}" href="{{ route('agreement-types.index') }}" data-parent-group="agreements" data-submenu-item="agreement-types">
+                                        Kelishuv turlari
+                                    </a>
+                                @endcan
+
+                                @can('view agreement directions')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-directions.*') ? 'is-active' : '' }}" href="{{ route('agreement-directions.index') }}" data-parent-group="agreements" data-submenu-item="agreement-directions">
+                                        Kelishuv yo'nalishlari
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcanany
 
                     <button class="ie-sidebar__item" type="button" data-sidebar-item="tadbirlar">
                         <span class="ie-sidebar__item-icon" aria-hidden="true">
@@ -133,18 +197,49 @@
                         </span>
                     </button>
 
-                    <button class="ie-sidebar__item" type="button" data-sidebar-item="tashriflar">
-                        <span class="ie-sidebar__item-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <circle cx="7.5" cy="16.5" r="2.5" stroke="currentColor" stroke-width="1.7"/>
-                                <circle cx="16.5" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.7"/>
-                                <path d="M9.7 15.4c2-.8 3.2-1.8 4.2-3.2 1-1.4 1.2-2.3 1.4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </span>
-                        <span class="ie-sidebar__item-copy">
-                            <span class="ie-sidebar__item-title">Tashriflar</span>
-                        </span>
-                    </button>
+                    @canany(['view visits', 'view visit types'])
+                        <div class="ie-sidebar__nav-group" data-submenu-group="visits">
+                            <button
+                                class="ie-sidebar__item {{ $visitsOpen ? 'is-active' : '' }}"
+                                type="button"
+                                data-sidebar-item="visits"
+                                data-submenu-trigger
+                                aria-expanded="{{ $visitsOpen ? 'true' : 'false' }}"
+                                aria-haspopup="true"
+                                aria-controls="ie-sidebar-inline-submenu-visits"
+                            >
+                                <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <circle cx="7.5" cy="16.5" r="2.5" stroke="currentColor" stroke-width="1.7"/>
+                                        <circle cx="16.5" cy="7.5" r="2.5" stroke="currentColor" stroke-width="1.7"/>
+                                        <path d="M9.7 15.4c2-.8 3.2-1.8 4.2-3.2 1-1.4 1.2-2.3 1.4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span class="ie-sidebar__item-copy">
+                                    <span class="ie-sidebar__item-title">Tashriflar</span>
+                                </span>
+                                <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <div class="ie-sidebar__submenu {{ $visitsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-visits" data-inline-submenu="visits">
+                                @can('view visits')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('visits.*') ? 'is-active' : '' }}" href="{{ route('visits.index') }}" data-parent-group="visits" data-submenu-item="visits-index">
+                                        Barcha tashriflar
+                                    </a>
+                                @endcan
+
+                                @can('view visit types')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('visit-types.*') ? 'is-active' : '' }}" href="{{ route('visit-types.index') }}" data-parent-group="visits" data-submenu-item="visit-types">
+                                        Tashrif turlari
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcanany
 
                     <button class="ie-sidebar__item" type="button" data-sidebar-item="hujjatlar">
                         <span class="ie-sidebar__item-icon" aria-hidden="true">
@@ -178,42 +273,98 @@
         </div>
     </aside>
 
-    <div class="ie-sidebar__floating-panel" data-floating-panel hidden>
+    <div class="ie-sidebar__floating-panel" data-floating-panel="asosiy" hidden>
         <p class="ie-sidebar__floating-title">Asosiy</p>
         <div class="ie-sidebar__floating-list">
-            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-submenu-item="dashboard">
+            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-parent-group="asosiy" data-submenu-item="dashboard">
                 Dashboard
             </a>
 
             @can('view users')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-submenu-item="users">
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="asosiy" data-submenu-item="users">
                     Foydalanuvchilar
                 </a>
             @endcan
 
             @can('view departments')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-submenu-item="departments">
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="asosiy" data-submenu-item="departments">
                     Bo'limlar
                 </a>
             @endcan
 
             @can('view ranks')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-submenu-item="ranks">
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="asosiy" data-submenu-item="ranks">
                     Unvonlar
                 </a>
             @endcan
 
             @can('view countries')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-submenu-item="countries">
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="asosiy" data-submenu-item="countries">
                     Davlatlar
                 </a>
             @endcan
 
             @can('view organization types')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-submenu-item="organization-types">
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="asosiy" data-submenu-item="organization-types">
                     Tashkilot turlari
+                </a>
+            @endcan
+
+            @can('view partner organizations')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="asosiy" data-submenu-item="partner-organizations">
+                    Hamkor tashkilotlar
+                </a>
+            @endcan
+
+            @can('view partner contacts')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="asosiy" data-submenu-item="partner-contacts">
+                    Hamkor kontaktlar
                 </a>
             @endcan
         </div>
     </div>
+
+    @canany(['view agreements', 'view agreement types', 'view agreement directions'])
+        <div class="ie-sidebar__floating-panel" data-floating-panel="agreements" hidden>
+            <p class="ie-sidebar__floating-title">Kelishuvlar</p>
+            <div class="ie-sidebar__floating-list">
+                @can('view agreements')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreements.*') ? 'is-active' : '' }}" href="{{ route('agreements.index') }}" data-parent-group="agreements" data-submenu-item="agreements">
+                        Barcha kelishuvlar
+                    </a>
+                @endcan
+
+                @can('view agreement types')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-types.*') ? 'is-active' : '' }}" href="{{ route('agreement-types.index') }}" data-parent-group="agreements" data-submenu-item="agreement-types">
+                        Kelishuv turlari
+                    </a>
+                @endcan
+
+                @can('view agreement directions')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-directions.*') ? 'is-active' : '' }}" href="{{ route('agreement-directions.index') }}" data-parent-group="agreements" data-submenu-item="agreement-directions">
+                        Kelishuv yo'nalishlari
+                    </a>
+                @endcan
+            </div>
+        </div>
+    @endcanany
+
+    @canany(['view visits', 'view visit types'])
+        <div class="ie-sidebar__floating-panel" data-floating-panel="visits" hidden>
+            <p class="ie-sidebar__floating-title">Tashriflar</p>
+            <div class="ie-sidebar__floating-list">
+                @can('view visits')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('visits.*') ? 'is-active' : '' }}" href="{{ route('visits.index') }}" data-parent-group="visits" data-submenu-item="visits-index">
+                        Barcha tashriflar
+                    </a>
+                @endcan
+
+                @can('view visit types')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('visit-types.*') ? 'is-active' : '' }}" href="{{ route('visit-types.index') }}" data-parent-group="visits" data-submenu-item="visit-types">
+                        Tashrif turlari
+                    </a>
+                @endcan
+            </div>
+        </div>
+    @endcanany
 </div>

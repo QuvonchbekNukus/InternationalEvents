@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class PartnerContact extends Model
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'partner_organization_id',
+        'full_name_ru',
+        'full_name_uz',
+        'full_name_cryl',
+        'position_ru',
+        'position_uz',
+        'position_cryl',
+        'email',
+        'phone',
+        'description',
+        'is_primary',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email' => 'encrypted',
+            'phone' => 'encrypted',
+            'is_primary' => 'boolean',
+        ];
+    }
+
+    public function partnerOrganization(): BelongsTo
+    {
+        return $this->belongsTo(PartnerOrganization::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->full_name_uz ?: $this->full_name_ru;
+    }
+}

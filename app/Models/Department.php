@@ -24,4 +24,9 @@ class Department extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    public function responsibleVisits(): HasMany
+    {
+        return $this->hasMany(Visit::class, 'responsible_department_id');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrganizationType extends Model
 {
@@ -16,4 +17,9 @@ class OrganizationType extends Model
         'name_uz',
         'name_cryl',
     ];
+
+    public function partnerOrganizations(): HasMany
+    {
+        return $this->hasMany(PartnerOrganization::class);
+    }
 }

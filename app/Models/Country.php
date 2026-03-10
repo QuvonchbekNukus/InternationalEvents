@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
@@ -72,5 +73,20 @@ class Country extends Model
     public function getHasFlagFileAttribute(): bool
     {
         return $this->flag_asset_path !== null && is_file(public_path($this->flag_asset_path));
+    }
+
+    public function partnerOrganizations(): HasMany
+    {
+        return $this->hasMany(PartnerOrganization::class);
+    }
+
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(Agreement::class);
+    }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
     }
 }

@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    @php
+        $sidebarCssVersion = filemtime(public_path('css/sidebar.css'));
+        $sidebarJsVersion = filemtime(public_path('js/sidebar.js'));
+    @endphp
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard')</title>
     <link rel="stylesheet" href="{{ asset('css/material-icons.css') }}">
     <link rel="stylesheet" href="{{ asset('css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/sidebar.css').'?v='.$sidebarCssVersion }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-admin.css') }}">
 </head>
 <body class="mg-admin-body">
@@ -41,7 +45,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/sidebar.js') }}" defer></script>
+    <script src="{{ asset('js/sidebar.js').'?v='.$sidebarJsVersion }}" defer></script>
     <script src="{{ asset('js/navbar.js') }}" defer></script>
     @stack('scripts')
 </body>

@@ -3,102 +3,157 @@ document.addEventListener('DOMContentLoaded', () => {
         const toggleButton = shell.querySelector('[data-sidebar-toggle]');
         const mobileToggle = shell.querySelector('[data-sidebar-mobile-toggle]');
         const backdrop = shell.querySelector('[data-sidebar-backdrop]');
-        const submenuTrigger = shell.querySelector('[data-submenu-trigger]');
-        const inlineSubmenu = shell.querySelector('[data-inline-submenu]');
-        const floatingPanel = shell.querySelector('[data-floating-panel]');
         const mainItems = Array.from(shell.querySelectorAll('[data-sidebar-item]'));
         const submenuItems = Array.from(shell.querySelectorAll('[data-submenu-item]'));
         const mobileBreakpoint = window.matchMedia('(max-width: 1120px)');
-        let floatingHideTimer = null;
-        let submenuOpen = inlineSubmenu.classList.contains('is-open');
+        const submenuGroups = Array.from(shell.querySelectorAll('[data-submenu-group]'))
+            .map((groupElement) => {
+                const key = groupElement.dataset.submenuGroup || '';
+                const trigger = groupElement.querySelector('[data-submenu-trigger]');
+                const inlineSubmenu = groupElement.querySelector('[data-inline-submenu]');
+                const floatingPanel = shell.querySelector(`[data-floating-panel="${key}"]`);
+
+                if (!key || !trigger || !inlineSubmenu) {
+                    return null;
+                }
+
+                return {
+                    key,
+                    trigger,
+                    inlineSubmenu,
+                    floatingPanel,
+                    open: inlineSubmenu.classList.contains('is-open'),
+                    hideTimer: null,
+                };
+            })
+            .filter(Boolean);
 
         const isCollapsed = () => shell.classList.contains('is-collapsed');
 
-        const isFloatingVisible = () => floatingPanel.classList.contains('is-visible');
+        const getGroup = (key) => submenuGroups.find((group) => group.key === key);
+
+        const isFloatingVisible = (group) => group?.floatingPanel?.classList.contains('is-visible') ?? false;
+
+        const syncInlineSubmenuHeight = (group) => {
+            if (isCollapsed() || !group.open) {
+                group.inlineSubmenu.style.maxHeight = '0px';
+                return;
+            }
+
+            group.inlineSubmenu.style.maxHeight = `${group.inlineSubmenu.scrollHeight}px`;
+        };
 
         const setMobileOpen = (open) => {
             shell.classList.toggle('is-mobile-open', open);
+
             if (mobileToggle) {
                 mobileToggle.setAttribute('aria-expanded', String(open));
             }
         };
 
-        const hideFloatingPanel = () => {
-            if (floatingHideTimer) {
-                window.clearTimeout(floatingHideTimer);
+        const hideFloatingPanel = (group) => {
+            if (!group?.floatingPanel) {
+                return;
             }
 
-            floatingPanel.classList.remove('is-visible');
-            floatingHideTimer = window.setTimeout(() => {
-                floatingPanel.hidden = true;
+            if (group.hideTimer) {
+                window.clearTimeout(group.hideTimer);
+            }
+
+            group.floatingPanel.classList.remove('is-visible');
+            group.hideTimer = window.setTimeout(() => {
+                group.floatingPanel.hidden = true;
             }, 240);
         };
 
-        const positionFloatingPanel = () => {
-            if (!submenuTrigger) {
+        const hideAllFloatingPanels = (exceptKey = null) => {
+            submenuGroups.forEach((group) => {
+                if (group.key === exceptKey) {
+                    return;
+                }
+
+                hideFloatingPanel(group);
+            });
+        };
+
+        const positionFloatingPanel = (group) => {
+            if (!group?.floatingPanel) {
                 return;
             }
 
             const compactSheetBreakpoint = 760;
             const shellRect = shell.getBoundingClientRect();
-            const triggerTop = submenuTrigger.offsetTop;
-            const surfaceTop = submenuTrigger.closest('.ie-sidebar__surface')?.offsetTop ?? 0;
+            const triggerTop = group.trigger.offsetTop;
+            const surfaceTop = group.trigger.closest('.ie-sidebar__surface')?.offsetTop ?? 0;
             const viewportHeight = window.innerHeight;
-            const panelWidth = floatingPanel.offsetWidth || 240;
+            const panelWidth = group.floatingPanel.offsetWidth || 240;
             const desiredTop = shellRect.top + triggerTop + surfaceTop - 4;
             const clampedTop = Math.max(16, Math.min(desiredTop, viewportHeight - 240));
 
-            floatingPanel.style.right = 'auto';
-            floatingPanel.style.bottom = 'auto';
+            group.floatingPanel.style.right = 'auto';
+            group.floatingPanel.style.bottom = 'auto';
 
             if (window.innerWidth <= compactSheetBreakpoint) {
-                floatingPanel.style.left = '12px';
-                floatingPanel.style.right = '12px';
-                floatingPanel.style.top = 'auto';
-                floatingPanel.style.bottom = '12px';
+                group.floatingPanel.style.left = '12px';
+                group.floatingPanel.style.right = '12px';
+                group.floatingPanel.style.top = 'auto';
+                group.floatingPanel.style.bottom = '12px';
                 return;
             }
 
             if (mobileBreakpoint.matches) {
                 const left = Math.min(shellRect.right + 12, window.innerWidth - panelWidth - 12);
-                floatingPanel.style.left = `${Math.max(12, left)}px`;
-                floatingPanel.style.top = `${clampedTop}px`;
+                group.floatingPanel.style.left = `${Math.max(12, left)}px`;
+                group.floatingPanel.style.top = `${clampedTop}px`;
                 return;
             }
 
             const left = Math.min(shellRect.right + 18, window.innerWidth - panelWidth - 16);
-            floatingPanel.style.left = `${Math.max(16, left)}px`;
-            floatingPanel.style.top = `${clampedTop}px`;
+            group.floatingPanel.style.left = `${Math.max(16, left)}px`;
+            group.floatingPanel.style.top = `${clampedTop}px`;
         };
 
-        const showFloatingPanel = () => {
-            if (!isCollapsed()) {
-                hideFloatingPanel();
+        const showFloatingPanel = (group) => {
+            if (!group?.floatingPanel || !isCollapsed()) {
+                hideFloatingPanel(group);
                 return;
             }
 
-            if (floatingHideTimer) {
-                window.clearTimeout(floatingHideTimer);
+            if (group.hideTimer) {
+                window.clearTimeout(group.hideTimer);
             }
 
-            positionFloatingPanel();
-            floatingPanel.hidden = false;
+            positionFloatingPanel(group);
+            group.floatingPanel.hidden = false;
+
             window.requestAnimationFrame(() => {
-                floatingPanel.classList.add('is-visible');
+                group.floatingPanel.classList.add('is-visible');
             });
         };
 
-        const setInlineSubmenu = (open) => {
-            submenuOpen = open;
+        const setInlineSubmenu = (group, open) => {
+            group.open = open;
+
             const shouldShowInline = open && !isCollapsed();
 
-            inlineSubmenu.classList.toggle('is-open', shouldShowInline);
-            inlineSubmenu.hidden = !shouldShowInline;
-            submenuTrigger.setAttribute('aria-expanded', String(open));
+            group.inlineSubmenu.classList.toggle('is-open', shouldShowInline);
+            group.inlineSubmenu.hidden = !shouldShowInline;
+            group.trigger.setAttribute('aria-expanded', String(open));
+            syncInlineSubmenuHeight(group);
 
             if (!shouldShowInline) {
-                hideFloatingPanel();
+                hideFloatingPanel(group);
             }
+        };
+
+        const closeOtherGroups = (activeKey) => {
+            submenuGroups.forEach((group) => {
+                if (group.key === activeKey) {
+                    return;
+                }
+
+                setInlineSubmenu(group, false);
+            });
         };
 
         const setMainActive = (key) => {
@@ -121,16 +176,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const setCollapsed = (collapsed) => {
             shell.classList.toggle('is-collapsed', collapsed);
-            toggleButton.setAttribute('aria-expanded', String(!collapsed));
-            toggleButton.setAttribute('aria-label', collapsed ? "Yon panelni kengaytirish" : "Yon panelni yig'ish");
+            toggleButton?.setAttribute('aria-expanded', String(!collapsed));
+            toggleButton?.setAttribute('aria-label', collapsed ? "Yon panelni kengaytirish" : "Yon panelni yig'ish");
 
-            if (collapsed && submenuOpen && submenuTrigger.classList.contains('is-active')) {
-                showFloatingPanel();
-            } else {
-                hideFloatingPanel();
+            submenuGroups.forEach((group) => {
+                setInlineSubmenu(group, group.open);
+            });
+
+            if (!collapsed) {
+                hideAllFloatingPanels();
+                return;
             }
 
-            setInlineSubmenu(submenuOpen && submenuTrigger.classList.contains('is-active'));
+            const activeGroup = submenuGroups.find((group) => group.open && group.trigger.classList.contains('is-active'));
+
+            hideAllFloatingPanels(activeGroup?.key ?? null);
+
+            if (activeGroup) {
+                showFloatingPanel(activeGroup);
+            }
         };
 
         toggleButton?.addEventListener('click', () => {
@@ -143,60 +207,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
         backdrop?.addEventListener('click', () => {
             setMobileOpen(false);
-            hideFloatingPanel();
+            hideAllFloatingPanels();
         });
 
-        submenuTrigger?.addEventListener('click', () => {
-            setMainActive('asosiy');
+        submenuGroups.forEach((group) => {
+            group.trigger.addEventListener('click', () => {
+                setMainActive(group.key);
 
-            if (isCollapsed()) {
-                if (isFloatingVisible()) {
-                    submenuOpen = false;
-                    hideFloatingPanel();
-                } else {
-                    submenuOpen = true;
-                    showFloatingPanel();
+                if (isCollapsed()) {
+                    const willOpen = !isFloatingVisible(group);
+
+                    closeOtherGroups(group.key);
+
+                    if (!willOpen) {
+                        setInlineSubmenu(group, false);
+                        return;
+                    }
+
+                    group.open = true;
+                    group.trigger.setAttribute('aria-expanded', 'true');
+                    hideAllFloatingPanels(group.key);
+                    showFloatingPanel(group);
+                    return;
                 }
 
-                submenuTrigger.setAttribute('aria-expanded', String(submenuOpen));
-                return;
-            }
+                const willOpen = !group.inlineSubmenu.classList.contains('is-open');
 
-            const willOpen = !inlineSubmenu.classList.contains('is-open');
-            setInlineSubmenu(willOpen);
+                closeOtherGroups(group.key);
+                setInlineSubmenu(group, willOpen);
+            });
         });
 
         mainItems.forEach((button) => {
-            if (button === submenuTrigger) {
+            if (submenuGroups.some((group) => group.trigger === button)) {
                 return;
             }
 
             button.addEventListener('click', () => {
                 setMainActive(button.dataset.sidebarItem || '');
                 clearSubmenuActive();
-                submenuOpen = false;
-                setInlineSubmenu(false);
+                submenuGroups.forEach((group) => {
+                    setInlineSubmenu(group, false);
+                });
             });
         });
 
         submenuItems.forEach((button) => {
             button.addEventListener('click', () => {
                 const key = button.dataset.submenuItem || '';
-                setMainActive('asosiy');
+                const parentGroup = getGroup(button.dataset.parentGroup || '');
+
+                if (!parentGroup) {
+                    return;
+                }
+
+                setMainActive(parentGroup.key);
                 setSubmenuActive(key);
-                submenuOpen = true;
+                closeOtherGroups(parentGroup.key);
+                parentGroup.open = true;
+                parentGroup.trigger.setAttribute('aria-expanded', 'true');
 
                 if (isCollapsed()) {
-                    showFloatingPanel();
-                } else {
-                    setInlineSubmenu(true);
+                    showFloatingPanel(parentGroup);
+                    return;
                 }
+
+                setInlineSubmenu(parentGroup, true);
             });
         });
 
         document.addEventListener('click', (event) => {
-            if (!shell.contains(event.target) && isFloatingVisible()) {
-                hideFloatingPanel();
+            const clickedInsideVisiblePanel = submenuGroups.some((group) => group.floatingPanel?.contains(event.target));
+
+            if ((shell.contains(event.target) || clickedInsideVisiblePanel) === false) {
+                hideAllFloatingPanels();
             }
         });
 
@@ -205,9 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            if (isFloatingVisible()) {
-                hideFloatingPanel();
-            }
+            hideAllFloatingPanels();
 
             if (shell.classList.contains('is-mobile-open')) {
                 setMobileOpen(false);
@@ -217,11 +299,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const handleViewportChange = () => {
             if (!mobileBreakpoint.matches) {
                 setMobileOpen(false);
-                positionFloatingPanel();
-                return;
+            } else {
+                hideAllFloatingPanels();
             }
 
-            hideFloatingPanel();
+            submenuGroups.forEach((group) => {
+                positionFloatingPanel(group);
+                syncInlineSubmenuHeight(group);
+            });
         };
 
         if (typeof mobileBreakpoint.addEventListener === 'function') {
@@ -230,10 +315,21 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileBreakpoint.addListener(handleViewportChange);
         }
 
-        window.addEventListener('resize', positionFloatingPanel);
+        window.addEventListener('resize', () => {
+            submenuGroups.forEach((group) => {
+                positionFloatingPanel(group);
+                syncInlineSubmenuHeight(group);
+            });
+        });
 
-        inlineSubmenu.hidden = false;
-        floatingPanel.hidden = true;
-        positionFloatingPanel();
+        submenuGroups.forEach((group) => {
+            group.inlineSubmenu.hidden = false;
+
+            if (group.floatingPanel) {
+                group.floatingPanel.hidden = true;
+            }
+
+            syncInlineSubmenuHeight(group);
+        });
     });
 });

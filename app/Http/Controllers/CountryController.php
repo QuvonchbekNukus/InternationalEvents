@@ -94,6 +94,18 @@ class CountryController extends Controller implements HasMiddleware
 
     public function destroy(Country $country): RedirectResponse
     {
+        if ($country->partnerOrganizations()->exists()) {
+            return back()->with('error', "Davlatga hamkor tashkilotlar biriktirilgan. Avval ularni boshqa davlatga o'tkazing yoki o'chiring.");
+        }
+
+        if ($country->agreements()->exists()) {
+            return back()->with('error', "Davlatga kelishuvlar biriktirilgan. Avval ularni boshqa davlatga o'tkazing.");
+        }
+
+        if ($country->visits()->exists()) {
+            return back()->with('error', "Davlatga tashriflar biriktirilgan. Avval ularni boshqa davlatga o'tkazing.");
+        }
+
         $countryName = $country->display_name;
         $country->delete();
 

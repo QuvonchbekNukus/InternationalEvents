@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -66,6 +67,21 @@ class User extends Authenticatable
     public function rank(): BelongsTo
     {
         return $this->belongsTo(Rank::class);
+    }
+
+    public function responsibleVisits(): HasMany
+    {
+        return $this->hasMany(Visit::class, 'responsible_user_id');
+    }
+
+    public function createdVisits(): HasMany
+    {
+        return $this->hasMany(Visit::class, 'created_by');
+    }
+
+    public function updatedVisits(): HasMany
+    {
+        return $this->hasMany(Visit::class, 'updated_by');
     }
 
     public function getFullNameAttribute(): string
