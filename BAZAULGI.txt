@@ -38,7 +38,7 @@ countries(hamkorlikdagi davlatlar)
 - name_ru
 - name_uz NULL
 - name_cryl NULL
-- iso2 NULL (davlatlarni qisqartma nomlari uz,ru)
+- iso2  (davlatlarni qisqartma nomlari uz,ru)
 - iso3 NULL (davlatlarni qisqartma nomlari uzb,rus)
 - region_ru NULL                -- Yevropa, Osiyo va hokazo
 - region_uz NULL                -- Yevropa, Osiyo va hokazo

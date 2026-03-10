@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name_ru');
             $table->string('name_uz')->nullable();
             $table->string('name_cryl')->nullable();
-            $table->string('iso2', 2)->nullable()->unique();
+            $table->string('iso2', 2)->unique();
             $table->string('iso3', 3)->nullable()->unique();
             $table->string('region_ru')->nullable();
             $table->string('region_uz')->nullable();

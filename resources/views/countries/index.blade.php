@@ -94,7 +94,14 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="row-subtitle">{{ $country->flag_path ?: "Bayroq yo'li kiritilmagan" }}</span>
+                                    @if ($country->has_flag_file)
+                                        <img
+                                            class="country-flag-preview"
+                                            src="{{ asset($country->flag_asset_path) }}"
+                                            alt="{{ $country->display_name }} bayrog'i"
+                                        >
+                                    @endif
+                                    <span class="row-subtitle">{{ $country->flag_asset_path ?: "ISO2 kiritilmagan" }}</span>
                                     <span class="row-subtitle">{{ $country->boundary_geojson_path ?: "GeoJSON yo'li kiritilmagan" }}</span>
                                 </td>
                                 <td>

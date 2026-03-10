@@ -59,4 +59,18 @@ class Country extends Model
     {
         return $this->name_uz ?: $this->name_ru;
     }
+
+    public function getFlagAssetPathAttribute(): ?string
+    {
+        if (! $this->iso2) {
+            return null;
+        }
+
+        return 'flags/'.strtolower($this->iso2).'.svg';
+    }
+
+    public function getHasFlagFileAttribute(): bool
+    {
+        return $this->flag_asset_path !== null && is_file(public_path($this->flag_asset_path));
+    }
 }

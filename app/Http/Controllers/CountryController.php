@@ -121,12 +121,12 @@ class CountryController extends Controller implements HasMiddleware
             'default_zoom' => ['nullable', 'numeric', 'between:1,20'],
             'cooperation_status' => ['required', 'string', Rule::in(Country::STATUSES)],
             'boundary_geojson_path' => ['nullable', 'string', 'max:255'],
-            'flag_path' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
         ]);
 
         $validated['iso2'] = isset($validated['iso2']) ? strtoupper((string) $validated['iso2']) : null;
         $validated['iso3'] = isset($validated['iso3']) ? strtoupper((string) $validated['iso3']) : null;
+        $validated['flag_path'] = null;
 
         return $validated;
     }

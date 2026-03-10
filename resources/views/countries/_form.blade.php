@@ -114,13 +114,12 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Bayroq rasmi yo'li</span>
-            <input type="text" name="flag_path" value="{{ old('flag_path', $country->flag_path) }}" placeholder="storage/flags/kazakhstan.png">
-            @error('flag_path')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
+        <div class="field field--span-2">
+            <span class="field-label">Bayroq logikasi</span>
+            <span class="row-subtitle">
+                Bayroq yo'li foydalanuvchidan olinmaydi. Tizim uni avtomatik `public/flags/{iso2}.svg` formatida ishlatadi va `flag_path` bazada bo'sh saqlanadi.
+            </span>
+        </div>
 
         <label class="field field--span-2">
             <span class="field-label">Izoh</span>
