@@ -106,6 +106,10 @@ class CountryController extends Controller implements HasMiddleware
             return back()->with('error', "Davlatga tashriflar biriktirilgan. Avval ularni boshqa davlatga o'tkazing.");
         }
 
+        if ($country->events()->exists()) {
+            return back()->with('error', "Davlatga tadbirlar biriktirilgan. Avval ularni boshqa davlatga o'tkazing.");
+        }
+
         $countryName = $country->display_name;
         $country->delete();
 

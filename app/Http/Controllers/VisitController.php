@@ -21,9 +21,9 @@ class VisitController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view visits', only: ['index']),
+            new Middleware('permission:view visits|view own visits', only: ['index']),
             new Middleware('permission:create visits', only: ['create', 'store']),
-            new Middleware('permission:edit visits', only: ['edit', 'update']),
+            new Middleware('permission:edit visits|edit own visits', only: ['edit', 'update']),
             new Middleware('permission:delete visits', only: ['destroy']),
         ];
     }
@@ -36,14 +36,29 @@ class VisitController extends Controller implements HasMiddleware
         $selectedDirection = trim((string) $request->string('direction'));
         $selectedStatus = trim((string) $request->string('status'));
 
-        $visits = Visit::query()
-            ->with([
-                'country:id,name_uz,name_ru,iso2',
-                'visitType:id,name_uz',
-                'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
-                'responsibleUser:id,first_name,middle_name,last_name',
-                'responsibleDepartment:id,name_uz',
-            ])
+        $visitsQuery = Visit::query()->with([
+            'country:id,name_uz,name_ru,iso2',
+            'visitType:id,name_uz',
+            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
+            'responsibleUser:id,first_name,middle_name,last_name',
+            'responsibleDepartment:id,name_uz',
+        ]);
+
+        $this->applyOwnScope(
+            $request,
+            $visitsQuery,
+            'view visits',
+            'view own visits',
+            function ($query, $user): void {
+                $query->where(function ($visitQuery) use ($user) {
+                    $visitQuery
+                        ->where('responsible_user_id', $user->id)
+                        ->orWhere('created_by', $user->id);
+                });
+            }
+        );
+
+        $visits = $visitsQuery
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($visitQuery) use ($search) {
                     $visitQuery
@@ -126,6 +141,15 @@ class VisitController extends Controller implements HasMiddleware
 
     public function edit(Visit $visit): View
     {
+        $this->authorizeOwnedRecord(
+            request(),
+            $visit,
+            'edit visits',
+            'edit own visits',
+            fn (Visit $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
         return view('visits.edit', [
             'visit' => $visit,
             ...$this->formOptions(),
@@ -134,6 +158,15 @@ class VisitController extends Controller implements HasMiddleware
 
     public function update(Request $request, Visit $visit): RedirectResponse
     {
+        $this->authorizeOwnedRecord(
+            $request,
+            $visit,
+            'edit visits',
+            'edit own visits',
+            fn (Visit $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
         $validated = $this->validatedData($request);
         $validated['updated_by'] = $request->user()?->id;
 

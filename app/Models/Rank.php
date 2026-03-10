@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rank extends Model
 {
+    use LogsModelActivity;
+
     /**
      * Indicates if the model should be timestamped.
      *

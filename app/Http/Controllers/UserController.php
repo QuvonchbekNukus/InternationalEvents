@@ -18,9 +18,9 @@ class UserController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view users', only: ['index']),
+            new Middleware('permission:view users|view own users', only: ['index']),
             new Middleware('permission:create users', only: ['create', 'store']),
-            new Middleware('permission:edit users', only: ['edit', 'update']),
+            new Middleware('permission:edit users|edit own users', only: ['edit', 'update']),
             new Middleware('permission:delete users', only: ['destroy']),
         ];
     }
@@ -32,8 +32,17 @@ class UserController extends Controller implements HasMiddleware
         $selectedDepartment = trim((string) $request->string('department_id'));
         $selectedStatus = trim((string) $request->string('status'));
 
-        $users = User::query()
-            ->with(['department:id,name_uz', 'rank:id,name_uz', 'roles:id,name'])
+        $usersQuery = User::query()->with(['department:id,name_uz', 'rank:id,name_uz', 'roles:id,name']);
+
+        $this->applyOwnScope(
+            $request,
+            $usersQuery,
+            'view users',
+            'view own users',
+            fn ($query, $user): mixed => $query->whereKey($user->id)
+        );
+
+        $users = $usersQuery
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($userQuery) use ($search) {
                     $userQuery
@@ -90,6 +99,14 @@ class UserController extends Controller implements HasMiddleware
 
     public function edit(User $user): View
     {
+        $this->authorizeOwnedRecord(
+            request(),
+            $user,
+            'edit users',
+            'edit own users',
+            fn (User $record, $currentUser): bool => $record->is($currentUser)
+        );
+
         $user->loadMissing(['roles:id,name']);
 
         return view('users.edit', [
@@ -100,10 +117,22 @@ class UserController extends Controller implements HasMiddleware
 
     public function update(Request $request, User $user): RedirectResponse
     {
-        [$validated, $roleName] = $this->validatedData($request, $user);
+        $this->authorizeOwnedRecord(
+            $request,
+            $user,
+            'edit users',
+            'edit own users',
+            fn (User $record, $currentUser): bool => $record->is($currentUser)
+        );
 
-        $user->update($validated);
-        $user->syncRoles([$roleName]);
+        if ($request->user()?->can('edit users')) {
+            [$validated, $roleName] = $this->validatedData($request, $user);
+
+            $user->update($validated);
+            $user->syncRoles([$roleName]);
+        } else {
+            $user->update($this->validatedOwnData($request, $user));
+        }
 
         return redirect()
             ->route('users.index')
@@ -122,6 +151,10 @@ class UserController extends Controller implements HasMiddleware
 
         if ($user->hasRole('super-admin') && $superAdminCount <= 1) {
             return back()->with('error', "Oxirgi super-admin foydalanuvchini o'chirib bo'lmaydi.");
+        }
+
+        if ($user->uploadedDocuments()->exists()) {
+            return back()->with('error', "Foydalanuvchi yuklagan hujjatlar mavjud. Avval ularni o'chiring.");
         }
 
         $fullName = $user->full_name;
@@ -167,6 +200,34 @@ class UserController extends Controller implements HasMiddleware
         }
 
         return [$validated, $roleName];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validatedOwnData(Request $request, User $user): array
+    {
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'phone' => [
+                'required',
+                'string',
+                'max:25',
+                Rule::unique('users', 'phone')->ignore($user->id),
+            ],
+            'password' => ['nullable', 'string', 'min:6', 'max:255'],
+            'position_uz' => ['nullable', 'string', 'max:255'],
+            'position_ru' => ['nullable', 'string', 'max:255'],
+            'position_cryl' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        if (($validated['password'] ?? '') === '') {
+            unset($validated['password']);
+        }
+
+        return $validated;
     }
 
     /**

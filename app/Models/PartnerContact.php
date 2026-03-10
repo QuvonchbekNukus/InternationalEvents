@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerContact extends Model
 {
+    use LogsModelActivity;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -24,6 +27,16 @@ class PartnerContact extends Model
         'phone',
         'description',
         'is_primary',
+    ];
+
+    /**
+     * Attributes excluded from audit details.
+     *
+     * @var list<string>
+     */
+    protected array $activityLogExcept = [
+        'email',
+        'phone',
     ];
 
     /**

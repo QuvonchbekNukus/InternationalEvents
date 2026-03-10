@@ -129,12 +129,12 @@
                                 </td>
                                 <td>
                                     <div class="row-actions">
-                                        @can('edit agreements')
+                                        @canany(['edit agreements', 'edit own agreements'])
                                             <a class="action-pill" href="{{ route('agreements.edit', $agreement) }}">
                                                 <i class="material-icons" aria-hidden="true">edit</i>
                                                 <span>Tahrirlash</span>
                                             </a>
-                                        @endcan
+                                        @endcanany
 
                                         @can('delete agreements')
                                             <form method="POST" action="{{ route('agreements.destroy', $agreement) }}" onsubmit="return confirm('Ushbu kelishuvni ochirishni tasdiqlaysizmi?');">

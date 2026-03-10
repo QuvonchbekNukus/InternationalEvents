@@ -102,12 +102,12 @@
                                 </td>
                                 <td>
                                     <div class="row-actions">
-                                        @can('edit users')
+                                        @canany(['edit users', 'edit own users'])
                                             <a class="action-pill" href="{{ route('users.edit', $user) }}">
                                                 <i class="material-icons" aria-hidden="true">edit</i>
                                                 <span>Tahrirlash</span>
                                             </a>
-                                        @endcan
+                                        @endcanany
 
                                         @can('delete users')
                                             <form method="POST" action="{{ route('users.destroy', $user) }}" onsubmit="return confirm('Ushbu foydalanuvchini ochirishni tasdiqlaysizmi?');">

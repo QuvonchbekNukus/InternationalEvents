@@ -31,7 +31,7 @@
                 <span class="topbar-badge">3</span>
             </button>
 
-            <div class="profile-chip" aria-label="Foydalanuvchi profili">
+            <a class="profile-chip" href="{{ route('profile.edit') }}" aria-label="Foydalanuvchi profili">
                 <span class="profile-avatar" aria-hidden="true">
                     <i class="material-icons topbar-icon">account_circle</i>
                 </span>
@@ -40,7 +40,7 @@
                     <span class="profile-copy-label">{{ $roleLabel }}</span>
                     <span class="profile-copy-name">{{ $currentUser?->full_name ?? 'Foydalanuvchi' }}</span>
                 </span>
-            </div>
+            </a>
 
             <form class="topbar-logout-form" method="POST" action="{{ route('logout') }}">
                 @csrf

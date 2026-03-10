@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -28,6 +29,24 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+
+        if ($user) {
+            DB::transaction(function () use ($user): void {
+                activity()->withoutLogs(function () use ($user): void {
+                    $user->forceFill([
+                        'last_login_at' => now(),
+                    ])->save();
+                });
+
+                activity('system')
+                    ->causedBy($user)
+                    ->performedOn($user)
+                    ->event('login')
+                    ->log('Tizimga kirdi');
+            });
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -36,6 +55,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if ($user) {
+            activity('system')
+                ->causedBy($user)
+                ->performedOn($user)
+                ->event('logout')
+                ->log('Tizimdan chiqdi');
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

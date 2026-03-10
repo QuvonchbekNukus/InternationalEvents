@@ -22,9 +22,9 @@ class AgreementController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view agreements', only: ['index']),
+            new Middleware('permission:view agreements|view own agreements', only: ['index']),
             new Middleware('permission:create agreements', only: ['create', 'store']),
-            new Middleware('permission:edit agreements', only: ['edit', 'update']),
+            new Middleware('permission:edit agreements|edit own agreements', only: ['edit', 'update']),
             new Middleware('permission:delete agreements', only: ['destroy']),
         ];
     }
@@ -37,15 +37,30 @@ class AgreementController extends Controller implements HasMiddleware
         $selectedDirection = trim((string) $request->string('agreement_direction_id'));
         $selectedStatus = trim((string) $request->string('status'));
 
-        $agreements = Agreement::query()
-            ->with([
-                'country:id,name_uz,name_ru,iso2',
-                'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
-                'agreementType:id,name_uz',
-                'agreementDirection:id,name_uz',
-                'responsibleUser:id,first_name,middle_name,last_name',
-                'responsibleDepartment:id,name_uz',
-            ])
+        $agreementsQuery = Agreement::query()->with([
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
+            'agreementType:id,name_uz',
+            'agreementDirection:id,name_uz',
+            'responsibleUser:id,first_name,middle_name,last_name',
+            'responsibleDepartment:id,name_uz',
+        ]);
+
+        $this->applyOwnScope(
+            $request,
+            $agreementsQuery,
+            'view agreements',
+            'view own agreements',
+            function ($query, $user): void {
+                $query->where(function ($agreementQuery) use ($user) {
+                    $agreementQuery
+                        ->where('responsible_user_id', $user->id)
+                        ->orWhere('created_by', $user->id);
+                });
+            }
+        );
+
+        $agreements = $agreementsQuery
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($agreementQuery) use ($search) {
                     $agreementQuery
@@ -129,6 +144,15 @@ class AgreementController extends Controller implements HasMiddleware
 
     public function edit(Agreement $agreement): View
     {
+        $this->authorizeOwnedRecord(
+            request(),
+            $agreement,
+            'edit agreements',
+            'edit own agreements',
+            fn (Agreement $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
         return view('agreements.edit', [
             'agreement' => $agreement,
             ...$this->formOptions(),
@@ -137,6 +161,15 @@ class AgreementController extends Controller implements HasMiddleware
 
     public function update(Request $request, Agreement $agreement): RedirectResponse
     {
+        $this->authorizeOwnedRecord(
+            $request,
+            $agreement,
+            'edit agreements',
+            'edit own agreements',
+            fn (Agreement $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
         $validated = $this->validatedData($request, $agreement);
         $validated['updated_by'] = $request->user()?->id;
 

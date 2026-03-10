@@ -1,8 +1,12 @@
 @php
-    $managementOpen = request()->routeIs('dashboard', 'users.*', 'departments.*', 'ranks.*', 'countries.*', 'organization-types.*', 'partner-organizations.*', 'partner-contacts.*');
+    $dashboardActive = request()->routeIs('dashboard');
+    $cooperationOpen = request()->routeIs('countries.*', 'organization-types.*', 'partner-organizations.*', 'partner-contacts.*');
+    $documentsOpen = request()->routeIs('documents.*', 'document-types.*');
+    $eventsOpen = request()->routeIs('events.*', 'event-types.*');
     $agreementsOpen = request()->routeIs('agreements.*', 'agreement-types.*', 'agreement-directions.*');
     $visitsOpen = request()->routeIs('visits.*', 'visit-types.*');
-    $settingsActive = request()->routeIs('profile.edit');
+    $settingsOpen = request()->routeIs('users.*', 'departments.*', 'ranks.*', 'activity-logs.*', 'role-permissions.*');
+    $canManageRolePermissions = auth()->user()?->hasRole('super-admin') || auth()->user()?->can('manage role permissions');
 @endphp
 
 <div class="ie-sidebar-shell" data-sidebar-shell>
@@ -58,83 +62,76 @@
                 <p class="ie-sidebar__section-title">MAIN</p>
 
                 <nav class="ie-sidebar__nav" aria-label="Asosiy menyu">
-                    <div class="ie-sidebar__nav-group" data-submenu-group="asosiy">
-                        <button
-                            class="ie-sidebar__item {{ $managementOpen ? 'is-active' : '' }}"
-                            type="button"
-                            data-sidebar-item="asosiy"
-                            data-submenu-trigger
-                            aria-expanded="{{ $managementOpen ? 'true' : 'false' }}"
-                            aria-haspopup="true"
-                            aria-controls="ie-sidebar-inline-submenu"
-                        >
-                            <span class="ie-sidebar__item-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M3.5 10.5L12 4l8.5 6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M6.5 9.5v10h11v-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M10 19.5v-4.8h4v4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                            <span class="ie-sidebar__item-copy">
-                                <span class="ie-sidebar__item-title">Asosiy</span>
-                            </span>
-                            <span class="ie-sidebar__item-chevron" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
+                    <a class="ie-sidebar__item {{ $dashboardActive ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-sidebar-item="dashboard">
+                        <span class="ie-sidebar__item-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M3.5 10.5L12 4l8.5 6.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M6.5 9.5v10h11v-10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10 19.5v-4.8h4v4.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="ie-sidebar__item-copy">
+                            <span class="ie-sidebar__item-title">Dashboard</span>
+                        </span>
+                    </a>
 
-                        <div class="ie-sidebar__submenu {{ $managementOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu" data-inline-submenu="asosiy">
-                            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-parent-group="asosiy" data-submenu-item="dashboard">
-                                Dashboard
-                            </a>
+                    @canany(['view countries', 'view organization types', 'view partner organizations', 'view partner contacts'])
+                        <div class="ie-sidebar__nav-group" data-submenu-group="cooperation">
+                            <button
+                                class="ie-sidebar__item {{ $cooperationOpen ? 'is-active' : '' }}"
+                                type="button"
+                                data-sidebar-item="cooperation"
+                                data-submenu-trigger
+                                aria-expanded="{{ $cooperationOpen ? 'true' : 'false' }}"
+                                aria-haspopup="true"
+                                aria-controls="ie-sidebar-inline-submenu-cooperation"
+                            >
+                                <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M7 6.5h10a3.5 3.5 0 0 1 0 7H7a3.5 3.5 0 0 1 0-7Z" stroke="currentColor" stroke-width="1.7"/>
+                                        <path d="M7 10h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                        <path d="M8 17.5h8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <span class="ie-sidebar__item-copy">
+                                    <span class="ie-sidebar__item-title">Hamkorlik</span>
+                                </span>
+                                <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
 
-                            @can('view users')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="asosiy" data-submenu-item="users">
-                                    Foydalanuvchilar
-                                </a>
-                            @endcan
+                            <div class="ie-sidebar__submenu {{ $cooperationOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-cooperation" data-inline-submenu="cooperation">
+                                @can('view countries')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="cooperation" data-submenu-item="countries">
+                                        Davlatlar
+                                    </a>
+                                @endcan
 
-                            @can('view departments')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="asosiy" data-submenu-item="departments">
-                                    Bo'limlar
-                                </a>
-                            @endcan
+                                @can('view partner organizations')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="cooperation" data-submenu-item="partner-organizations">
+                                        Hamkor tashkilotlar
+                                    </a>
+                                @endcan
 
-                            @can('view ranks')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="asosiy" data-submenu-item="ranks">
-                                    Unvonlar
-                                </a>
-                            @endcan
+                                @can('view partner contacts')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="cooperation" data-submenu-item="partner-contacts">
+                                        Hamkor kontaktlar
+                                    </a>
+                                @endcan
 
-                            @can('view countries')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="asosiy" data-submenu-item="countries">
-                                    Davlatlar
-                                </a>
-                            @endcan
-
-                            @can('view organization types')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="asosiy" data-submenu-item="organization-types">
-                                    Tashkilot turlari
-                                </a>
-                            @endcan
-
-                            @can('view partner organizations')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="asosiy" data-submenu-item="partner-organizations">
-                                    Hamkor tashkilotlar
-                                </a>
-                            @endcan
-
-                            @can('view partner contacts')
-                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="asosiy" data-submenu-item="partner-contacts">
-                                    Hamkor kontaktlar
-                                </a>
-                            @endcan
+                                @can('view organization types')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="cooperation" data-submenu-item="organization-types">
+                                        Tashkilot turlari
+                                    </a>
+                                @endcan
+                            </div>
                         </div>
-                    </div>
+                    @endcanany
 
-                    @canany(['view agreements', 'view agreement types', 'view agreement directions'])
+                    @canany(['view agreements', 'view own agreements', 'view agreement types', 'view agreement directions'])
                         <div class="ie-sidebar__nav-group" data-submenu-group="agreements">
                             <button
                                 class="ie-sidebar__item {{ $agreementsOpen ? 'is-active' : '' }}"
@@ -163,11 +160,11 @@
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $agreementsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-agreements" data-inline-submenu="agreements">
-                                @can('view agreements')
+                                @canany(['view agreements', 'view own agreements'])
                                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreements.*') ? 'is-active' : '' }}" href="{{ route('agreements.index') }}" data-parent-group="agreements" data-submenu-item="agreements">
                                         Barcha kelishuvlar
                                     </a>
-                                @endcan
+                                @endcanany
 
                                 @can('view agreement types')
                                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-types.*') ? 'is-active' : '' }}" href="{{ route('agreement-types.index') }}" data-parent-group="agreements" data-submenu-item="agreement-types">
@@ -184,20 +181,51 @@
                         </div>
                     @endcanany
 
-                    <button class="ie-sidebar__item" type="button" data-sidebar-item="tadbirlar">
-                        <span class="ie-sidebar__item-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <rect x="4" y="5" width="16" height="15" rx="3.5" stroke="currentColor" stroke-width="1.7"/>
-                                <path d="M8 3.5v3.2M16 3.5v3.2M4 10h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                                <path d="M12.5 13l.8 1.7 1.9.3-1.4 1.3.3 1.9-1.6-.9-1.6.9.3-1.9-1.4-1.3 1.9-.3.8-1.7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-                            </svg>
-                        </span>
-                        <span class="ie-sidebar__item-copy">
-                            <span class="ie-sidebar__item-title">Tadbirlar</span>
-                        </span>
-                    </button>
+                    @canany(['view events', 'view own events', 'view event types'])
+                        <div class="ie-sidebar__nav-group" data-submenu-group="events">
+                            <button
+                                class="ie-sidebar__item {{ $eventsOpen ? 'is-active' : '' }}"
+                                type="button"
+                                data-sidebar-item="events"
+                                data-submenu-trigger
+                                aria-expanded="{{ $eventsOpen ? 'true' : 'false' }}"
+                                aria-haspopup="true"
+                                aria-controls="ie-sidebar-inline-submenu-events"
+                            >
+                                <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="4" y="5" width="16" height="15" rx="3.5" stroke="currentColor" stroke-width="1.7"/>
+                                        <path d="M8 3.5v3.2M16 3.5v3.2M4 10h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                        <path d="M12.5 13l.8 1.7 1.9.3-1.4 1.3.3 1.9-1.6-.9-1.6.9.3-1.9-1.4-1.3 1.9-.3.8-1.7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span class="ie-sidebar__item-copy">
+                                    <span class="ie-sidebar__item-title">Tadbirlar</span>
+                                </span>
+                                <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
 
-                    @canany(['view visits', 'view visit types'])
+                            <div class="ie-sidebar__submenu {{ $eventsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-events" data-inline-submenu="events">
+                                @canany(['view events', 'view own events'])
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('events.*') ? 'is-active' : '' }}" href="{{ route('events.index') }}" data-parent-group="events" data-submenu-item="events-index">
+                                        Barcha tadbirlar
+                                    </a>
+                                @endcanany
+
+                                @can('view event types')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('event-types.*') ? 'is-active' : '' }}" href="{{ route('event-types.index') }}" data-parent-group="events" data-submenu-item="event-types">
+                                        Tadbir turlari
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcanany
+
+                    @canany(['view visits', 'view own visits', 'view visit types'])
                         <div class="ie-sidebar__nav-group" data-submenu-group="visits">
                             <button
                                 class="ie-sidebar__item {{ $visitsOpen ? 'is-active' : '' }}"
@@ -226,11 +254,11 @@
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $visitsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-visits" data-inline-submenu="visits">
-                                @can('view visits')
+                                @canany(['view visits', 'view own visits'])
                                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('visits.*') ? 'is-active' : '' }}" href="{{ route('visits.index') }}" data-parent-group="visits" data-submenu-item="visits-index">
                                         Barcha tashriflar
                                     </a>
-                                @endcan
+                                @endcanany
 
                                 @can('view visit types')
                                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('visit-types.*') ? 'is-active' : '' }}" href="{{ route('visit-types.index') }}" data-parent-group="visits" data-submenu-item="visit-types">
@@ -241,31 +269,109 @@
                         </div>
                     @endcanany
 
-                    <button class="ie-sidebar__item" type="button" data-sidebar-item="hujjatlar">
-                        <span class="ie-sidebar__item-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M8 4.5h7l3 3V18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                                <path d="M15 4.5v3.2h3.2M10 12.5h4M10 16h6M6 8H4.8A1.8 1.8 0 0 0 3 9.8v8.4A1.8 1.8 0 0 0 4.8 20H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </span>
-                        <span class="ie-sidebar__item-copy">
-                            <span class="ie-sidebar__item-title">Hujjatlar</span>
-                        </span>
-                    </button>
+                    @canany(['view documents', 'view own documents', 'view document types'])
+                        <div class="ie-sidebar__nav-group" data-submenu-group="documents">
+                            <button
+                                class="ie-sidebar__item {{ $documentsOpen ? 'is-active' : '' }}"
+                                type="button"
+                                data-sidebar-item="documents"
+                                data-submenu-trigger
+                                aria-expanded="{{ $documentsOpen ? 'true' : 'false' }}"
+                                aria-haspopup="true"
+                                aria-controls="ie-sidebar-inline-submenu-documents"
+                            >
+                                <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M8 4.5h7l3 3V18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                        <path d="M15 4.5v3.2h3.2M10 12.5h4M10 16h6M6 8H4.8A1.8 1.8 0 0 0 3 9.8v8.4A1.8 1.8 0 0 0 4.8 20H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span class="ie-sidebar__item-copy">
+                                    <span class="ie-sidebar__item-title">Hujjatlar</span>
+                                </span>
+                                <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </button>
 
-                    <a class="ie-sidebar__item {{ $settingsActive ? 'is-active' : '' }}" href="{{ route('profile.edit') }}" data-sidebar-item="sozlamalar">
-                        <span class="ie-sidebar__item-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M4 7h6M14 7h6M4 12h10M18 12h2M4 17h3M11 17h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-                                <circle cx="11" cy="7" r="2" stroke="currentColor" stroke-width="1.7"/>
-                                <circle cx="16" cy="12" r="2" stroke="currentColor" stroke-width="1.7"/>
-                                <circle cx="9" cy="17" r="2" stroke="currentColor" stroke-width="1.7"/>
-                            </svg>
-                        </span>
-                        <span class="ie-sidebar__item-copy">
-                            <span class="ie-sidebar__item-title">Sozlamalar</span>
-                        </span>
-                    </a>
+                            <div class="ie-sidebar__submenu {{ $documentsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-documents" data-inline-submenu="documents">
+                                @canany(['view documents', 'view own documents'])
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('documents.*') ? 'is-active' : '' }}" href="{{ route('documents.index') }}" data-parent-group="documents" data-submenu-item="documents-index">
+                                        Barcha hujjatlar
+                                    </a>
+                                @endcanany
+
+                                @can('view document types')
+                                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('document-types.*') ? 'is-active' : '' }}" href="{{ route('document-types.index') }}" data-parent-group="documents" data-submenu-item="document-types">
+                                        Hujjat turlari
+                                    </a>
+                                @endcan
+                            </div>
+                        </div>
+                    @endcanany
+
+                    <div class="ie-sidebar__nav-group" data-submenu-group="settings">
+                        <button
+                            class="ie-sidebar__item {{ $settingsOpen ? 'is-active' : '' }}"
+                            type="button"
+                            data-sidebar-item="settings"
+                            data-submenu-trigger
+                            aria-expanded="{{ $settingsOpen ? 'true' : 'false' }}"
+                            aria-haspopup="true"
+                            aria-controls="ie-sidebar-inline-submenu-settings"
+                        >
+                            <span class="ie-sidebar__item-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M4 7h6M14 7h6M4 12h10M18 12h2M4 17h3M11 17h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    <circle cx="11" cy="7" r="2" stroke="currentColor" stroke-width="1.7"/>
+                                    <circle cx="16" cy="12" r="2" stroke="currentColor" stroke-width="1.7"/>
+                                    <circle cx="9" cy="17" r="2" stroke="currentColor" stroke-width="1.7"/>
+                                </svg>
+                            </span>
+                            <span class="ie-sidebar__item-copy">
+                                <span class="ie-sidebar__item-title">Sozlamalar</span>
+                            </span>
+                            <span class="ie-sidebar__item-chevron" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                        </button>
+
+                        <div class="ie-sidebar__submenu {{ $settingsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-settings" data-inline-submenu="settings">
+                            @canany(['view users', 'view own users'])
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="settings" data-submenu-item="users">
+                                    Foydalanuvchilar
+                                </a>
+                            @endcanany
+
+                            @can('view departments')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="settings" data-submenu-item="departments">
+                                    Bo'limlar
+                                </a>
+                            @endcan
+
+                            @can('view ranks')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="settings" data-submenu-item="ranks">
+                                    Unvonlar
+                                </a>
+                            @endcan
+
+                            @can('view activity logs')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('activity-logs.*') ? 'is-active' : '' }}" href="{{ route('activity-logs.index') }}" data-parent-group="settings" data-submenu-item="activity-logs">
+                                    Tizim loglari
+                                </a>
+                            @endcan
+
+                            @if ($canManageRolePermissions)
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('role-permissions.*') ? 'is-active' : '' }}" href="{{ route('role-permissions.index') }}" data-parent-group="settings" data-submenu-item="role-permissions">
+                                    Ruxsatlarni boshqarish
+                                </a>
+                            @endif
+                        </div>
+                    </div>
                 </nav>
             </section>
 
@@ -273,66 +379,65 @@
         </div>
     </aside>
 
-    <div class="ie-sidebar__floating-panel" data-floating-panel="asosiy" hidden>
-        <p class="ie-sidebar__floating-title">Asosiy</p>
-        <div class="ie-sidebar__floating-list">
-            <a class="ie-sidebar__submenu-item {{ request()->routeIs('dashboard') ? 'is-active' : '' }}" href="{{ route('dashboard') }}" data-parent-group="asosiy" data-submenu-item="dashboard">
-                Dashboard
-            </a>
+    @canany(['view countries', 'view organization types', 'view partner organizations', 'view partner contacts'])
+        <div class="ie-sidebar__floating-panel" data-floating-panel="cooperation" hidden>
+            <p class="ie-sidebar__floating-title">Hamkorlik</p>
+            <div class="ie-sidebar__floating-list">
+                @can('view countries')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="cooperation" data-submenu-item="countries">
+                        Davlatlar
+                    </a>
+                @endcan
 
-            @can('view users')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="asosiy" data-submenu-item="users">
-                    Foydalanuvchilar
-                </a>
-            @endcan
+                @can('view partner organizations')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="cooperation" data-submenu-item="partner-organizations">
+                        Hamkor tashkilotlar
+                    </a>
+                @endcan
 
-            @can('view departments')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="asosiy" data-submenu-item="departments">
-                    Bo'limlar
-                </a>
-            @endcan
+                @can('view partner contacts')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="cooperation" data-submenu-item="partner-contacts">
+                        Hamkor kontaktlar
+                    </a>
+                @endcan
 
-            @can('view ranks')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="asosiy" data-submenu-item="ranks">
-                    Unvonlar
-                </a>
-            @endcan
-
-            @can('view countries')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-parent-group="asosiy" data-submenu-item="countries">
-                    Davlatlar
-                </a>
-            @endcan
-
-            @can('view organization types')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="asosiy" data-submenu-item="organization-types">
-                    Tashkilot turlari
-                </a>
-            @endcan
-
-            @can('view partner organizations')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-organizations.*') ? 'is-active' : '' }}" href="{{ route('partner-organizations.index') }}" data-parent-group="asosiy" data-submenu-item="partner-organizations">
-                    Hamkor tashkilotlar
-                </a>
-            @endcan
-
-            @can('view partner contacts')
-                <a class="ie-sidebar__submenu-item {{ request()->routeIs('partner-contacts.*') ? 'is-active' : '' }}" href="{{ route('partner-contacts.index') }}" data-parent-group="asosiy" data-submenu-item="partner-contacts">
-                    Hamkor kontaktlar
-                </a>
-            @endcan
+                @can('view organization types')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-parent-group="cooperation" data-submenu-item="organization-types">
+                        Tashkilot turlari
+                    </a>
+                @endcan
+            </div>
         </div>
-    </div>
+    @endcanany
 
-    @canany(['view agreements', 'view agreement types', 'view agreement directions'])
+    @canany(['view events', 'view own events', 'view event types'])
+        <div class="ie-sidebar__floating-panel" data-floating-panel="events" hidden>
+            <p class="ie-sidebar__floating-title">Tadbirlar</p>
+            <div class="ie-sidebar__floating-list">
+                @canany(['view events', 'view own events'])
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('events.*') ? 'is-active' : '' }}" href="{{ route('events.index') }}" data-parent-group="events" data-submenu-item="events-index">
+                        Barcha tadbirlar
+                    </a>
+                @endcanany
+
+                @can('view event types')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('event-types.*') ? 'is-active' : '' }}" href="{{ route('event-types.index') }}" data-parent-group="events" data-submenu-item="event-types">
+                        Tadbir turlari
+                    </a>
+                @endcan
+            </div>
+        </div>
+    @endcanany
+
+    @canany(['view agreements', 'view own agreements', 'view agreement types', 'view agreement directions'])
         <div class="ie-sidebar__floating-panel" data-floating-panel="agreements" hidden>
             <p class="ie-sidebar__floating-title">Kelishuvlar</p>
             <div class="ie-sidebar__floating-list">
-                @can('view agreements')
+                @canany(['view agreements', 'view own agreements'])
                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreements.*') ? 'is-active' : '' }}" href="{{ route('agreements.index') }}" data-parent-group="agreements" data-submenu-item="agreements">
                         Barcha kelishuvlar
                     </a>
-                @endcan
+                @endcanany
 
                 @can('view agreement types')
                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('agreement-types.*') ? 'is-active' : '' }}" href="{{ route('agreement-types.index') }}" data-parent-group="agreements" data-submenu-item="agreement-types">
@@ -349,15 +454,15 @@
         </div>
     @endcanany
 
-    @canany(['view visits', 'view visit types'])
+    @canany(['view visits', 'view own visits', 'view visit types'])
         <div class="ie-sidebar__floating-panel" data-floating-panel="visits" hidden>
             <p class="ie-sidebar__floating-title">Tashriflar</p>
             <div class="ie-sidebar__floating-list">
-                @can('view visits')
+                @canany(['view visits', 'view own visits'])
                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('visits.*') ? 'is-active' : '' }}" href="{{ route('visits.index') }}" data-parent-group="visits" data-submenu-item="visits-index">
                         Barcha tashriflar
                     </a>
-                @endcan
+                @endcanany
 
                 @can('view visit types')
                     <a class="ie-sidebar__submenu-item {{ request()->routeIs('visit-types.*') ? 'is-active' : '' }}" href="{{ route('visit-types.index') }}" data-parent-group="visits" data-submenu-item="visit-types">
@@ -367,4 +472,58 @@
             </div>
         </div>
     @endcanany
+
+    @canany(['view documents', 'view own documents', 'view document types'])
+        <div class="ie-sidebar__floating-panel" data-floating-panel="documents" hidden>
+            <p class="ie-sidebar__floating-title">Hujjatlar</p>
+            <div class="ie-sidebar__floating-list">
+                @canany(['view documents', 'view own documents'])
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('documents.*') ? 'is-active' : '' }}" href="{{ route('documents.index') }}" data-parent-group="documents" data-submenu-item="documents-index">
+                        Barcha hujjatlar
+                    </a>
+                @endcanany
+
+                @can('view document types')
+                    <a class="ie-sidebar__submenu-item {{ request()->routeIs('document-types.*') ? 'is-active' : '' }}" href="{{ route('document-types.index') }}" data-parent-group="documents" data-submenu-item="document-types">
+                        Hujjat turlari
+                    </a>
+                @endcan
+            </div>
+        </div>
+    @endcanany
+
+    <div class="ie-sidebar__floating-panel" data-floating-panel="settings" hidden>
+        <p class="ie-sidebar__floating-title">Sozlamalar</p>
+        <div class="ie-sidebar__floating-list">
+            @canany(['view users', 'view own users'])
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('users.*') ? 'is-active' : '' }}" href="{{ route('users.index') }}" data-parent-group="settings" data-submenu-item="users">
+                    Foydalanuvchilar
+                </a>
+            @endcanany
+
+            @can('view departments')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('departments.*') ? 'is-active' : '' }}" href="{{ route('departments.index') }}" data-parent-group="settings" data-submenu-item="departments">
+                    Bo'limlar
+                </a>
+            @endcan
+
+            @can('view ranks')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-parent-group="settings" data-submenu-item="ranks">
+                    Unvonlar
+                </a>
+            @endcan
+
+            @can('view activity logs')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('activity-logs.*') ? 'is-active' : '' }}" href="{{ route('activity-logs.index') }}" data-parent-group="settings" data-submenu-item="activity-logs">
+                    Tizim loglari
+                </a>
+            @endcan
+
+            @if ($canManageRolePermissions)
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('role-permissions.*') ? 'is-active' : '' }}" href="{{ route('role-permissions.index') }}" data-parent-group="settings" data-submenu-item="role-permissions">
+                    Ruxsatlarni boshqarish
+                </a>
+            @endif
+        </div>
+    </div>
 </div>

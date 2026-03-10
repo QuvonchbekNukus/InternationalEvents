@@ -43,44 +43,46 @@
             @enderror
         </label>
 
-        <label class="field">
-            <span class="field-label">Rol</span>
-            <select name="role" required>
-                <option value="">Rolni tanlang</option>
-                @foreach ($roles as $role)
-                    <option value="{{ $role }}" @selected($selectedRole === $role)>{{ \Illuminate\Support\Str::headline(str_replace('-', ' ', $role)) }}</option>
-                @endforeach
-            </select>
-            @error('role')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
+        @can('edit users')
+            <label class="field">
+                <span class="field-label">Rol</span>
+                <select name="role" required>
+                    <option value="">Rolni tanlang</option>
+                    @foreach ($roles as $role)
+                        <option value="{{ $role }}" @selected($selectedRole === $role)>{{ \Illuminate\Support\Str::headline(str_replace('-', ' ', $role)) }}</option>
+                    @endforeach
+                </select>
+                @error('role')
+                    <span class="field-error">{{ $message }}</span>
+                @enderror
+            </label>
 
-        <label class="field">
-            <span class="field-label">Unvon</span>
-            <select name="rank_id" required>
-                <option value="">Unvonni tanlang</option>
-                @foreach ($ranks as $rank)
-                    <option value="{{ $rank->id }}" @selected((string) old('rank_id', $user->rank_id) === (string) $rank->id)>{{ $rank->name_uz }}</option>
-                @endforeach
-            </select>
-            @error('rank_id')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
+            <label class="field">
+                <span class="field-label">Unvon</span>
+                <select name="rank_id" required>
+                    <option value="">Unvonni tanlang</option>
+                    @foreach ($ranks as $rank)
+                        <option value="{{ $rank->id }}" @selected((string) old('rank_id', $user->rank_id) === (string) $rank->id)>{{ $rank->name_uz }}</option>
+                    @endforeach
+                </select>
+                @error('rank_id')
+                    <span class="field-error">{{ $message }}</span>
+                @enderror
+            </label>
 
-        <label class="field">
-            <span class="field-label">Bo'lim</span>
-            <select name="department_id">
-                <option value="">Biriktirilmagan</option>
-                @foreach ($departments as $department)
-                    <option value="{{ $department->id }}" @selected((string) old('department_id', $user->department_id) === (string) $department->id)>{{ $department->name_uz }}</option>
-                @endforeach
-            </select>
-            @error('department_id')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
+            <label class="field">
+                <span class="field-label">Bo'lim</span>
+                <select name="department_id">
+                    <option value="">Biriktirilmagan</option>
+                    @foreach ($departments as $department)
+                        <option value="{{ $department->id }}" @selected((string) old('department_id', $user->department_id) === (string) $department->id)>{{ $department->name_uz }}</option>
+                    @endforeach
+                </select>
+                @error('department_id')
+                    <span class="field-error">{{ $message }}</span>
+                @enderror
+            </label>
+        @endcan
 
         <label class="field">
             <span class="field-label">Parol</span>
@@ -115,11 +117,13 @@
             @enderror
         </label>
 
-        <label class="checkbox-field field--span-2">
-            <input type="hidden" name="is_active" value="0">
-            <input type="checkbox" name="is_active" value="1" @checked($isActive)>
-            <span>Foydalanuvchi faol holatda bo'lsin</span>
-        </label>
+        @can('edit users')
+            <label class="checkbox-field field--span-2">
+                <input type="hidden" name="is_active" value="0">
+                <input type="checkbox" name="is_active" value="1" @checked($isActive)>
+                <span>Foydalanuvchi faol holatda bo'lsin</span>
+            </label>
+        @endcan
     </div>
 
     <div class="form-actions">

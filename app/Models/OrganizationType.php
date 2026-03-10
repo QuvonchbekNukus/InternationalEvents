@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrganizationType extends Model
 {
+    use LogsModelActivity;
+
     /**
      * The attributes that are mass assignable.
      *

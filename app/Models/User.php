@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsModelActivity;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, LogsModelActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -43,6 +44,16 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+    ];
+
+    /**
+     * Attributes excluded from audit details.
+     *
+     * @var list<string>
+     */
+    protected array $activityLogExcept = [
+        'password',
+        'remember_token',
     ];
 
     /**
@@ -82,6 +93,26 @@ class User extends Authenticatable
     public function updatedVisits(): HasMany
     {
         return $this->hasMany(Visit::class, 'updated_by');
+    }
+
+    public function responsibleEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'responsible_user_id');
+    }
+
+    public function createdEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'created_by');
+    }
+
+    public function updatedEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'updated_by');
+    }
+
+    public function uploadedDocuments(): HasMany
+    {
+        return $this->hasMany(Document::class, 'uploaded_by');
     }
 
     public function getFullNameAttribute(): string

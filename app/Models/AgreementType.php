@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 
 class AgreementType extends Model
 {
+    use LogsModelActivity;
+
     /**
      * The attributes that are mass assignable.
      *
