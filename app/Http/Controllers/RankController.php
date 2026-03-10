@@ -3,70 +3,103 @@
 namespace App\Http\Controllers;
 
 use App\Models\Rank;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\View\View;
 
-class RankController extends Controller
+class RankController extends Controller implements HasMiddleware
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(): JsonResponse
+    public static function middleware(): array
     {
-        $ranks = Rank::query()->orderBy('id')->get();
+        return [
+            new Middleware('permission:view ranks', only: ['index']),
+            new Middleware('permission:create ranks', only: ['create', 'store']),
+            new Middleware('permission:edit ranks', only: ['edit', 'update']),
+            new Middleware('permission:delete ranks', only: ['destroy']),
+        ];
+    }
 
-        return response()->json($ranks);
+    public function index(Request $request): View
+    {
+        $search = trim((string) $request->string('search'));
+
+        $ranks = Rank::query()
+            ->withCount('users')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($rankQuery) use ($search) {
+                    $rankQuery
+                        ->where('name_uz', 'like', "%{$search}%")
+                        ->orWhere('name_ru', 'like', "%{$search}%")
+                        ->orWhere('name_cryl', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name_uz')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('ranks.index', [
+            'ranks' => $ranks,
+            'search' => $search,
+        ]);
+    }
+
+    public function create(): View
+    {
+        return view('ranks.create', [
+            'rank' => new Rank(),
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $rank = Rank::create($this->validatedData($request));
+
+        return redirect()
+            ->route('ranks.index')
+            ->with('status', "Unvon {$rank->name_uz} muvaffaqiyatli yaratildi.");
+    }
+
+    public function edit(Rank $rank): View
+    {
+        return view('ranks.edit', [
+            'rank' => $rank,
+        ]);
+    }
+
+    public function update(Request $request, Rank $rank): RedirectResponse
+    {
+        $rank->update($this->validatedData($request));
+
+        return redirect()
+            ->route('ranks.index')
+            ->with('status', "Unvon {$rank->name_uz} yangilandi.");
+    }
+
+    public function destroy(Rank $rank): RedirectResponse
+    {
+        if ($rank->users()->exists()) {
+            return back()->with('error', "Unvonga foydalanuvchilar biriktirilgan. Avval ulardagi unvonni yangilang.");
+        }
+
+        $rankName = $rank->name_uz;
+        $rank->delete();
+
+        return redirect()
+            ->route('ranks.index')
+            ->with('status', "Unvon {$rankName} o'chirildi.");
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @return array<string, mixed>
      */
-    public function store(Request $request): JsonResponse
+    private function validatedData(Request $request): array
     {
-        $validated = $request->validate([
+        return $request->validate([
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['required', 'string', 'max:255'],
             'name_cryl' => ['required', 'string', 'max:255'],
-        ]);
-
-        $rank = Rank::create($validated);
-
-        return response()->json($rank, 201);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Rank $rank): JsonResponse
-    {
-        return response()->json($rank);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Rank $rank): JsonResponse
-    {
-        $validated = $request->validate([
-            'name_ru' => ['sometimes', 'required', 'string', 'max:255'],
-            'name_uz' => ['sometimes', 'required', 'string', 'max:255'],
-            'name_cryl' => ['sometimes', 'required', 'string', 'max:255'],
-        ]);
-
-        $rank->update($validated);
-
-        return response()->json($rank);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Rank $rank): JsonResponse
-    {
-        $rank->delete();
-
-        return response()->json([
-            'message' => 'Rank deleted successfully.',
         ]);
     }
 }

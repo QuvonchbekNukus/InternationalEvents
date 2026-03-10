@@ -3,6 +3,7 @@
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RankController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -18,8 +19,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::apiResource('departments', DepartmentController::class);
-    Route::apiResource('ranks', RankController::class);
+    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('departments', DepartmentController::class)->except(['show']);
+    Route::resource('ranks', RankController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

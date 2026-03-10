@@ -20,20 +20,23 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DepartmentSeeder::class,
             RankSeeder::class,
+            PermissionSeeder::class,
             RoleSeeder::class,
         ]);
 
-        User::query()->updateOrCreate(
+        $user = User::query()->updateOrCreate(
             ['phone' => '998996822712'],
             [
                 'first_name' => 'Test',
                 'middle_name' => 'Testlovich',
                 'last_name' => 'User',
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'department_id' => Department::query()->where('code', 'XAB')->value('id'),
                 'rank_id' => Rank::query()->where('name_uz', 'Leytenant')->value('id') ?? 1,
                 'is_active' => true,
             ]
         );
+
+        $user->syncRoles(['super-admin']);
     }
 }

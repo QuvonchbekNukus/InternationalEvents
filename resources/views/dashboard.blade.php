@@ -1,143 +1,128 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #08172c;
-            --panel: rgba(10, 27, 49, 0.88);
-            --panel-border: rgba(150, 180, 220, 0.16);
-            --text: #e5eefc;
-            --muted: #9fb2d4;
-            --primary: #2563eb;
-        }
+@extends('layouts.dashboard')
 
-        * { box-sizing: border-box; }
+@section('title', 'Dashboard')
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 28%),
-                linear-gradient(135deg, #071324, #0d2747 50%, #071324);
-        }
+@section('content')
+    @php
+        $currentRole = auth()->user()?->getRoleNames()->first();
+        $resourceCards = [
+            [
+                'permission' => 'view users',
+                'title' => 'Foydalanuvchilar',
+                'count' => \App\Models\User::count(),
+                'description' => 'Tizimdagi xodimlar, lavozim va rollar holati.',
+                'icon' => 'groups',
+                'route' => route('users.index'),
+                'action' => 'Boshqarish',
+            ],
+            [
+                'permission' => 'view departments',
+                'title' => "Bo'limlar",
+                'count' => \App\Models\Department::count(),
+                'description' => "Ichki bo'limlar va ularning biriktirilgan xodimlari.",
+                'icon' => 'apartment',
+                'route' => route('departments.index'),
+                'action' => "Bo'limlarni ko'rish",
+            ],
+            [
+                'permission' => 'view ranks',
+                'title' => 'Unvonlar',
+                'count' => \App\Models\Rank::count(),
+                'description' => 'Harbiy unvonlar va foydalanuvchi birikmalari.',
+                'icon' => 'military_tech',
+                'route' => route('ranks.index'),
+                'action' => "Unvonlarni ko'rish",
+            ],
+        ];
+    @endphp
 
-        .page {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 32px 20px;
-        }
-
-        .topbar,
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: 18px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
-        }
-
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 18px 20px;
-            margin-bottom: 24px;
-        }
-
-        .title {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .subtitle {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn,
-        .btn-secondary {
-            border: 0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            text-decoration: none;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn {
-            background: linear-gradient(90deg, #1d4ed8, #2563eb);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .panel {
-            padding: 28px;
-        }
-
-        .panel h2 {
-            margin: 0 0 10px;
-            font-size: 20px;
-        }
-
-        .panel p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
-        @media (max-width: 700px) {
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="page">
-        <section class="topbar">
+    <div class="page-section">
+        <div class="page-header">
             <div>
-                <h1 class="title">Boshqaruv paneli</h1>
-                <p class="subtitle">
-                    {{ trim(auth()->user()->first_name.' '.auth()->user()->middle_name.' '.auth()->user()->last_name) }}
+                <p class="eyebrow">Bosh sahifa</p>
+                <h1 class="page-title">Boshqaruv paneli</h1>
+                <p class="page-subtitle">
+                    Foydalanuvchilar, bo'limlar va unvonlar modullari bitta kabinet ichida boshqariladi.
                 </p>
             </div>
 
-            <div class="actions">
-                @if (Route::has('profile.edit'))
-                    <a class="btn-secondary" href="{{ route('profile.edit') }}">Profil</a>
-                @endif
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="btn">Chiqish</button>
-                </form>
+            <div class="context-chip">
+                <i class="material-icons" aria-hidden="true">shield</i>
+                <span>{{ $currentRole ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole)) : 'Rol biriktirilmagan' }}</span>
             </div>
-        </section>
+        </div>
 
-        <section class="panel">
-            <h2>Tizimga kirish muvaffaqiyatli bajarildi</h2>
-            <p>Autentifikatsiya endi faqat telefon raqami va parol orqali ishlaydi. Bu sahifa vaqtinchalik asosiy kabinet sifatida turibdi.</p>
-        </section>
+        <div class="stats-grid">
+            @foreach ($resourceCards as $card)
+                @if (auth()->user()?->can($card['permission']))
+                    <article class="stat-card">
+                        <div class="stat-card__head">
+                            <span class="stat-icon">
+                                <i class="material-icons" aria-hidden="true">{{ $card['icon'] }}</i>
+                            </span>
+                            <a class="text-link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
+                        </div>
+
+                        <strong class="stat-value">{{ $card['count'] }}</strong>
+                        <h2 class="stat-title">{{ $card['title'] }}</h2>
+                        <p class="stat-description">{{ $card['description'] }}</p>
+                    </article>
+                @endif
+            @endforeach
+        </div>
+
+        <div class="content-grid">
+            <section class="content-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Permission tizimi</p>
+                        <h2 class="section-title">Rollar va huquqlar</h2>
+                    </div>
+                </div>
+
+                <div class="stack-list">
+                    <article class="stack-list__item">
+                        <strong>Super Admin</strong>
+                        <span>Barcha CRUD amallari va foydalanuvchi o'chirish huquqiga ega.</span>
+                    </article>
+
+                    <article class="stack-list__item">
+                        <strong>Admin</strong>
+                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim va unvonlarni to'liq boshqaradi.</span>
+                    </article>
+
+                    <article class="stack-list__item">
+                        <strong>Operator</strong>
+                        <span>Users, departments va ranks jadvallarini faqat ko'rish huquqiga ega.</span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="content-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Tezkor eslatma</p>
+                        <h2 class="section-title">Ish jarayoni</h2>
+                    </div>
+                </div>
+
+                <div class="stack-list">
+                    <article class="stack-list__item">
+                        <strong>1. Ruxsatlar seed orqali yaratiladi</strong>
+                        <span>`PermissionSeeder` va `RoleSeeder` mavjud rollarni permissionlar bilan sinxronlaydi.</span>
+                    </article>
+
+                    <article class="stack-list__item">
+                        <strong>2. Menyular permission boyicha korinadi</strong>
+                        <span>Sidebar ichidagi CRUD sahifalar faqat ruxsati bor foydalanuvchiga chiqadi.</span>
+                    </article>
+
+                    <article class="stack-list__item">
+                        <strong>3. Har bir controller action himoyalangan</strong>
+                        <span>`permission:*` middleware har bir resource uchun alohida qo'llanadi.</span>
+                    </article>
+                </div>
+            </section>
+        </div>
     </div>
-</body>
-</html>
+@endsection
