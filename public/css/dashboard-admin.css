@@ -426,6 +426,18 @@ a {
     border-color: rgba(255, 121, 121, 0.14);
 }
 
+.status-pill.is-planned {
+    color: #f7ebcf;
+    background: rgba(125, 88, 25, 0.34);
+    border-color: rgba(255, 202, 99, 0.18);
+}
+
+.status-pill.is-completed {
+    color: #d7e8ff;
+    background: rgba(35, 68, 121, 0.38);
+    border-color: rgba(121, 172, 255, 0.18);
+}
+
 .row-actions {
     display: flex;
     justify-content: flex-end;

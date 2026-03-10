@@ -1,5 +1,5 @@
 @php
-    $managementOpen = request()->routeIs('dashboard', 'users.*', 'departments.*', 'ranks.*');
+    $managementOpen = request()->routeIs('dashboard', 'users.*', 'departments.*', 'ranks.*', 'countries.*', 'organization-types.*');
     $settingsActive = request()->routeIs('profile.edit');
 @endphp
 
@@ -105,6 +105,18 @@
                                     Unvonlar
                                 </a>
                             @endcan
+
+                            @can('view countries')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-submenu-item="countries">
+                                    Davlatlar
+                                </a>
+                            @endcan
+
+                            @can('view organization types')
+                                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-submenu-item="organization-types">
+                                    Tashkilot turlari
+                                </a>
+                            @endcan
                         </div>
                     </div>
 
@@ -188,6 +200,18 @@
             @can('view ranks')
                 <a class="ie-sidebar__submenu-item {{ request()->routeIs('ranks.*') ? 'is-active' : '' }}" href="{{ route('ranks.index') }}" data-submenu-item="ranks">
                     Unvonlar
+                </a>
+            @endcan
+
+            @can('view countries')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('countries.*') ? 'is-active' : '' }}" href="{{ route('countries.index') }}" data-submenu-item="countries">
+                    Davlatlar
+                </a>
+            @endcan
+
+            @can('view organization types')
+                <a class="ie-sidebar__submenu-item {{ request()->routeIs('organization-types.*') ? 'is-active' : '' }}" href="{{ route('organization-types.index') }}" data-submenu-item="organization-types">
+                    Tashkilot turlari
                 </a>
             @endcan
         </div>

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\OrganizationTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RankController;
 use App\Http\Controllers\UserController;
@@ -22,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('departments', DepartmentController::class)->except(['show']);
     Route::resource('ranks', RankController::class)->except(['show']);
+    Route::resource('countries', CountryController::class)->except(['show']);
+    Route::resource('organization-types', OrganizationTypeController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';

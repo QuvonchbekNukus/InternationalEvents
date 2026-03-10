@@ -20,8 +20,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             DepartmentSeeder::class,
             RankSeeder::class,
+            CountrySeeder::class,
             PermissionSeeder::class,
             RoleSeeder::class,
+            UserSeeder::class,
         ]);
 
         $user = User::query()->updateOrCreate(

@@ -33,6 +33,24 @@
                 'route' => route('ranks.index'),
                 'action' => "Unvonlarni ko'rish",
             ],
+            [
+                'permission' => 'view countries',
+                'title' => 'Davlatlar',
+                'count' => \App\Models\Country::count(),
+                'description' => 'Hamkorlik qilinayotgan davlatlar va ularning holati.',
+                'icon' => 'public',
+                'route' => route('countries.index'),
+                'action' => "Davlatlarni ko'rish",
+            ],
+            [
+                'permission' => 'view organization types',
+                'title' => 'Tashkilot turlari',
+                'count' => \App\Models\OrganizationType::count(),
+                'description' => "Hamkor subyektlar uchun tashkilot toifalari ro'yxati.",
+                'icon' => 'domain',
+                'route' => route('organization-types.index'),
+                'action' => "Turlarni ko'rish",
+            ],
         ];
     @endphp
 
@@ -42,7 +60,7 @@
                 <p class="eyebrow">Bosh sahifa</p>
                 <h1 class="page-title">Boshqaruv paneli</h1>
                 <p class="page-subtitle">
-                    Foydalanuvchilar, bo'limlar va unvonlar modullari bitta kabinet ichida boshqariladi.
+                    Foydalanuvchilar, bo'limlar, unvonlar, davlatlar va tashkilot turlari modullari bitta kabinet ichida boshqariladi.
                 </p>
             </div>
 
@@ -88,12 +106,12 @@
 
                     <article class="stack-list__item">
                         <strong>Admin</strong>
-                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim va unvonlarni to'liq boshqaradi.</span>
+                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim, unvon, davlat va tashkilot turlarini to'liq boshqaradi.</span>
                     </article>
 
                     <article class="stack-list__item">
                         <strong>Operator</strong>
-                        <span>Users, departments va ranks jadvallarini faqat ko'rish huquqiga ega.</span>
+                        <span>Users, departments, ranks, countries va organization types jadvallarini faqat ko'rish huquqiga ega.</span>
                     </article>
                 </div>
             </section>

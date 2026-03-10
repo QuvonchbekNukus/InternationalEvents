@@ -28,6 +28,14 @@ class PermissionSeeder extends Seeder
             'create ranks',
             'edit ranks',
             'delete ranks',
+            'view countries',
+            'create countries',
+            'edit countries',
+            'delete countries',
+            'view organization types',
+            'create organization types',
+            'edit organization types',
+            'delete organization types',
         ];
 
         foreach ($permissions as $permissionName) {
