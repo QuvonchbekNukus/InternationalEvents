@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-sidebar-shell]').forEach((shell) => {
+        const floatingTransitionMs = 320;
         const toggleButton = shell.querySelector('[data-sidebar-toggle]');
         const mobileToggle = shell.querySelector('[data-sidebar-mobile-toggle]');
         const backdrop = shell.querySelector('[data-sidebar-backdrop]');
@@ -63,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             group.floatingPanel.classList.remove('is-visible');
             group.hideTimer = window.setTimeout(() => {
                 group.floatingPanel.hidden = true;
-            }, 240);
+            }, floatingTransitionMs);
         };
 
         const hideAllFloatingPanels = (exceptKey = null) => {

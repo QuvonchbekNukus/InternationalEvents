@@ -1,100 +1,104 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Dashboard')
+@section('title', __('ui.dashboard.page_title'))
 
 @section('content')
     @php
         $currentRole = auth()->user()?->getRoleNames()->first();
+        $translatedRole = $currentRole ? __("ui.roles.$currentRole") : __('ui.roles.unassigned');
+        $roleLabel = $currentRole && $translatedRole === "ui.roles.$currentRole"
+            ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole))
+            : $translatedRole;
         $resourceCards = [
             [
                 'permission' => 'view users',
-                'title' => 'Foydalanuvchilar',
+                'title' => __('ui.dashboard.cards.users.title'),
                 'count' => \App\Models\User::count(),
-                'description' => 'Tizimdagi xodimlar, lavozim va rollar holati.',
+                'description' => __('ui.dashboard.cards.users.description'),
                 'icon' => 'groups',
                 'route' => route('users.index'),
-                'action' => 'Boshqarish',
+                'action' => __('ui.dashboard.cards.users.action'),
             ],
             [
                 'permission' => 'view departments',
-                'title' => "Bo'limlar",
+                'title' => __('ui.dashboard.cards.departments.title'),
                 'count' => \App\Models\Department::count(),
-                'description' => "Ichki bo'limlar va ularning biriktirilgan xodimlari.",
+                'description' => __('ui.dashboard.cards.departments.description'),
                 'icon' => 'apartment',
                 'route' => route('departments.index'),
-                'action' => "Bo'limlarni ko'rish",
+                'action' => __('ui.dashboard.cards.departments.action'),
             ],
             [
                 'permission' => 'view ranks',
-                'title' => 'Unvonlar',
+                'title' => __('ui.dashboard.cards.ranks.title'),
                 'count' => \App\Models\Rank::count(),
-                'description' => 'Harbiy unvonlar va foydalanuvchi birikmalari.',
+                'description' => __('ui.dashboard.cards.ranks.description'),
                 'icon' => 'military_tech',
                 'route' => route('ranks.index'),
-                'action' => "Unvonlarni ko'rish",
+                'action' => __('ui.dashboard.cards.ranks.action'),
             ],
             [
                 'permission' => 'view countries',
-                'title' => 'Davlatlar',
+                'title' => __('ui.dashboard.cards.countries.title'),
                 'count' => \App\Models\Country::count(),
-                'description' => 'Hamkorlik qilinayotgan davlatlar va ularning holati.',
+                'description' => __('ui.dashboard.cards.countries.description'),
                 'icon' => 'public',
                 'route' => route('countries.index'),
-                'action' => "Davlatlarni ko'rish",
+                'action' => __('ui.dashboard.cards.countries.action'),
             ],
             [
                 'permission' => 'view agreements',
-                'title' => 'Barcha kelishuvlar',
+                'title' => __('ui.dashboard.cards.agreements.title'),
                 'count' => \App\Models\Agreement::count(),
-                'description' => 'Davlat, tur, yo\'nalish va javobgarlar bilan biriktirilgan kelishuvlar.',
+                'description' => __('ui.dashboard.cards.agreements.description'),
                 'icon' => 'feed',
                 'route' => route('agreements.index'),
-                'action' => "Kelishuvlarni ko'rish",
+                'action' => __('ui.dashboard.cards.agreements.action'),
             ],
             [
                 'permission' => 'view agreement types',
-                'title' => 'Kelishuv turlari',
+                'title' => __('ui.dashboard.cards.agreement_types.title'),
                 'count' => \App\Models\AgreementType::count(),
-                'description' => 'Memorandum, bitim, shartnoma va boshqa hujjat turlari.',
+                'description' => __('ui.dashboard.cards.agreement_types.description'),
                 'icon' => 'description',
                 'route' => route('agreement-types.index'),
-                'action' => "Turlarni ko'rish",
+                'action' => __('ui.dashboard.cards.agreement_types.action'),
             ],
             [
                 'permission' => 'view agreement directions',
-                'title' => "Kelishuv yo'nalishlari",
+                'title' => __('ui.dashboard.cards.agreement_directions.title'),
                 'count' => \App\Models\AgreementDirection::count(),
-                'description' => "Texnologiya, xavfsizlik va boshqa hamkorlik yo'nalishlari.",
+                'description' => __('ui.dashboard.cards.agreement_directions.description'),
                 'icon' => 'alt_route',
                 'route' => route('agreement-directions.index'),
-                'action' => "Yo'nalishlarni ko'rish",
+                'action' => __('ui.dashboard.cards.agreement_directions.action'),
             ],
             [
                 'permission' => 'view organization types',
-                'title' => 'Tashkilot turlari',
+                'title' => __('ui.dashboard.cards.organization_types.title'),
                 'count' => \App\Models\OrganizationType::count(),
-                'description' => "Hamkor subyektlar uchun tashkilot toifalari ro'yxati.",
+                'description' => __('ui.dashboard.cards.organization_types.description'),
                 'icon' => 'domain',
                 'route' => route('organization-types.index'),
-                'action' => "Turlarni ko'rish",
+                'action' => __('ui.dashboard.cards.organization_types.action'),
             ],
             [
                 'permission' => 'view partner organizations',
-                'title' => 'Hamkor tashkilotlar',
+                'title' => __('ui.dashboard.cards.partner_organizations.title'),
                 'count' => \App\Models\PartnerOrganization::count(),
-                'description' => "Davlat va tur kesimidagi hamkor tashkilotlar bazasi.",
+                'description' => __('ui.dashboard.cards.partner_organizations.description'),
                 'icon' => 'business',
                 'route' => route('partner-organizations.index'),
-                'action' => "Tashkilotlarni ko'rish",
+                'action' => __('ui.dashboard.cards.partner_organizations.action'),
             ],
             [
                 'permission' => 'view partner contacts',
-                'title' => 'Hamkor kontaktlar',
+                'title' => __('ui.dashboard.cards.partner_contacts.title'),
                 'count' => \App\Models\PartnerContact::count(),
-                'description' => "Hamkor tashkilotlarga biriktirilgan mas'ul shaxslar bazasi.",
+                'description' => __('ui.dashboard.cards.partner_contacts.description'),
                 'icon' => 'contact_phone',
                 'route' => route('partner-contacts.index'),
-                'action' => "Kontaktlarni ko'rish",
+                'action' => __('ui.dashboard.cards.partner_contacts.action'),
             ],
         ];
     @endphp
@@ -102,16 +106,16 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">Bosh sahifa</p>
-                <h1 class="page-title">Boshqaruv paneli</h1>
+                <p class="eyebrow">{{ __('ui.dashboard.eyebrow') }}</p>
+                <h1 class="page-title">{{ __('ui.dashboard.title') }}</h1>
                 <p class="page-subtitle">
-                    Foydalanuvchilar, bo'limlar, unvonlar, davlatlar, barcha kelishuvlar, kelishuv turlari, kelishuv yo'nalishlari, tashkilot turlari, hamkor tashkilotlar va kontaktlar modullari bitta kabinet ichida boshqariladi.
+                    {{ __('ui.dashboard.subtitle') }}
                 </p>
             </div>
 
             <div class="context-chip">
                 <i class="material-icons" aria-hidden="true">shield</i>
-                <span>{{ $currentRole ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole)) : 'Rol biriktirilmagan' }}</span>
+                <span>{{ $roleLabel }}</span>
             </div>
         </div>
 
@@ -134,58 +138,90 @@
             @endforeach
         </div>
 
-        <div class="content-grid">
-            <section class="content-card">
-                <div class="section-heading">
-                    <div>
-                        <p class="eyebrow">Permission tizimi</p>
-                        <h2 class="section-title">Rollar va huquqlar</h2>
+        @if (($eventCalendar['has_access'] ?? false) === true)
+            <section class="content-card dashboard-calendar-card">
+                <div class="section-heading dashboard-calendar-card__head">
+                    <div class="dashboard-calendar-card__intro">
+                        <p class="eyebrow">{{ __('ui.dashboard.calendar.eyebrow') }}</p>
+                        <div class="dashboard-calendar-card__title-row">
+                            <h2 class="section-title">{{ __('ui.dashboard.calendar.title') }}</h2>
+                            <span class="badge">{{ __('ui.dashboard.calendar.event_count', ['count' => $eventCalendar['event_count']]) }}</span>
+                        </div>
+                        <p class="dashboard-calendar-card__subtitle">
+                            {{ __('ui.dashboard.calendar.subtitle') }}
+                        </p>
+                    </div>
+
+                    <div class="dashboard-calendar-card__controls">
+                        <div class="dashboard-calendar-card__month-nav">
+                            <a class="btn btn--ghost dashboard-calendar-card__nav" href="{{ $eventCalendar['prev_url'] }}" aria-label="{{ __('ui.dashboard.calendar.previous_month') }}">
+                                <i class="material-icons" aria-hidden="true">chevron_left</i>
+                            </a>
+
+                            <div class="dashboard-calendar-card__month">
+                                <strong>{{ $eventCalendar['month_label'] }}</strong>
+                            </div>
+
+                            <a class="btn btn--ghost dashboard-calendar-card__nav" href="{{ $eventCalendar['next_url'] }}" aria-label="{{ __('ui.dashboard.calendar.next_month') }}">
+                                <i class="material-icons" aria-hidden="true">chevron_right</i>
+                            </a>
+                        </div>
+
+                        @if ($eventCalendar['events_url'])
+                            <a class="btn btn--ghost dashboard-calendar-card__link" href="{{ $eventCalendar['events_url'] }}">
+                                <i class="material-icons" aria-hidden="true">calendar_month</i>
+                                <span>{{ __('ui.dashboard.calendar.all_events') }}</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 
-                <div class="stack-list">
-                    <article class="stack-list__item">
-                        <strong>Super Admin</strong>
-                        <span>Barcha CRUD amallari va foydalanuvchi o'chirish huquqiga ega.</span>
-                    </article>
+                @if (($eventCalendar['event_count'] ?? 0) > 0)
+                    <div class="event-calendar" aria-label="{{ __('ui.dashboard.calendar.aria') }}">
+                        <div class="event-calendar__weekdays">
+                            @foreach ($eventCalendar['day_labels'] as $dayLabel)
+                                <div class="event-calendar__weekday">{{ $dayLabel }}</div>
+                            @endforeach
+                        </div>
 
-                    <article class="stack-list__item">
-                        <strong>Admin</strong>
-                        <span>Foydalanuvchi yaratish/tahrirlash, bo'lim, unvon, davlat, barcha kelishuvlar, kelishuv turlari, kelishuv yo'nalishlari, tashkilot turlari, hamkor tashkilotlar va kontaktlarni to'liq boshqaradi.</span>
-                    </article>
+                        <div class="event-calendar__weeks">
+                            @foreach ($eventCalendar['weeks'] as $week)
+                                <section class="event-calendar__week">
+                                    <div class="event-calendar__days">
+                                        @foreach ($week['days'] as $day)
+                                            <div class="event-calendar__day {{ $day['is_current_month'] ? '' : 'is-muted' }} {{ $day['is_today'] ? 'is-today' : '' }}">
+                                                <time datetime="{{ $day['date'] }}">{{ $day['day_number'] }}</time>
+                                            </div>
+                                        @endforeach
+                                    </div>
 
-                    <article class="stack-list__item">
-                        <strong>Operator</strong>
-                        <span>Users, departments, ranks, countries, agreements, agreement types, agreement directions, organization types, partner organizations va partner contacts jadvallarini faqat ko'rish huquqiga ega.</span>
-                    </article>
-                </div>
-            </section>
-
-            <section class="content-card">
-                <div class="section-heading">
-                    <div>
-                        <p class="eyebrow">Tezkor eslatma</p>
-                        <h2 class="section-title">Ish jarayoni</h2>
+                                    <div class="event-calendar__lanes">
+                                        @foreach ($week['lanes'] as $lane)
+                                            <div class="event-calendar__lane">
+                                                @foreach ($lane as $segment)
+                                                    <a
+                                                        class="event-calendar__event event-calendar__event--{{ $segment['color'] }} {{ $segment['starts_before'] ? 'is-continued-left' : '' }} {{ $segment['ends_after'] ? 'is-continued-right' : '' }}"
+                                                        href="{{ $segment['url'] }}"
+                                                        style="grid-column: {{ $segment['start_column'] }} / span {{ $segment['span'] }}"
+                                                        title="{{ $segment['tooltip'] }}"
+                                                    >
+                                                        <span class="event-calendar__event-title">{{ $segment['title'] }}</span>
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </section>
+                            @endforeach
+                        </div>
                     </div>
-                </div>
-
-                <div class="stack-list">
-                    <article class="stack-list__item">
-                        <strong>1. Ruxsatlar seed orqali yaratiladi</strong>
-                        <span>`PermissionSeeder` va `RoleSeeder` mavjud rollarni permissionlar bilan sinxronlaydi.</span>
-                    </article>
-
-                    <article class="stack-list__item">
-                        <strong>2. Menyular permission boyicha korinadi</strong>
-                        <span>Sidebar ichidagi CRUD sahifalar faqat ruxsati bor foydalanuvchiga chiqadi.</span>
-                    </article>
-
-                    <article class="stack-list__item">
-                        <strong>3. Har bir controller action himoyalangan</strong>
-                        <span>`permission:*` middleware har bir resource uchun alohida qo'llanadi.</span>
-                    </article>
-                </div>
+                @else
+                    <div class="table-empty">
+                        {{ __('ui.dashboard.calendar.empty') }}
+                    </div>
+                @endif
             </section>
-        </div>
+        @endif
+
     </div>
 @endsection

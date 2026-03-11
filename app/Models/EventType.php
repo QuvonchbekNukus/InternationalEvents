@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class EventType extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,5 +26,10 @@ class EventType extends Model
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('name');
     }
 }

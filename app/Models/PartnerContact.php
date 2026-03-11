@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartnerContact extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     /**
      * The attributes that are mass assignable.
@@ -60,6 +62,6 @@ class PartnerContact extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->full_name_uz ?: $this->full_name_ru;
+        return $this->firstAvailableLocalizedValue('full_name');
     }
 }

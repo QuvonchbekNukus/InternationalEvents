@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\EventType;
 use App\Models\PartnerOrganization;
 use App\Models\User;
+use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -22,7 +23,7 @@ class EventController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view events|view own events', only: ['index']),
+            new Middleware('permission:view events|view own events', only: ['index', 'show']),
             new Middleware('permission:create events', only: ['create', 'store']),
             new Middleware('permission:edit events|edit own events', only: ['edit', 'update']),
             new Middleware('permission:delete events', only: ['destroy']),
@@ -134,17 +135,54 @@ class EventController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, UserNotificationService $notificationService): RedirectResponse
     {
         $validated = $this->validatedData($request);
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
         $event = Event::create($validated);
+        $notificationService->notifyResponsibleUser(
+            $event,
+            null,
+            $event->responsible_user_id,
+            $request->user(),
+            'tadbir',
+            true
+        );
 
         return redirect()
             ->route('events.index')
             ->with('status', "Tadbir {$event->display_title} muvaffaqiyatli yaratildi.");
+    }
+
+    public function show(Request $request, Event $event): View
+    {
+        $this->authorizeViewedRecord(
+            $request,
+            $event,
+            'view events',
+            'view own events',
+            fn (Event $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $event->load([
+            'eventType:id,name_uz',
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'responsibleUser:id,first_name,middle_name,last_name',
+            'responsibleDepartment:id,name_uz',
+            'creator:id,first_name,middle_name,last_name',
+            'updater:id,first_name,middle_name,last_name',
+        ]);
+
+        return view('events.show', [
+            'event' => $event,
+            'formats' => Event::FORMAT_LABELS,
+            'statuses' => Event::STATUS_LABELS,
+        ]);
     }
 
     public function edit(Event $event): View
@@ -164,7 +202,7 @@ class EventController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function update(Request $request, Event $event): RedirectResponse
+    public function update(Request $request, Event $event, UserNotificationService $notificationService): RedirectResponse
     {
         $this->authorizeOwnedRecord(
             $request,
@@ -175,10 +213,18 @@ class EventController extends Controller implements HasMiddleware
                 || (int) $record->created_by === (int) $user->id
         );
 
+        $previousResponsibleUserId = $event->responsible_user_id;
         $validated = $this->validatedData($request);
         $validated['updated_by'] = $request->user()?->id;
 
         $event->update($validated);
+        $notificationService->notifyResponsibleUser(
+            $event->fresh(),
+            $previousResponsibleUserId,
+            $event->responsible_user_id,
+            $request->user(),
+            'tadbir'
+        );
 
         return redirect()
             ->route('events.index')

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Country extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     public const STATUSES = [
         'active',
@@ -61,7 +63,7 @@ class Country extends Model
 
     public function getDisplayNameAttribute(): string
     {
-        return $this->name_uz ?: $this->name_ru;
+        return $this->firstAvailableLocalizedValue('name');
     }
 
     public function getFlagAssetPathAttribute(): ?string

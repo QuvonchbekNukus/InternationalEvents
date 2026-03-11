@@ -1,266 +1,210 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg: #09182d;
-            --panel: rgba(11, 28, 51, 0.9);
-            --panel-border: rgba(166, 190, 225, 0.14);
-            --text: #e5eefc;
-            --muted: #9eb3d8;
-            --input-bg: rgba(255, 255, 255, 0.04);
-            --input-border: rgba(160, 184, 220, 0.16);
-            --primary: #2563eb;
-            --danger: #dc2626;
-            --success: #22c55e;
-        }
+@extends('layouts.dashboard')
 
-        * { box-sizing: border-box; }
+@section('title', 'Profil')
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: "Segoe UI", Arial, sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top right, rgba(37, 99, 235, 0.18), transparent 24%),
-                linear-gradient(135deg, #061222, #0c2442 55%, #061222);
-        }
+@section('content')
+    <div class="page-section">
+        <div class="page-header">
+            <div>
+                <p class="eyebrow">SETTINGS / PROFILE</p>
+                <h1 class="page-title">Profil sozlamalari</h1>
+                <p class="page-subtitle">
+                    Shaxsiy ma'lumotlar va parol xavfsizligini shu sahifada boshqaring.
+                </p>
+            </div>
 
-        .page {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 28px 18px 40px;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 22px;
-        }
-
-        .topbar a {
-            color: var(--text);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .status {
-            margin-bottom: 16px;
-            padding: 12px 14px;
-            border-radius: 12px;
-            background: rgba(34, 197, 94, 0.12);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: #bbf7d0;
-        }
-
-        .grid {
-            display: grid;
-            gap: 18px;
-        }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: 18px;
-            padding: 24px;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
-        }
-
-        .panel h2 {
-            margin: 0 0 14px;
-            font-size: 20px;
-        }
-
-        .fields {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 14px;
-        }
-
-        .field-full {
-            grid-column: 1 / -1;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        input {
-            width: 100%;
-            height: 44px;
-            border-radius: 10px;
-            border: 1px solid var(--input-border);
-            background: var(--input-bg);
-            color: var(--text);
-            padding: 0 12px;
-            outline: none;
-        }
-
-        .error {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #fca5a5;
-        }
-
-        .actions {
-            margin-top: 16px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            border: 0;
-            border-radius: 10px;
-            padding: 12px 16px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .btn-primary {
-            background: linear-gradient(90deg, #1d4ed8, #2563eb);
-        }
-
-        .btn-danger {
-            background: linear-gradient(90deg, #b91c1c, #dc2626);
-        }
-
-        @media (max-width: 700px) {
-            .fields {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="page">
-        <div class="topbar">
-            <h1>Profil</h1>
-            <a href="{{ route('dashboard') }}">Dashboardga qaytish</a>
+            <a class="btn btn--ghost" href="{{ route('dashboard') }}">
+                <i class="material-icons" aria-hidden="true">dashboard</i>
+                <span>Dashboard</span>
+            </a>
         </div>
 
-        @if (session('status'))
-            <div class="status">{{ session('status') }}</div>
-        @endif
+        <form class="resource-form" method="POST" action="{{ route('profile.update') }}">
+            @csrf
+            @method('PATCH')
 
-        <div class="grid">
-            <section class="panel">
-                <h2>Profil ma'lumotlari</h2>
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Asosiy ma'lumotlar</p>
+                    <h2 class="section-title">Profil ma'lumotlari</h2>
+                </div>
+            </div>
 
-                <form method="POST" action="{{ route('profile.update') }}">
-                    @csrf
-                    @method('PATCH')
+            <div class="form-grid">
+                <label class="field">
+                    <span class="field-label">Ism</span>
+                    <input
+                        id="first_name"
+                        name="first_name"
+                        type="text"
+                        value="{{ old('first_name', $user->first_name) }}"
+                        autocomplete="given-name"
+                        required
+                    >
+                    @error('first_name')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
 
-                    <div class="fields">
-                        <div>
-                            <label for="first_name">Ism</label>
-                            <input id="first_name" name="first_name" type="text" value="{{ old('first_name', $user->first_name) }}" required>
-                            @error('first_name')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <label class="field">
+                    <span class="field-label">Otasining ismi</span>
+                    <input
+                        id="middle_name"
+                        name="middle_name"
+                        type="text"
+                        value="{{ old('middle_name', $user->middle_name) }}"
+                        autocomplete="additional-name"
+                        required
+                    >
+                    @error('middle_name')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
 
-                        <div>
-                            <label for="middle_name">Otasining ismi</label>
-                            <input id="middle_name" name="middle_name" type="text" value="{{ old('middle_name', $user->middle_name) }}" required>
-                            @error('middle_name')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <label class="field">
+                    <span class="field-label">Familiya</span>
+                    <input
+                        id="last_name"
+                        name="last_name"
+                        type="text"
+                        value="{{ old('last_name', $user->last_name) }}"
+                        autocomplete="family-name"
+                        required
+                    >
+                    @error('last_name')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
 
-                        <div>
-                            <label for="last_name">Familiya</label>
-                            <input id="last_name" name="last_name" type="text" value="{{ old('last_name', $user->last_name) }}" required>
-                            @error('last_name')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <label class="field">
+                    <span class="field-label">Telefon</span>
+                    <input
+                        id="phone"
+                        name="phone"
+                        type="text"
+                        value="{{ old('phone', $user->phone) }}"
+                        autocomplete="tel"
+                        required
+                    >
+                    @error('phone')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
+            </div>
 
-                        <div>
-                            <label for="phone">Telefon</label>
-                            <input id="phone" name="phone" type="text" value="{{ old('phone', $user->phone) }}" required>
-                            @error('phone')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+            <div class="form-actions">
+                <button class="btn btn--primary" type="submit">
+                    <i class="material-icons" aria-hidden="true">save</i>
+                    <span>Saqlash</span>
+                </button>
+            </div>
+        </form>
 
-                    <div class="actions">
-                        <button type="submit" class="btn btn-primary">Saqlash</button>
-                    </div>
-                </form>
-            </section>
+        <form class="resource-form" method="POST" action="{{ route('password.update') }}">
+            @csrf
+            @method('PUT')
 
-            <section class="panel">
-                <h2>Parolni yangilash</h2>
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Xavfsizlik</p>
+                    <h2 class="section-title">Parolni yangilash</h2>
+                </div>
+            </div>
 
-                <form method="POST" action="{{ route('password.update') }}">
-                    @csrf
-                    @method('PUT')
+            <div class="form-grid">
+                <label class="field field--span-2">
+                    <span class="field-label">Joriy parol</span>
+                    <input
+                        id="current_password"
+                        name="current_password"
+                        type="password"
+                        autocomplete="current-password"
+                        required
+                    >
+                    @error('current_password', 'updatePassword')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
 
-                    <div class="fields">
-                        <div class="field-full">
-                            <label for="current_password">Joriy parol</label>
-                            <input id="current_password" name="current_password" type="password" required>
-                            @error('current_password', 'updatePassword')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <label class="field">
+                    <span class="field-label">Yangi parol</span>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                    >
+                    @error('password', 'updatePassword')
+                        <span class="field-error">{{ $message }}</span>
+                    @enderror
+                </label>
 
-                        <div>
-                            <label for="password">Yangi parol</label>
-                            <input id="password" name="password" type="password" required>
-                            @error('password', 'updatePassword')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
+                <label class="field">
+                    <span class="field-label">Parolni tasdiqlang</span>
+                    <input
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        type="password"
+                        autocomplete="new-password"
+                        required
+                    >
+                </label>
+            </div>
 
-                        <div>
-                            <label for="password_confirmation">Parolni tasdiqlang</label>
-                            <input id="password_confirmation" name="password_confirmation" type="password" required>
-                        </div>
-                    </div>
+            <div class="form-actions">
+                <button class="btn btn--primary" type="submit">
+                    <i class="material-icons" aria-hidden="true">lock_reset</i>
+                    <span>Parolni yangilash</span>
+                </button>
+            </div>
+        </form>
 
-                    <div class="actions">
-                        <button type="submit" class="btn btn-primary">Parolni yangilash</button>
-                    </div>
-                </form>
-            </section>
+        <section class="content-card" id="profile-notifications">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Bildirishnomalar</p>
+                    <h2 class="section-title">Shaxsiy notificationlar</h2>
+                </div>
 
-            <section class="panel">
-                <h2>Akkauntni o'chirish</h2>
+                <span class="badge">{{ $notifications->total() }} ta</span>
+            </div>
 
-                <form method="POST" action="{{ route('profile.destroy') }}">
-                    @csrf
-                    @method('DELETE')
+            @if ($notifications->count())
+                <div class="notification-list">
+                    @foreach ($notifications as $notification)
+                        <a
+                            class="notification-item {{ $notification->is_read ? '' : 'is-unread' }}"
+                            href="{{ route('notifications.open', $notification) }}"
+                        >
+                            <span class="notification-item__icon notification-item__icon--{{ $notification->type ?: 'info' }}" aria-hidden="true">
+                                <i class="material-icons">{{ $notification->type_icon }}</i>
+                            </span>
 
-                    <div class="fields">
-                        <div class="field-full">
-                            <label for="delete_password">Parol</label>
-                            <input id="delete_password" name="password" type="password" required>
-                            @error('password', 'userDeletion')
-                                <div class="error">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                            <span class="notification-item__content">
+                                <span class="notification-item__topline">
+                                    <span class="notification-item__title">{{ $notification->title }}</span>
+                                    <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                </span>
+                                <span class="notification-item__message">{{ $notification->message }}</span>
+                            </span>
 
-                    <div class="actions">
-                        <button type="submit" class="btn btn-danger">Akkauntni o'chirish</button>
-                    </div>
-                </form>
-            </section>
-        </div>
+                            <span class="notification-item__aside">
+                                <span class="badge">{{ $notification->type_label }}</span>
+                                @if (! $notification->is_read)
+                                    <span class="notification-item__open">Yangi</span>
+                                @endif
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+
+                <x-dashboard-pagination :paginator="$notifications" />
+            @else
+                <div class="table-empty">
+                    Hozircha sizga biriktirilgan o'zgarishlar bo'yicha bildirishnomalar yo'q.
+                </div>
+            @endif
+        </section>
     </div>
-</body>
-</html>
+@endsection

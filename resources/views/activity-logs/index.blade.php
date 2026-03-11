@@ -43,7 +43,7 @@
             <input class="toolbar-select" type="date" name="to" value="{{ $filters['to'] }}" aria-label="Tugash sanasi">
 
             <button class="btn btn--ghost" type="submit">
-                <i class="material-icons" aria-hidden="true">filter_alt</i>
+                <i class="material-icons" aria-hidden="true">filter_list</i>
                 <span>Filtrlash</span>
             </button>
 

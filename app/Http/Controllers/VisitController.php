@@ -8,6 +8,7 @@ use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Models\Visit;
 use App\Models\VisitType;
+use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -21,7 +22,7 @@ class VisitController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view visits|view own visits', only: ['index']),
+            new Middleware('permission:view visits|view own visits', only: ['index', 'show']),
             new Middleware('permission:create visits', only: ['create', 'store']),
             new Middleware('permission:edit visits|edit own visits', only: ['edit', 'update']),
             new Middleware('permission:delete visits', only: ['destroy']),
@@ -126,17 +127,53 @@ class VisitController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, UserNotificationService $notificationService): RedirectResponse
     {
         $validated = $this->validatedData($request);
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
         $visit = Visit::create($validated);
+        $notificationService->notifyResponsibleUser(
+            $visit,
+            null,
+            $visit->responsible_user_id,
+            $request->user(),
+            'tashrif',
+            true
+        );
 
         return redirect()
             ->route('visits.index')
             ->with('status', "Tashrif {$visit->display_title} muvaffaqiyatli yaratildi.");
+    }
+
+    public function show(Request $request, Visit $visit): View
+    {
+        $this->authorizeViewedRecord(
+            $request,
+            $visit,
+            'view visits',
+            'view own visits',
+            fn (Visit $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $visit->load([
+            'visitType:id,name_uz',
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'responsibleUser:id,first_name,middle_name,last_name',
+            'responsibleDepartment:id,name_uz',
+            'creator:id,first_name,middle_name,last_name',
+            'updater:id,first_name,middle_name,last_name',
+        ]);
+
+        return view('visits.show', [
+            'visit' => $visit,
+            'directions' => Visit::DIRECTION_LABELS,
+            'statuses' => Visit::STATUS_LABELS,
+        ]);
     }
 
     public function edit(Visit $visit): View
@@ -156,7 +193,7 @@ class VisitController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function update(Request $request, Visit $visit): RedirectResponse
+    public function update(Request $request, Visit $visit, UserNotificationService $notificationService): RedirectResponse
     {
         $this->authorizeOwnedRecord(
             $request,
@@ -167,10 +204,18 @@ class VisitController extends Controller implements HasMiddleware
                 || (int) $record->created_by === (int) $user->id
         );
 
+        $previousResponsibleUserId = $visit->responsible_user_id;
         $validated = $this->validatedData($request);
         $validated['updated_by'] = $request->user()?->id;
 
         $visit->update($validated);
+        $notificationService->notifyResponsibleUser(
+            $visit->fresh(),
+            $previousResponsibleUserId,
+            $visit->responsible_user_id,
+            $request->user(),
+            'tashrif'
+        );
 
         return redirect()
             ->route('visits.index')

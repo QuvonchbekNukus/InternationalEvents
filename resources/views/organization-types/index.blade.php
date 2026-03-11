@@ -13,7 +13,7 @@
 
             @can('create organization types')
                 <a class="btn btn--primary" href="{{ route('organization-types.create') }}">
-                    <i class="material-icons" aria-hidden="true">domain_add</i>
+                    <i class="material-icons" aria-hidden="true">domain</i>
                     <span>Yangi tur</span>
                 </a>
             @endcan
@@ -26,7 +26,7 @@
             </label>
 
             <button class="btn btn--ghost" type="submit">
-                <i class="material-icons" aria-hidden="true">filter_alt</i>
+                <i class="material-icons" aria-hidden="true">filter_list</i>
                 <span>Qidirish</span>
             </button>
 

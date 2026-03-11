@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Visit extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     public const DIRECTIONS = [
         'incoming',
@@ -125,6 +127,6 @@ class Visit extends Model
 
     public function getDisplayTitleAttribute(): string
     {
-        return $this->title_uz ?: $this->title_ru;
+        return $this->firstAvailableLocalizedValue('title');
     }
 }

@@ -9,6 +9,7 @@ use App\Models\Country;
 use App\Models\Department;
 use App\Models\PartnerOrganization;
 use App\Models\User;
+use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -22,7 +23,7 @@ class AgreementController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view agreements|view own agreements', only: ['index']),
+            new Middleware('permission:view agreements|view own agreements', only: ['index', 'show']),
             new Middleware('permission:create agreements', only: ['create', 'store']),
             new Middleware('permission:edit agreements|edit own agreements', only: ['edit', 'update']),
             new Middleware('permission:delete agreements', only: ['destroy']),
@@ -129,17 +130,53 @@ class AgreementController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, UserNotificationService $notificationService): RedirectResponse
     {
         $validated = $this->validatedData($request);
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
         $agreement = Agreement::create($validated);
+        $notificationService->notifyResponsibleUser(
+            $agreement,
+            null,
+            $agreement->responsible_user_id,
+            $request->user(),
+            'kelishuv',
+            true
+        );
 
         return redirect()
             ->route('agreements.index')
             ->with('status', "Kelishuv {$agreement->display_title} muvaffaqiyatli yaratildi.");
+    }
+
+    public function show(Request $request, Agreement $agreement): View
+    {
+        $this->authorizeViewedRecord(
+            $request,
+            $agreement,
+            'view agreements',
+            'view own agreements',
+            fn (Agreement $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $agreement->load([
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreementType:id,name_uz',
+            'agreementDirection:id,name_uz',
+            'responsibleUser:id,first_name,middle_name,last_name',
+            'responsibleDepartment:id,name_uz',
+            'creator:id,first_name,middle_name,last_name',
+            'updater:id,first_name,middle_name,last_name',
+        ]);
+
+        return view('agreements.show', [
+            'agreement' => $agreement,
+            'statuses' => Agreement::STATUS_LABELS,
+        ]);
     }
 
     public function edit(Agreement $agreement): View
@@ -159,7 +196,7 @@ class AgreementController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function update(Request $request, Agreement $agreement): RedirectResponse
+    public function update(Request $request, Agreement $agreement, UserNotificationService $notificationService): RedirectResponse
     {
         $this->authorizeOwnedRecord(
             $request,
@@ -170,10 +207,18 @@ class AgreementController extends Controller implements HasMiddleware
                 || (int) $record->created_by === (int) $user->id
         );
 
+        $previousResponsibleUserId = $agreement->responsible_user_id;
         $validated = $this->validatedData($request, $agreement);
         $validated['updated_by'] = $request->user()?->id;
 
         $agreement->update($validated);
+        $notificationService->notifyResponsibleUser(
+            $agreement->fresh(),
+            $previousResponsibleUserId,
+            $agreement->responsible_user_id,
+            $request->user(),
+            'kelishuv'
+        );
 
         return redirect()
             ->route('agreements.index')

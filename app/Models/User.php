@@ -115,6 +115,16 @@ class User extends Authenticatable
         return $this->hasMany(Document::class, 'uploaded_by');
     }
 
+    public function notificationItems(): HasMany
+    {
+        return $this->hasMany(Notification::class)->latest();
+    }
+
+    public function unreadNotificationItems(): HasMany
+    {
+        return $this->notificationItems()->where('is_read', false);
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim(implode(' ', array_filter([

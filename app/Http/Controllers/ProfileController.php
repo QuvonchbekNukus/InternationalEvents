@@ -18,6 +18,12 @@ class ProfileController extends Controller
     {
         return view('profile.edit', [
             'user' => $request->user(),
+            'notifications' => $request->user()
+                ->notificationItems()
+                ->orderBy('is_read')
+                ->orderByDesc('created_at')
+                ->paginate(10, ['*'], 'notifications_page')
+                ->withQueryString(),
         ]);
     }
 

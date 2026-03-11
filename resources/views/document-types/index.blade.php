@@ -26,7 +26,7 @@
             </label>
 
             <button class="btn btn--ghost" type="submit">
-                <i class="material-icons" aria-hidden="true">filter_alt</i>
+                <i class="material-icons" aria-hidden="true">filter_list</i>
                 <span>Qidirish</span>
             </button>
 

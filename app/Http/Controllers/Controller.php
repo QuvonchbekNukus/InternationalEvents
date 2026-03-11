@@ -41,4 +41,20 @@ abstract class Controller
 
         abort_unless($user?->can($editOwnPermission) && $ownershipCallback($record, $user), 403);
     }
+
+    protected function authorizeViewedRecord(
+        Request $request,
+        Model $record,
+        string $viewPermission,
+        string $viewOwnPermission,
+        callable $ownershipCallback
+    ): void {
+        $user = $request->user();
+
+        if ($user?->can($viewPermission)) {
+            return;
+        }
+
+        abort_unless($user?->can($viewOwnPermission) && $ownershipCallback($record, $user), 403);
+    }
 }
