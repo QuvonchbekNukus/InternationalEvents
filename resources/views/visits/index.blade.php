@@ -1,53 +1,53 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Barcha tashriflar')
+@section('title', __('ui.sidebar.all_visits'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visits</p>
-                <h1 class="page-title">Barcha tashriflar</h1>
-                <p class="page-subtitle">Tashriflar ro'yxati, yo'nalishlar, davlatlar va holatlar bo'yicha nazorat oynasi.</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visits')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.all_visits') }}</h1>
+                <p class="page-subtitle">{{ __('ui.pages.visits.index.subtitle') }}</p>
             </div>
 
             @can('create visits')
                 <a class="btn btn--primary" href="{{ route('visits.create') }}">
                     <i class="material-icons" aria-hidden="true">flight_takeoff</i>
-                    <span>Yangi tashrif</span>
+                    <span>{{ __('ui.pages.visits.index.create_action') }}</span>
                 </a>
             @endcan
         </div>
 
         <form class="toolbar" method="GET" action="{{ route('visits.index') }}">
-            <label class="toolbar-search" aria-label="Tashrif qidirish">
+            <label class="toolbar-search" aria-label="{{ __('ui.pages.visits.index.search_label') }}">
                 <i class="material-icons" aria-hidden="true">search</i>
-                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Nom, davlat, tashkilot, shahar yoki maqsad bo'yicha qidiring">
+                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="{{ __('ui.pages.visits.index.search_placeholder') }}">
             </label>
 
-            <select class="toolbar-select" name="country_id" aria-label="Davlat bo'yicha filter">
-                <option value="">Barcha davlatlar</option>
+            <select class="toolbar-select" name="country_id" aria-label="{{ __('ui.pages.visits.index.country_filter') }}">
+                <option value="">{{ __('ui.pages.visits.index.all_countries') }}</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) $filters['country_id'] === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) $filters['country_id'] === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
 
-            <select class="toolbar-select" name="visit_type_id" aria-label="Tashrif turi bo'yicha filter">
-                <option value="">Barcha turlar</option>
+            <select class="toolbar-select" name="visit_type_id" aria-label="{{ __('ui.pages.visits.index.type_filter') }}">
+                <option value="">{{ __('ui.pages.visits.index.all_types') }}</option>
                 @foreach ($visitTypes as $visitType)
-                    <option value="{{ $visitType->id }}" @selected((string) $filters['visit_type_id'] === (string) $visitType->id)>{{ $visitType->name_uz }}</option>
+                    <option value="{{ $visitType->id }}" @selected((string) $filters['visit_type_id'] === (string) $visitType->id)>{{ $visitType->display_name }}</option>
                 @endforeach
             </select>
 
-            <select class="toolbar-select" name="direction" aria-label="Yo'nalish bo'yicha filter">
-                <option value="">Barcha yo'nalishlar</option>
+            <select class="toolbar-select" name="direction" aria-label="{{ __('ui.pages.visits.index.direction_filter') }}">
+                <option value="">{{ __('ui.pages.visits.index.all_directions') }}</option>
                 @foreach ($directions as $directionValue => $directionLabel)
                     <option value="{{ $directionValue }}" @selected($filters['direction'] === $directionValue)>{{ $directionLabel }}</option>
                 @endforeach
             </select>
 
-            <select class="toolbar-select" name="status" aria-label="Holat bo'yicha filter">
-                <option value="">Barcha holatlar</option>
+            <select class="toolbar-select" name="status" aria-label="{{ __('ui.pages.visits.index.status_filter') }}">
+                <option value="">{{ __('ui.pages.visits.index.all_statuses') }}</option>
                 @foreach ($statuses as $statusValue => $statusLabel)
                     <option value="{{ $statusValue }}" @selected($filters['status'] === $statusValue)>{{ $statusLabel }}</option>
                 @endforeach
@@ -55,13 +55,13 @@
 
             <button class="btn btn--ghost" type="submit">
                 <i class="material-icons" aria-hidden="true">filter_list</i>
-                <span>Filtrlash</span>
+                <span>{{ __('ui.common.actions.filter') }}</span>
             </button>
 
             @if (collect($filters)->filter()->isNotEmpty())
                 <a class="btn btn--ghost" href="{{ route('visits.index') }}">
                     <i class="material-icons" aria-hidden="true">restart_alt</i>
-                    <span>Tozalash</span>
+                    <span>{{ __('ui.common.actions.clear') }}</span>
                 </a>
             @endif
         </form>
@@ -71,13 +71,13 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Tashrif</th>
-                            <th>Davlat / tashkilot</th>
-                            <th>Turi / yo'nalishi</th>
-                            <th>Manzil</th>
-                            <th>Muddat</th>
-                            <th>Javobgar</th>
-                            <th>Holat</th>
+                            <th>{{ __('ui.pages.visits.index.headers.visit') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.country_org') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.type_direction') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.address') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.duration') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.responsible') }}</th>
+                            <th>{{ __('ui.pages.visits.index.headers.status') }}</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -98,30 +98,30 @@
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $visit->country?->display_name ?: '-' }}</span>
-                                    <span class="row-subtitle">{{ $visit->partnerOrganization?->display_name ?: "Tashkilot biriktirilmagan" }}</span>
+                                    <span class="row-subtitle">{{ $visit->partnerOrganization?->display_name ?: __('ui.pages.visits.index.values.organization_missing') }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $visit->visitType?->name_uz ?: "Tur biriktirilmagan" }}</span>
-                                    <span class="row-subtitle">{{ $directions[$visit->direction] ?? "Yo'nalish tanlanmagan" }}</span>
+                                    <span class="row-title">{{ $visit->visitType?->display_name ?: __('ui.pages.visits.index.values.type_missing') }}</span>
+                                    <span class="row-subtitle">{{ $directions[$visit->direction] ?? __('ui.pages.visits.index.values.direction_missing') }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $visit->city ?: "Shahar yo'q" }}</span>
-                                    <span class="row-subtitle">{{ $visit->address ?: "Manzil kiritilmagan" }}</span>
+                                    <span class="row-title">{{ $visit->city ?: __('ui.pages.visits.index.values.city_missing') }}</span>
+                                    <span class="row-subtitle">{{ $visit->address ?: __('ui.pages.visits.index.values.address_missing') }}</span>
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $visit->start_date?->format('d.m.Y') }}</span>
-                                    <span class="row-subtitle">{{ $visit->end_date?->format('d.m.Y') ?: "Tugash sanasi yo'q" }}</span>
+                                    <span class="row-subtitle">{{ $visit->end_date?->format('d.m.Y') ?: __('ui.pages.visits.index.values.end_date_missing') }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $visit->responsibleUser?->full_name ?: "Javobgar biriktirilmagan" }}</span>
-                                    <span class="row-subtitle">{{ $visit->responsibleDepartment?->name_uz ?: "Bo'lim biriktirilmagan" }}</span>
+                                    <span class="row-title">{{ $visit->responsibleUser?->full_name ?: __('ui.pages.visits.index.values.responsible_missing') }}</span>
+                                    <span class="row-subtitle">{{ $visit->responsibleDepartment?->display_name ?: __('ui.pages.visits.index.values.department_missing') }}</span>
                                 </td>
                                 <td>
                                     <span class="status-pill {{ $statusClass }}">
                                         {{ $statuses[$visit->status] ?? $visit->status }}
                                     </span>
-                                    @if ($visit->purpose_uz || $visit->description)
-                                        <span class="row-subtitle">{{ \Illuminate\Support\Str::limit($visit->purpose_uz ?: $visit->description, 90) }}</span>
+                                    @if ($visit->display_purpose || $visit->description)
+                                        <span class="row-subtitle">{{ \Illuminate\Support\Str::limit($visit->display_purpose ?: $visit->description, 90) }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -129,18 +129,18 @@
                                         @canany(['edit visits', 'edit own visits'])
                                             <a class="action-pill" href="{{ route('visits.edit', $visit) }}">
                                                 <i class="material-icons" aria-hidden="true">edit</i>
-                                                <span>Tahrirlash</span>
+                                                <span>{{ __('ui.common.actions.edit') }}</span>
                                             </a>
                                         @endcanany
 
                                         @can('delete visits')
-                                            <form method="POST" action="{{ route('visits.destroy', $visit) }}" onsubmit="return confirm('Ushbu tashrifni o\'chirishni tasdiqlaysizmi?');">
+                                            <form method="POST" action="{{ route('visits.destroy', $visit) }}" onsubmit="return confirm(@js(__('ui.pages.visits.index.confirm_delete')));">
                                                 @csrf
                                                 @method('DELETE')
 
                                                 <button class="action-pill action-pill--danger" type="submit">
                                                     <i class="material-icons" aria-hidden="true">delete</i>
-                                                    <span>O'chirish</span>
+                                                    <span>{{ __('ui.common.actions.delete') }}</span>
                                                 </button>
                                             </form>
                                         @endcan
@@ -152,7 +152,7 @@
                 </table>
             @else
                 <div class="table-empty">
-                    Tashriflar hali yaratilmagan. Yangi tashrif qo'shing yoki filtrlarni tozalang.
+                    {{ __('ui.pages.visits.index.empty') }}
                 </div>
             @endif
 

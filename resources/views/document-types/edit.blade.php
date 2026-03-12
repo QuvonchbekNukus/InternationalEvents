@@ -6,8 +6,8 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Document Types</p>
-                <h1 class="page-title">{{ $documentType->name_uz }}</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.document_types')]) }}</p>
+                <h1 class="page-title">{{ $documentType->display_name }}</h1>
                 <p class="page-subtitle">Hujjat turining nomlarini yangilang.</p>
             </div>
         </div>

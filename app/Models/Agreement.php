@@ -125,4 +125,9 @@ class Agreement extends Model
     {
         return $this->firstAvailableLocalizedValue('short_title', 'title');
     }
+
+    public function getDisplayShortTitleAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('short_title');
+    }
 }

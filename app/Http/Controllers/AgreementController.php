@@ -39,12 +39,12 @@ class AgreementController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $agreementsQuery = Agreement::query()->with([
-            'country:id,name_uz,name_ru,iso2',
-            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
-            'agreementType:id,name_uz',
-            'agreementDirection:id,name_uz',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id',
+            'agreementType:id,name_uz,name_ru,name_cryl',
+            'agreementDirection:id,name_uz,name_ru,name_cryl',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
         ]);
 
         $this->applyOwnScope(
@@ -75,24 +75,29 @@ class AgreementController extends Controller implements HasMiddleware
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"))
                         ->orWhereHas('agreementType', fn ($typeQuery) => $typeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"))
                         ->orWhereHas('agreementDirection', fn ($directionQuery) => $directionQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleUser', fn ($userQuery) => $userQuery
                             ->where('first_name', 'like', "%{$search}%")
                             ->orWhere('middle_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleDepartment', fn ($departmentQuery) => $departmentQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -106,9 +111,9 @@ class AgreementController extends Controller implements HasMiddleware
 
         return view('agreements.index', [
             'agreements' => $agreements,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
-            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'statuses' => Agreement::STATUS_LABELS,
             'filters' => [
                 'search' => $search,
@@ -163,12 +168,12 @@ class AgreementController extends Controller implements HasMiddleware
         );
 
         $agreement->load([
-            'country:id,name_uz,name_ru,iso2',
-            'partnerOrganization:id,name_uz,name_ru,short_name',
-            'agreementType:id,name_uz',
-            'agreementDirection:id,name_uz',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'agreementType:id,name_uz,name_ru,name_cryl',
+            'agreementDirection:id,name_uz,name_ru,name_cryl',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
         ]);
@@ -293,12 +298,12 @@ class AgreementController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
-            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
-            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
+            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
-            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'statuses' => Agreement::STATUS_LABELS,
         ];
     }

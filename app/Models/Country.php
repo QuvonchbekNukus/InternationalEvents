@@ -66,6 +66,13 @@ class Country extends Model
         return $this->firstAvailableLocalizedValue('name');
     }
 
+    public function getDisplayRegionAttribute(): ?string
+    {
+        $value = $this->firstAvailableLocalizedValue('region');
+
+        return $value !== '' ? $value : null;
+    }
+
     public function getFlagAssetPathAttribute(): ?string
     {
         if (! $this->iso2) {

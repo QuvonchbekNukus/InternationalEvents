@@ -32,7 +32,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $partnerOrganizations = PartnerOrganization::query()
-            ->with(['country:id,name_uz,name_ru,iso2', 'organizationType:id,name_uz'])
+            ->with(['country:id,name_uz,name_ru,name_cryl,iso2', 'organizationType:id,name_uz,name_ru,name_cryl'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($partnerOrganizationQuery) use ($search) {
                     $partnerOrganizationQuery
@@ -45,10 +45,12 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('organizationType', fn ($typeQuery) => $typeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -60,8 +62,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return view('partner-organizations.index', [
             'partnerOrganizations' => $partnerOrganizations,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'statuses' => PartnerOrganization::STATUS_LABELS,
             'filters' => [
                 'search' => $search,
@@ -148,8 +150,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'statuses' => PartnerOrganization::STATUS_LABELS,
         ];
     }

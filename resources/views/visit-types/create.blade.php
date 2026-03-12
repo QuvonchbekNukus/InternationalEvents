@@ -6,7 +6,7 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visit Types</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visit_types')]) }}</p>
                 <h1 class="page-title">Yangi tashrif turi</h1>
                 <p class="page-subtitle">Tashrif turining uch tildagi nomlarini kiriting.</p>
             </div>

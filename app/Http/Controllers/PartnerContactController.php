@@ -30,7 +30,7 @@ class PartnerContactController extends Controller implements HasMiddleware
         $selectedPrimary = trim((string) $request->string('primary'));
 
         $partnerContacts = PartnerContact::query()
-            ->with(['partnerOrganization:id,name_uz,name_ru,short_name,country_id', 'partnerOrganization.country:id,name_uz,name_ru,iso2'])
+            ->with(['partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id', 'partnerOrganization.country:id,name_uz,name_ru,name_cryl,iso2'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($partnerContactQuery) use ($search) {
                     $partnerContactQuery
@@ -44,6 +44,7 @@ class PartnerContactController extends Controller implements HasMiddleware
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"));
                 });
             })
@@ -57,9 +58,9 @@ class PartnerContactController extends Controller implements HasMiddleware
         return view('partner-contacts.index', [
             'partnerContacts' => $partnerContacts,
             'partnerOrganizations' => PartnerOrganization::query()
-                ->with('country:id,name_uz,name_ru,iso2')
+                ->with('country:id,name_uz,name_ru,name_cryl,iso2')
                 ->orderBy('name_uz')
-                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
+                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
             'filters' => [
                 'search' => $search,
                 'partner_organization_id' => $selectedOrganization,
@@ -157,9 +158,9 @@ class PartnerContactController extends Controller implements HasMiddleware
     {
         return [
             'partnerOrganizations' => PartnerOrganization::query()
-                ->with('country:id,name_uz,name_ru,iso2')
+                ->with('country:id,name_uz,name_ru,name_cryl,iso2')
                 ->orderBy('name_uz')
-                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
+                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
         ];
     }
 

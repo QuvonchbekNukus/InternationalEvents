@@ -13,6 +13,7 @@ trait ResolvesLocalizedAttributes
     {
         $localePriority = match (App::currentLocale()) {
             'ru' => ['ru', 'uz', 'cryl'],
+            'cryl' => ['cryl', 'uz', 'ru'],
             default => ['uz', 'ru', 'cryl'],
         };
 

@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', "Kelishuv yo'nalishlari")
+@section('title', __('ui.sidebar.agreement_directions'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Agreement Directions</p>
-                <h1 class="page-title">Kelishuv yo'nalishlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.agreement_directions')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.agreement_directions') }}</h1>
                 <p class="page-subtitle">Texnologiya, xavfsizlik va boshqa hamkorlik yo'nalishlarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($agreementDirections as $agreementDirection)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $agreementDirection->name_uz }}</span>
+                                    <span class="row-title">{{ $agreementDirection->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $agreementDirection->name_ru }}</span>

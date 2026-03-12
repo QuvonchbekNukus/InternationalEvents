@@ -38,11 +38,11 @@ class VisitController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $visitsQuery = Visit::query()->with([
-            'country:id,name_uz,name_ru,iso2',
-            'visitType:id,name_uz',
-            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'visitType:id,name_uz,name_ru,name_cryl',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
         ]);
 
         $this->applyOwnScope(
@@ -75,13 +75,16 @@ class VisitController extends Controller implements HasMiddleware
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('visitType', fn ($visitTypeQuery) => $visitTypeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"))
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleUser', fn ($userQuery) => $userQuery
                             ->where('first_name', 'like', "%{$search}%")
@@ -89,7 +92,8 @@ class VisitController extends Controller implements HasMiddleware
                             ->orWhere('last_name', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleDepartment', fn ($departmentQuery) => $departmentQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -103,8 +107,8 @@ class VisitController extends Controller implements HasMiddleware
 
         return view('visits.index', [
             'visits' => $visits,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'visitTypes' => VisitType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'visitTypes' => VisitType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'directions' => Visit::DIRECTION_LABELS,
             'statuses' => Visit::STATUS_LABELS,
             'filters' => [
@@ -160,11 +164,11 @@ class VisitController extends Controller implements HasMiddleware
         );
 
         $visit->load([
-            'visitType:id,name_uz',
-            'country:id,name_uz,name_ru,iso2',
-            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'visitType:id,name_uz,name_ru,name_cryl',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
         ]);
@@ -290,11 +294,11 @@ class VisitController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'visitTypes' => VisitType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
-            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'visitTypes' => VisitType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
-            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'directions' => Visit::DIRECTION_LABELS,
             'statuses' => Visit::STATUS_LABELS,
         ];

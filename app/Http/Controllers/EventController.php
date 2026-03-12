@@ -39,12 +39,12 @@ class EventController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $eventsQuery = Event::query()->with([
-            'country:id,name_uz,name_ru,iso2',
-            'eventType:id,name_uz',
-            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
-            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'eventType:id,name_uz,name_ru,name_cryl',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id',
+            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
         ]);
 
         $this->applyOwnScope(
@@ -77,26 +77,32 @@ class EventController extends Controller implements HasMiddleware
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('eventType', fn ($eventTypeQuery) => $eventTypeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"))
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"))
                         ->orWhereHas('agreement', fn ($agreementQuery) => $agreementQuery
                             ->where('title_uz', 'like', "%{$search}%")
                             ->orWhere('title_ru', 'like', "%{$search}%")
+                            ->orWhere('title_cryl', 'like', "%{$search}%")
                             ->orWhere('short_title_uz', 'like', "%{$search}%")
-                            ->orWhere('short_title_ru', 'like', "%{$search}%"))
+                            ->orWhere('short_title_ru', 'like', "%{$search}%")
+                            ->orWhere('short_title_cryl', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleUser', fn ($userQuery) => $userQuery
                             ->where('first_name', 'like', "%{$search}%")
                             ->orWhere('middle_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleDepartment', fn ($departmentQuery) => $departmentQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -110,8 +116,8 @@ class EventController extends Controller implements HasMiddleware
 
         return view('events.index', [
             'events' => $events,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'eventTypes' => EventType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'eventTypes' => EventType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'formats' => Event::FORMAT_LABELS,
             'statuses' => Event::STATUS_LABELS,
             'filters' => [
@@ -168,12 +174,12 @@ class EventController extends Controller implements HasMiddleware
         );
 
         $event->load([
-            'eventType:id,name_uz',
-            'country:id,name_uz,name_ru,iso2',
-            'partnerOrganization:id,name_uz,name_ru,short_name',
-            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'eventType:id,name_uz,name_ru,name_cryl',
+            'country:id,name_uz,name_ru,name_cryl,iso2',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz',
+            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
         ]);
@@ -310,12 +316,12 @@ class EventController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'eventTypes' => EventType::query()->orderBy('name_uz')->get(['id', 'name_uz']),
-            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
-            'agreements' => Agreement::query()->orderBy('title_uz')->get(['id', 'country_id', 'title_uz', 'title_ru', 'short_title_uz', 'short_title_ru']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'eventTypes' => EventType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
+            'agreements' => Agreement::query()->orderBy('title_uz')->get(['id', 'country_id', 'title_uz', 'title_ru', 'title_cryl', 'short_title_uz', 'short_title_ru', 'short_title_cryl']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
-            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'formats' => Event::FORMAT_LABELS,
             'statuses' => Event::STATUS_LABELS,
         ];

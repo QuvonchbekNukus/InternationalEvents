@@ -6,7 +6,7 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Partner Organizations</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_organizations')]) }}</p>
                 <h1 class="page-title">{{ $partnerOrganization->display_name }}</h1>
                 <p class="page-subtitle">Hamkor tashkilotning asosiy ma'lumotlarini yangilang.</p>
             </div>

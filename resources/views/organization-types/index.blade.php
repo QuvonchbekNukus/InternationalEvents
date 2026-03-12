@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Tashkilot turlari')
+@section('title', __('ui.sidebar.organization_types'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Organization Types</p>
-                <h1 class="page-title">Tashkilot turlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.organization_types')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.organization_types') }}</h1>
                 <p class="page-subtitle">Hamkor tashkilotlar yoki subyektlar uchun tur toifalarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($organizationTypes as $organizationType)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $organizationType->name_uz }}</span>
+                                    <span class="row-title">{{ $organizationType->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $organizationType->name_ru }}</span>

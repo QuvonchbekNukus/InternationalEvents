@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const mainItems = Array.from(shell.querySelectorAll('[data-sidebar-item]'));
         const submenuItems = Array.from(shell.querySelectorAll('[data-submenu-item]'));
         const mobileBreakpoint = window.matchMedia('(max-width: 1120px)');
+        const expandLabel = toggleButton?.dataset.expandLabel || 'Expand sidebar';
+        const collapseLabel = toggleButton?.dataset.collapseLabel || 'Collapse sidebar';
         const submenuGroups = Array.from(shell.querySelectorAll('[data-submenu-group]'))
             .map((groupElement) => {
                 const key = groupElement.dataset.submenuGroup || '';
@@ -178,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const setCollapsed = (collapsed) => {
             shell.classList.toggle('is-collapsed', collapsed);
             toggleButton?.setAttribute('aria-expanded', String(!collapsed));
-            toggleButton?.setAttribute('aria-label', collapsed ? "Yon panelni kengaytirish" : "Yon panelni yig'ish");
+            toggleButton?.setAttribute('aria-label', collapsed ? expandLabel : collapseLabel);
 
             submenuGroups.forEach((group) => {
                 setInlineSubmenu(group, group.open);

@@ -16,7 +16,7 @@
                 <option value="">Hamkor tashkilotni tanlang</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
                     <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $partnerContact->partner_organization_id) === (string) $partnerOrganization->id)>
-                        {{ $partnerOrganization->name_uz ?: $partnerOrganization->name_ru }}{{ $partnerOrganization->country?->iso2 ? ' ('.$partnerOrganization->country->iso2.')' : '' }}
+                        {{ $partnerOrganization->display_name }}{{ $partnerOrganization->country?->iso2 ? ' ('.$partnerOrganization->country->iso2.')' : '' }}
                     </option>
                 @endforeach
             </select>
@@ -107,7 +107,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('partner-contacts.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('partner-contacts.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

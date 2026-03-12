@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="ie-sidebar__identity">
-                        <h2 class="ie-sidebar__name ie-sidebar__name--brand">MILLIY GVARDIYA</h2>
+                        <h2 class="ie-sidebar__name ie-sidebar__name--brand">{{ __('ui.nav.brand_title') }}</h2>
                     </div>
                 </div>
 
@@ -48,6 +48,8 @@
                     class="ie-sidebar__collapse-toggle"
                     type="button"
                     data-sidebar-toggle
+                    data-expand-label="{{ __('ui.sidebar.expand') }}"
+                    data-collapse-label="{{ __('ui.sidebar.collapse') }}"
                     aria-label="{{ __('ui.sidebar.collapse') }}"
                     aria-expanded="true"
                 >

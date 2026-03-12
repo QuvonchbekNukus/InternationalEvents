@@ -11,7 +11,7 @@
             <select name="country_id" required>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) old('country_id', $partnerOrganization->country_id) === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) old('country_id', $partnerOrganization->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
             @error('country_id')
@@ -24,7 +24,7 @@
             <select name="organization_type_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($organizationTypes as $organizationType)
-                    <option value="{{ $organizationType->id }}" @selected((string) old('organization_type_id', $partnerOrganization->organization_type_id) === (string) $organizationType->id)>{{ $organizationType->name_uz }}</option>
+                    <option value="{{ $organizationType->id }}" @selected((string) old('organization_type_id', $partnerOrganization->organization_type_id) === (string) $organizationType->id)>{{ $organizationType->display_name }}</option>
                 @endforeach
             </select>
             @error('organization_type_id')
@@ -110,7 +110,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('partner-organizations.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('partner-organizations.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

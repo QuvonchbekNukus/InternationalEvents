@@ -86,7 +86,7 @@ class DashboardController extends Controller
 
         $eventsQuery = Event::query()
             ->with([
-                'country:id,name_uz,name_ru,iso2',
+                'country:id,name_uz,name_ru,name_cryl,iso2',
                 'eventType:id,name_uz,name_ru,name_cryl',
             ])
             ->where(function ($query) use ($monthStart, $monthEnd): void {

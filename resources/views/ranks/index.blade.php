@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Unvonlar')
+@section('title', __('ui.sidebar.ranks'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Ranks</p>
-                <h1 class="page-title">Unvonlar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.ranks')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.ranks') }}</h1>
                 <p class="page-subtitle">Foydalanuvchilarga biriktiriladigan harbiy unvonlar ro'yxati.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($ranks as $rank)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $rank->name_uz }}</span>
+                                    <span class="row-title">{{ $rank->display_name }}</span>
                                     <span class="row-subtitle">{{ $rank->name_cryl }}</span>
                                 </td>
                                 <td>

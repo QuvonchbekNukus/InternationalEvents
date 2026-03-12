@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', "Bo'limlar")
+@section('title', __('ui.sidebar.departments'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Departments</p>
-                <h1 class="page-title">Bo'limlar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.departments')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.departments') }}</h1>
                 <p class="page-subtitle">Ichki tuzilma bo'limlari va ular bilan bog'langan foydalanuvchilar soni.</p>
             </div>
 
@@ -54,7 +54,7 @@
                         @foreach ($departments as $department)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $department->name_uz }}</span>
+                                    <span class="row-title">{{ $department->display_name }}</span>
                                     <span class="row-subtitle">{{ $department->name_ru }}</span>
                                 </td>
                                 <td>

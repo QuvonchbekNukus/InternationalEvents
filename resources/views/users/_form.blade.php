@@ -62,7 +62,7 @@
                 <select name="rank_id" required>
                     <option value="">Unvonni tanlang</option>
                     @foreach ($ranks as $rank)
-                        <option value="{{ $rank->id }}" @selected((string) old('rank_id', $user->rank_id) === (string) $rank->id)>{{ $rank->name_uz }}</option>
+                        <option value="{{ $rank->id }}" @selected((string) old('rank_id', $user->rank_id) === (string) $rank->id)>{{ $rank->display_name }}</option>
                     @endforeach
                 </select>
                 @error('rank_id')
@@ -75,7 +75,7 @@
                 <select name="department_id">
                     <option value="">Biriktirilmagan</option>
                     @foreach ($departments as $department)
-                        <option value="{{ $department->id }}" @selected((string) old('department_id', $user->department_id) === (string) $department->id)>{{ $department->name_uz }}</option>
+                        <option value="{{ $department->id }}" @selected((string) old('department_id', $user->department_id) === (string) $department->id)>{{ $department->display_name }}</option>
                     @endforeach
                 </select>
                 @error('department_id')
@@ -127,7 +127,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('users.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('users.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

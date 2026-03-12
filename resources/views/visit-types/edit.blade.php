@@ -6,8 +6,8 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visit Types</p>
-                <h1 class="page-title">{{ $visitType->name_uz }}</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visit_types')]) }}</p>
+                <h1 class="page-title">{{ $visitType->display_name }}</h1>
                 <p class="page-subtitle">Tashrif turining nomlarini yangilang.</p>
             </div>
         </div>

@@ -19,7 +19,7 @@
             <select name="country_id" required>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) old('country_id', $agreement->country_id) === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) old('country_id', $agreement->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
             @error('country_id')
@@ -32,7 +32,7 @@
             <select name="partner_organization_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
-                    <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $agreement->partner_organization_id) === (string) $partnerOrganization->id)>{{ $partnerOrganization->name_uz ?: $partnerOrganization->name_ru }}</option>
+                    <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $agreement->partner_organization_id) === (string) $partnerOrganization->id)>{{ $partnerOrganization->display_name }}</option>
                 @endforeach
             </select>
             @error('partner_organization_id')
@@ -45,7 +45,7 @@
             <select name="agreement_type_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($agreementTypes as $agreementType)
-                    <option value="{{ $agreementType->id }}" @selected((string) old('agreement_type_id', $agreement->agreement_type_id) === (string) $agreementType->id)>{{ $agreementType->name_uz }}</option>
+                    <option value="{{ $agreementType->id }}" @selected((string) old('agreement_type_id', $agreement->agreement_type_id) === (string) $agreementType->id)>{{ $agreementType->display_name }}</option>
                 @endforeach
             </select>
             @error('agreement_type_id')
@@ -58,7 +58,7 @@
             <select name="agreement_direction_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($agreementDirections as $agreementDirection)
-                    <option value="{{ $agreementDirection->id }}" @selected((string) old('agreement_direction_id', $agreement->agreement_direction_id) === (string) $agreementDirection->id)>{{ $agreementDirection->name_uz }}</option>
+                    <option value="{{ $agreementDirection->id }}" @selected((string) old('agreement_direction_id', $agreement->agreement_direction_id) === (string) $agreementDirection->id)>{{ $agreementDirection->display_name }}</option>
                 @endforeach
             </select>
             @error('agreement_direction_id')
@@ -120,7 +120,7 @@
             <select name="responsible_department_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($responsibleDepartments as $responsibleDepartment)
-                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $agreement->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->name_uz }}</option>
+                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $agreement->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->display_name }}</option>
                 @endforeach
             </select>
             @error('responsible_department_id')
@@ -186,7 +186,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('agreements.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('agreements.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

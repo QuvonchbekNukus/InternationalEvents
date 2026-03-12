@@ -47,7 +47,7 @@
             <select name="document_type_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($documentTypes as $documentType)
-                    <option value="{{ $documentType->id }}" @selected((string) old('document_type_id', $document->document_type_id) === (string) $documentType->id)>{{ $documentType->name_uz }}</option>
+                    <option value="{{ $documentType->id }}" @selected((string) old('document_type_id', $document->document_type_id) === (string) $documentType->id)>{{ $documentType->display_name }}</option>
                 @endforeach
             </select>
             @error('document_type_id')
@@ -160,7 +160,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('documents.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('documents.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

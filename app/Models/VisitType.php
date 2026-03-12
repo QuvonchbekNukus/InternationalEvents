@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VisitType extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,5 +26,10 @@ class VisitType extends Model
     public function visits(): HasMany
     {
         return $this->hasMany(Visit::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('name');
     }
 }

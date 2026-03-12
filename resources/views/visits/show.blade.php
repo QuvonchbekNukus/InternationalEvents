@@ -19,21 +19,21 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visits</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visits')]) }}</p>
                 <h1 class="page-title">{{ $visit->display_title }}</h1>
-                <p class="page-subtitle">Tashrifning maqsadi, muddati va biriktirilgan mas'ullar bo'yicha batafsil ko'rinish.</p>
+                <p class="page-subtitle">{{ __('ui.details.visits.subtitle') }}</p>
             </div>
 
             <div class="form-actions">
                 <a class="btn btn--ghost" href="{{ route('visits.index') }}">
                     <i class="material-icons" aria-hidden="true">arrow_back</i>
-                    <span>Ro'yxatga qaytish</span>
+                    <span>{{ __('ui.common.actions.back_to_list') }}</span>
                 </a>
 
                 @if ($canEdit)
                     <a class="btn btn--primary" href="{{ route('visits.edit', $visit) }}">
                         <i class="material-icons" aria-hidden="true">edit</i>
-                        <span>Tahrirlash</span>
+                        <span>{{ __('ui.common.actions.edit') }}</span>
                     </a>
                 @endif
             </div>
@@ -43,29 +43,29 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Asosiy ma'lumotlar</p>
-                        <h2 class="section-title">Tashrif tafsilotlari</h2>
+                        <p class="eyebrow">{{ __('ui.details.visits.primary_eyebrow') }}</p>
+                        <h2 class="section-title">{{ __('ui.details.visits.primary_title') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Tashrif turi</span>
-                        <strong>{{ $visit->visitType?->name_uz ?: "Biriktirilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.visit_type') }}</span>
+                        <strong>{{ $visit->visitType?->display_name ?: __('ui.common.values.unassigned') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Yo'nalish</span>
-                        <strong>{{ $directions[$visit->direction] ?? "Kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.direction') }}</span>
+                        <strong>{{ $directions[$visit->direction] ?? __('ui.common.values.not_entered') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Holat</span>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.status') }}</span>
                         <span class="status-pill {{ $statusClass }}">{{ $statuses[$visit->status] ?? $visit->status }}</span>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Muddat</span>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.duration') }}</span>
                         <strong>
                             {{ $visit->start_date?->format('d.m.Y') ?: '--' }}
                             {{ ' - ' }}
@@ -78,30 +78,30 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Lokatsiya</p>
-                        <h2 class="section-title">Davlat va manzil</h2>
+                        <p class="eyebrow">{{ __('ui.details.visits.location_eyebrow') }}</p>
+                        <h2 class="section-title">{{ __('ui.details.visits.location_title') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Davlat</span>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.country') }}</span>
                         <strong>{{ $visit->country?->display_name ?: '-' }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Hamkor tashkilot</span>
-                        <strong>{{ $visit->partnerOrganization?->display_name ?: "Biriktirilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.partner_organization') }}</span>
+                        <strong>{{ $visit->partnerOrganization?->display_name ?: __('ui.common.values.unassigned') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Shahar</span>
-                        <strong>{{ $visit->city ?: "Kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.city') }}</span>
+                        <strong>{{ $visit->city ?: __('ui.common.values.not_entered') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Manzil</span>
-                        <strong>{{ $visit->address ?: "Kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.address') }}</span>
+                        <strong>{{ $visit->address ?: __('ui.common.values.not_entered') }}</strong>
                     </article>
                 </div>
             </section>
@@ -109,43 +109,43 @@
             <section class="content-card detail-card detail-card--full">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Mas'ullar va mazmun</p>
-                        <h2 class="section-title">Qo'shimcha ma'lumotlar</h2>
+                        <p class="eyebrow">{{ __('ui.details.visits.additional_eyebrow') }}</p>
+                        <h2 class="section-title">{{ __('ui.details.visits.additional_title') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Javobgar foydalanuvchi</span>
-                        <strong>{{ $visit->responsibleUser?->full_name ?: "Biriktirilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.responsible_user') }}</span>
+                        <strong>{{ $visit->responsibleUser?->full_name ?: __('ui.common.values.unassigned') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Javobgar bo'lim</span>
-                        <strong>{{ $visit->responsibleDepartment?->name_uz ?: "Biriktirilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.responsible_department') }}</span>
+                        <strong>{{ $visit->responsibleDepartment?->display_name ?: __('ui.common.values.unassigned') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Yaratgan foydalanuvchi</span>
-                        <strong>{{ $visit->creator?->full_name ?: "Noma'lum" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.creator') }}</span>
+                        <strong>{{ $visit->creator?->full_name ?: __('ui.common.values.unknown') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Oxirgi yangilagan</span>
-                        <strong>{{ $visit->updater?->full_name ?: "Noma'lum" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.updater') }}</span>
+                        <strong>{{ $visit->updater?->full_name ?: __('ui.common.values.unknown') }}</strong>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">
-                        <span class="detail-list__label">Maqsad</span>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.purpose') }}</span>
                         <p class="detail-note">
-                            {{ $visit->purpose_uz ?: ($visit->purpose_ru ?: ($visit->purpose_cryl ?: "Maqsad kiritilmagan.")) }}
+                            {{ $visit->display_purpose ?: __('ui.common.values.purpose_missing') }}
                         </p>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">
-                        <span class="detail-list__label">Natija / izoh</span>
+                        <span class="detail-list__label">{{ __('ui.details.visits.fields.result') }}</span>
                         <p class="detail-note">
-                            {{ $visit->result_summary_uz ?: ($visit->result_summary_ru ?: ($visit->result_summary_cryl ?: ($visit->description ?: "Qo'shimcha ma'lumot kiritilmagan."))) }}
+                            {{ $visit->display_result_summary ?: ($visit->description ?: __('ui.common.values.no_additional_info')) }}
                         </p>
                     </article>
                 </div>

@@ -64,4 +64,9 @@ class PartnerContact extends Model
     {
         return $this->firstAvailableLocalizedValue('full_name');
     }
+
+    public function getDisplayPositionAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('position');
+    }
 }

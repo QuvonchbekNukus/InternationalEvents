@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, LogsModelActivity;
+    use HasFactory, Notifiable, HasRoles, LogsModelActivity, ResolvesLocalizedAttributes;
 
     /**
      * The attributes that are mass assignable.
@@ -132,5 +133,10 @@ class User extends Authenticatable
             $this->first_name,
             $this->middle_name,
         ])));
+    }
+
+    public function getDisplayPositionAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('position');
     }
 }

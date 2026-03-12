@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Hujjat turlari')
+@section('title', __('ui.sidebar.document_types'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Document Types</p>
-                <h1 class="page-title">Hujjat turlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.document_types')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.document_types') }}</h1>
                 <p class="page-subtitle">Buyruq, memorandum, xat va boshqa hujjat turlarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($documentTypes as $documentType)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $documentType->name_uz }}</span>
+                                    <span class="row-title">{{ $documentType->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $documentType->name_ru }}</span>

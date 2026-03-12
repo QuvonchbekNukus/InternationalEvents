@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Hamkor kontaktlar')
+@section('title', __('ui.sidebar.partner_contacts'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Partner Contacts</p>
-                <h1 class="page-title">Hamkor kontaktlar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_contacts')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.partner_contacts') }}</h1>
                 <p class="page-subtitle">Hamkor tashkilotlarga biriktirilgan asosiy va yordamchi kontaktlar ro'yxati.</p>
             </div>
 
@@ -29,7 +29,7 @@
                 <option value="">Barcha tashkilotlar</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
                     <option value="{{ $partnerOrganization->id }}" @selected((string) $filters['partner_organization_id'] === (string) $partnerOrganization->id)>
-                        {{ $partnerOrganization->name_uz ?: $partnerOrganization->name_ru }}
+                        {{ $partnerOrganization->display_name }}
                     </option>
                 @endforeach
             </select>
@@ -74,13 +74,13 @@
                                     <span class="row-subtitle">{{ $partnerContact->full_name_ru }} / {{ $partnerContact->full_name_cryl }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $partnerContact->partnerOrganization?->name_uz ?: ($partnerContact->partnerOrganization?->name_ru ?: '-') }}</span>
+                                    <span class="row-title">{{ $partnerContact->partnerOrganization?->display_name ?: '-' }}</span>
                                     <span class="row-subtitle">
-                                        {{ $partnerContact->partnerOrganization?->country?->name_uz ?: ($partnerContact->partnerOrganization?->country?->name_ru ?: "Davlat yo'q") }}
+                                        {{ $partnerContact->partnerOrganization?->country?->display_name ?: "Davlat yo'q" }}
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $partnerContact->position_uz ?: "Lavozim kiritilmagan" }}</span>
+                                    <span class="row-title">{{ $partnerContact->display_position ?: "Lavozim kiritilmagan" }}</span>
                                     @if ($partnerContact->position_ru || $partnerContact->position_cryl)
                                         <span class="row-subtitle">{{ $partnerContact->position_ru ?: '-' }} / {{ $partnerContact->position_cryl ?: '-' }}</span>
                                     @endif

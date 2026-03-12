@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Tadbir turlari')
+@section('title', __('ui.sidebar.event_types'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Event Types</p>
-                <h1 class="page-title">Tadbir turlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.event_types')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.event_types') }}</h1>
                 <p class="page-subtitle">Seminar, forum, konferensiya va boshqa tadbir turlarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($eventTypes as $eventType)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $eventType->name_uz }}</span>
+                                    <span class="row-title">{{ $eventType->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $eventType->name_ru }}</span>

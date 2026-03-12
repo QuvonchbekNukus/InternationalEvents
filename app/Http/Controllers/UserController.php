@@ -32,7 +32,7 @@ class UserController extends Controller implements HasMiddleware
         $selectedDepartment = trim((string) $request->string('department_id'));
         $selectedStatus = trim((string) $request->string('status'));
 
-        $usersQuery = User::query()->with(['department:id,name_uz', 'rank:id,name_uz', 'roles:id,name']);
+        $usersQuery = User::query()->with(['department:id,name_uz,name_ru,name_cryl', 'rank:id,name_uz,name_ru,name_cryl', 'roles:id,name']);
 
         $this->applyOwnScope(
             $request,
@@ -51,8 +51,16 @@ class UserController extends Controller implements HasMiddleware
                         ->orWhere('last_name', 'like', "%{$search}%")
                         ->orWhere('phone', 'like', "%{$search}%")
                         ->orWhere('position_uz', 'like', "%{$search}%")
-                        ->orWhereHas('department', fn ($departmentQuery) => $departmentQuery->where('name_uz', 'like', "%{$search}%"))
-                        ->orWhereHas('rank', fn ($rankQuery) => $rankQuery->where('name_uz', 'like', "%{$search}%"));
+                        ->orWhere('position_ru', 'like', "%{$search}%")
+                        ->orWhere('position_cryl', 'like', "%{$search}%")
+                        ->orWhereHas('department', fn ($departmentQuery) => $departmentQuery
+                            ->where('name_uz', 'like', "%{$search}%")
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"))
+                        ->orWhereHas('rank', fn ($rankQuery) => $rankQuery
+                            ->where('name_uz', 'like', "%{$search}%")
+                            ->orWhere('name_ru', 'like', "%{$search}%")
+                            ->orWhere('name_cryl', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedRole !== '', fn ($query) => $query->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', $selectedRole)))
@@ -67,7 +75,7 @@ class UserController extends Controller implements HasMiddleware
         return view('users.index', [
             'users' => $users,
             'roles' => Role::query()->orderBy('name')->pluck('name'),
-            'departments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz']),
+            'departments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'filters' => [
                 'search' => $search,
                 'role' => $selectedRole,

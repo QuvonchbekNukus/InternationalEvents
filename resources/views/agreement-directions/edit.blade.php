@@ -6,8 +6,8 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Agreement Directions</p>
-                <h1 class="page-title">{{ $agreementDirection->name_uz }}</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.agreement_directions')]) }}</p>
+                <h1 class="page-title">{{ $agreementDirection->display_name }}</h1>
                 <p class="page-subtitle">Kelishuv yo'nalishining nomlarini yangilang.</p>
             </div>
         </div>

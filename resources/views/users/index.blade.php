@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Foydalanuvchilar')
+@section('title', __('ui.sidebar.users'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Users</p>
-                <h1 class="page-title">Foydalanuvchilar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.users')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.users') }}</h1>
                 <p class="page-subtitle">
                     Tizim foydalanuvchilari, rollar, bo'limlar va unvonlar bir sahifada boshqariladi.
                 </p>
@@ -37,7 +37,7 @@
             <select class="toolbar-select" name="department_id" aria-label="Bo'lim bo'yicha filter">
                 <option value="">Barcha bo'limlar</option>
                 @foreach ($departments as $department)
-                    <option value="{{ $department->id }}" @selected((string) $filters['department_id'] === (string) $department->id)>{{ $department->name_uz }}</option>
+                    <option value="{{ $department->id }}" @selected((string) $filters['department_id'] === (string) $department->id)>{{ $department->display_name }}</option>
                 @endforeach
             </select>
 
@@ -79,13 +79,13 @@
                             <tr>
                                 <td>
                                     <span class="row-title">{{ $user->full_name }}</span>
-                                    <span class="row-subtitle">{{ $user->phone }}{{ $user->position_uz ? ' - '.$user->position_uz : '' }}</span>
+                                    <span class="row-subtitle">{{ $user->phone }}{{ $user->display_position ? ' - '.$user->display_position : '' }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $user->department?->name_uz ?? "Biriktirilmagan" }}</span>
+                                    <span class="row-title">{{ $user->department?->display_name ?? "Biriktirilmagan" }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $user->rank?->name_uz ?? '-' }}</span>
+                                    <span class="row-title">{{ $user->rank?->display_name ?? '-' }}</span>
                                 </td>
                                 <td>
                                     <span class="badge">

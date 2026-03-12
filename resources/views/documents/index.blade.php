@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Barcha hujjatlar')
+@section('title', __('ui.sidebar.all_documents'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Documents</p>
-                <h1 class="page-title">Barcha hujjatlar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.documents')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.all_documents') }}</h1>
                 <p class="page-subtitle">Yuklangan hujjatlar, fayl holati va bog'langan obyektlar bo'yicha nazorat oynasi.</p>
             </div>
 
@@ -28,7 +28,7 @@
             <select class="toolbar-select" name="document_type_id" aria-label="Hujjat turi bo'yicha filter">
                 <option value="">Barcha turlar</option>
                 @foreach ($documentTypes as $documentType)
-                    <option value="{{ $documentType->id }}" @selected((string) $filters['document_type_id'] === (string) $documentType->id)>{{ $documentType->name_uz }}</option>
+                    <option value="{{ $documentType->id }}" @selected((string) $filters['document_type_id'] === (string) $documentType->id)>{{ $documentType->display_name }}</option>
                 @endforeach
             </select>
 
@@ -86,7 +86,7 @@
                                     <span class="row-title">{{ $document->display_title }}</span>
                                     <span class="row-subtitle">{{ $document->title_ru }}{{ $document->title_cryl ? ' / '.$document->title_cryl : '' }}</span>
                                     <span class="row-subtitle">{{ $document->document_number ?: "Raqam biriktirilmagan" }}</span>
-                                    <span class="row-subtitle">{{ $document->documentType?->name_uz ?: "Tur biriktirilmagan" }}</span>
+                                    <span class="row-subtitle">{{ $document->documentType?->display_name ?: "Tur biriktirilmagan" }}</span>
                                 </td>
                                 <td>
                                     <span class="row-title">{{ \Illuminate\Support\Str::limit($document->file_name, 40) }}</span>

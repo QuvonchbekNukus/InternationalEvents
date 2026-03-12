@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Yangi tashrif')
+@section('title', __('ui.pages.visits.create.title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visits</p>
-                <h1 class="page-title">Yangi tashrif</h1>
-                <p class="page-subtitle">Tashrif bo'yicha asosiy ma'lumotlar, maqsad va natijalarni kiriting.</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visits')]) }}</p>
+                <h1 class="page-title">{{ __('ui.pages.visits.create.title') }}</h1>
+                <p class="page-subtitle">{{ __('ui.pages.visits.create.subtitle') }}</p>
             </div>
         </div>
 
         @include('visits._form', [
             'action' => route('visits.store'),
             'method' => 'POST',
-            'submitLabel' => 'Saqlash',
+            'submitLabel' => __('ui.common.actions.save'),
         ])
     </div>
 @endsection

@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Yangi davlat')
+@section('title', __('ui.pages.countries.create.title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Countries</p>
-                <h1 class="page-title">Yangi davlat</h1>
-                <p class="page-subtitle">Hamkor davlat uchun nom, ISO kodlari, mintaqa va xarita parametrlarini kiriting.</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.countries')]) }}</p>
+                <h1 class="page-title">{{ __('ui.pages.countries.create.title') }}</h1>
+                <p class="page-subtitle">{{ __('ui.pages.countries.create.subtitle') }}</p>
             </div>
         </div>
 
         @include('countries._form', [
             'action' => route('countries.store'),
             'method' => 'POST',
-            'submitLabel' => 'Saqlash',
+            'submitLabel' => __('ui.common.actions.save'),
         ])
     </div>
 @endsection

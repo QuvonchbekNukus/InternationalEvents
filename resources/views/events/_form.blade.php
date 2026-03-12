@@ -35,7 +35,7 @@
             <select name="event_type_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($eventTypes as $eventType)
-                    <option value="{{ $eventType->id }}" @selected((string) old('event_type_id', $event->event_type_id) === (string) $eventType->id)>{{ $eventType->name_uz }}</option>
+                    <option value="{{ $eventType->id }}" @selected((string) old('event_type_id', $event->event_type_id) === (string) $eventType->id)>{{ $eventType->display_name }}</option>
                 @endforeach
             </select>
             @error('event_type_id')
@@ -48,7 +48,7 @@
             <select name="country_id" required>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) old('country_id', $event->country_id) === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) old('country_id', $event->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
             @error('country_id')
@@ -74,7 +74,7 @@
             <select name="agreement_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($agreements as $agreement)
-                    <option value="{{ $agreement->id }}" @selected((string) old('agreement_id', $event->agreement_id) === (string) $agreement->id)>{{ $agreement->short_title_uz ?: ($agreement->title_uz ?: $agreement->title_ru) }}</option>
+                    <option value="{{ $agreement->id }}" @selected((string) old('agreement_id', $event->agreement_id) === (string) $agreement->id)>{{ $agreement->display_title }}</option>
                 @endforeach
             </select>
             @error('agreement_id')
@@ -148,7 +148,7 @@
             <select name="responsible_department_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($responsibleDepartments as $responsibleDepartment)
-                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $event->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->name_uz }}</option>
+                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $event->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->display_name }}</option>
                 @endforeach
             </select>
             @error('responsible_department_id')
@@ -222,7 +222,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('events.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('events.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

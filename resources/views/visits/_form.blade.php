@@ -35,7 +35,7 @@
             <select name="visit_type_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($visitTypes as $visitType)
-                    <option value="{{ $visitType->id }}" @selected((string) old('visit_type_id', $visit->visit_type_id) === (string) $visitType->id)>{{ $visitType->name_uz }}</option>
+                    <option value="{{ $visitType->id }}" @selected((string) old('visit_type_id', $visit->visit_type_id) === (string) $visitType->id)>{{ $visitType->display_name }}</option>
                 @endforeach
             </select>
             @error('visit_type_id')
@@ -48,7 +48,7 @@
             <select name="country_id" required>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) old('country_id', $visit->country_id) === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) old('country_id', $visit->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
             @error('country_id')
@@ -128,7 +128,7 @@
             <select name="responsible_department_id">
                 <option value="">Biriktirilmagan</option>
                 @foreach ($responsibleDepartments as $responsibleDepartment)
-                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $visit->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->name_uz }}</option>
+                    <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $visit->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->display_name }}</option>
                 @endforeach
             </select>
             @error('responsible_department_id')
@@ -226,7 +226,7 @@
     </div>
 
     <div class="form-actions">
-        <a class="btn btn--ghost" href="{{ route('visits.index') }}">Bekor qilish</a>
+        <a class="btn btn--ghost" href="{{ route('visits.index') }}">{{ __('ui.common.actions.cancel') }}</a>
         <button class="btn btn--primary" type="submit">
             <i class="material-icons" aria-hidden="true">save</i>
             <span>{{ $submitLabel }}</span>

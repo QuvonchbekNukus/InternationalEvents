@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
 
@@ -80,7 +80,7 @@ return [
 
     'locale' => 'uz',
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'uz'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
@@ -93,9 +93,9 @@ return [
             'label' => 'Русский',
             'short' => 'RU',
         ],
-        'en' => [
-            'label' => 'English',
-            'short' => 'EN',
+        'cryl' => [
+            'label' => 'Ўзбекча (кирилл)',
+            'short' => 'ЎЗ',
         ],
     ],
 

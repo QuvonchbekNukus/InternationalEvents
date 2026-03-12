@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Kelishuv turlari')
+@section('title', __('ui.sidebar.agreement_types'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Agreement Types</p>
-                <h1 class="page-title">Kelishuv turlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.agreement_types')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.agreement_types') }}</h1>
                 <p class="page-subtitle">Memorandum, bitim, shartnoma va boshqa hujjat turlarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($agreementTypes as $agreementType)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $agreementType->name_uz }}</span>
+                                    <span class="row-title">{{ $agreementType->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $agreementType->name_ru }}</span>

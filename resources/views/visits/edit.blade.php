@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Tashrifni tahrirlash')
+@section('title', __('ui.pages.visits.edit.title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visits</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visits')]) }}</p>
                 <h1 class="page-title">{{ $visit->display_title }}</h1>
-                <p class="page-subtitle">Tashrifga oid ma'lumotlarni yangilang.</p>
+                <p class="page-subtitle">{{ __('ui.pages.visits.edit.subtitle') }}</p>
             </div>
         </div>
 
         @include('visits._form', [
             'action' => route('visits.update', $visit),
             'method' => 'PUT',
-            'submitLabel' => 'Yangilash',
+            'submitLabel' => __('ui.common.actions.update'),
         ])
     </div>
 @endsection

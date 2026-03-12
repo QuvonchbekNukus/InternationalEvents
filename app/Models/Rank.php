@@ -3,12 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rank extends Model
 {
     use LogsModelActivity;
+    use ResolvesLocalizedAttributes;
 
     /**
      * Indicates if the model should be timestamped.
@@ -31,5 +33,10 @@ class Rank extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('name');
     }
 }

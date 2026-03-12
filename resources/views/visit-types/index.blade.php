@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Tashrif turlari')
+@section('title', __('ui.sidebar.visit_types'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Visit Types</p>
-                <h1 class="page-title">Tashrif turlari</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.visit_types')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.visit_types') }}</h1>
                 <p class="page-subtitle">Rasmiy, ishchi, do'stona va boshqa tashrif turlarini boshqarish oynasi.</p>
             </div>
 
@@ -53,7 +53,7 @@
                         @foreach ($visitTypes as $visitType)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $visitType->name_uz }}</span>
+                                    <span class="row-title">{{ $visitType->display_name }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $visitType->name_ru }}</span>

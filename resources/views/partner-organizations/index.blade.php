@@ -1,13 +1,13 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Hamkor tashkilotlar')
+@section('title', __('ui.sidebar.partner_organizations'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Partner Organizations</p>
-                <h1 class="page-title">Hamkor tashkilotlar</h1>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_organizations')]) }}</p>
+                <h1 class="page-title">{{ __('ui.sidebar.partner_organizations') }}</h1>
                 <p class="page-subtitle">Davlatlar va tashkilot turlari kesimida hamkor subyektlar ro'yxati.</p>
             </div>
 
@@ -28,14 +28,14 @@
             <select class="toolbar-select" name="country_id" aria-label="Davlat bo'yicha filter">
                 <option value="">Barcha davlatlar</option>
                 @foreach ($countries as $country)
-                    <option value="{{ $country->id }}" @selected((string) $filters['country_id'] === (string) $country->id)>{{ $country->name_uz ?: $country->name_ru }}</option>
+                    <option value="{{ $country->id }}" @selected((string) $filters['country_id'] === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
             </select>
 
             <select class="toolbar-select" name="organization_type_id" aria-label="Tashkilot turi bo'yicha filter">
                 <option value="">Barcha turlar</option>
                 @foreach ($organizationTypes as $organizationType)
-                    <option value="{{ $organizationType->id }}" @selected((string) $filters['organization_type_id'] === (string) $organizationType->id)>{{ $organizationType->name_uz }}</option>
+                    <option value="{{ $organizationType->id }}" @selected((string) $filters['organization_type_id'] === (string) $organizationType->id)>{{ $organizationType->display_name }}</option>
                 @endforeach
             </select>
 
@@ -92,11 +92,11 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $partnerOrganization->country?->name_uz ?: ($partnerOrganization->country?->name_ru ?: '-') }}</span>
+                                    <span class="row-title">{{ $partnerOrganization->country?->display_name ?: '-' }}</span>
                                     <span class="row-subtitle">{{ $partnerOrganization->country?->iso2 ?: "ISO2 yo'q" }}</span>
                                 </td>
                                 <td>
-                                    <span class="row-title">{{ $partnerOrganization->organizationType?->name_uz ?: "Tur biriktirilmagan" }}</span>
+                                    <span class="row-title">{{ $partnerOrganization->organizationType?->display_name ?: "Tur biriktirilmagan" }}</span>
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $partnerOrganization->city ?: "Shahar yo'q" }}</span>

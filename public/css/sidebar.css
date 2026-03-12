@@ -1,5 +1,5 @@
 .ie-sidebar-shell {
-    --sidebar-expanded: clamp(280px, 22vw, 324px);
+    --sidebar-expanded: clamp(296px, 23vw, 340px);
     --sidebar-collapsed: 92px;
     --sidebar-width: var(--sidebar-expanded);
     --sidebar-radius: clamp(24px, 2vw, 30px);
@@ -241,6 +241,7 @@
     font-size: 16px;
     line-height: 1.06;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .ie-sidebar__collapse-toggle {
@@ -312,7 +313,8 @@
 
 .ie-sidebar__item,
 .ie-sidebar__logout {
-    display: flex;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
     align-items: center;
     gap: 12px;
     width: 100%;
@@ -376,6 +378,7 @@
     width: 38px;
     height: 38px;
     flex: 0 0 auto;
+    min-width: 38px;
     border-radius: 14px;
     color: rgba(255, 249, 242, 0.96);
     background:
@@ -408,7 +411,9 @@
 
 .ie-sidebar__item-copy,
 .ie-sidebar__contact-copy {
+    flex: 1 1 auto;
     min-width: 0;
+    overflow: hidden;
     transition: opacity 0.22s ease, transform 0.22s ease, max-width 0.22s ease;
 }
 
@@ -416,9 +421,10 @@
 .ie-sidebar__contact-name,
 .ie-sidebar__logout-label {
     display: block;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
+    overflow-wrap: anywhere;
 }
 
 .ie-sidebar__item-title,
@@ -426,10 +432,14 @@
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.01em;
+    line-height: 1.3;
 }
 
 .ie-sidebar__item-chevron {
     margin-left: auto;
+    flex: 0 0 auto;
+    min-width: 16px;
+    justify-self: end;
     color: rgba(255, 255, 255, 0.6);
     transition: opacity 0.24s ease, transform 0.24s ease, max-width 0.24s ease;
 }
@@ -493,7 +503,7 @@
 
 .ie-sidebar__submenu-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
     width: 100%;
     min-height: 40px;
@@ -516,6 +526,7 @@
     flex: 0 0 auto;
     width: 18px;
     height: 18px;
+    margin-top: 2px;
     color: rgba(255, 241, 242, 0.7);
     transition: color 0.22s ease, transform 0.22s ease;
 }
@@ -528,9 +539,11 @@
 .ie-sidebar__submenu-label {
     min-width: 0;
     flex: 1 1 auto;
-    white-space: nowrap;
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    line-height: 1.35;
 }
 
 .ie-sidebar__submenu-item:hover,
@@ -803,6 +816,7 @@
 .ie-sidebar-shell.is-collapsed .ie-sidebar__item,
 .ie-sidebar-shell.is-collapsed .ie-sidebar__contact,
 .ie-sidebar-shell.is-collapsed .ie-sidebar__logout {
+    grid-template-columns: 38px;
     justify-content: center;
     padding-left: 6px;
     padding-right: 6px;

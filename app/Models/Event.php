@@ -136,4 +136,9 @@ class Event extends Model
     {
         return $this->firstAvailableLocalizedValue('title');
     }
+
+    public function getDisplayResultSummaryAttribute(): string
+    {
+        return $this->firstAvailableLocalizedValue('result_summary');
+    }
 }

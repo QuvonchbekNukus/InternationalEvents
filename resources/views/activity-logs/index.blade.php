@@ -6,7 +6,7 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">SETTINGS / AUDIT</p>
+                <p class="eyebrow">{{ __('ui.sidebar.settings') }} / {{ __('ui.sidebar.activity_logs') }}</p>
                 <h1 class="page-title">Tizim loglari</h1>
                 <p class="page-subtitle">Kim qachon tizimga kirgani, chiqgani va qaysi obyekt ustida qanday amal bajargani shu yerda ko'rinadi.</p>
             </div>

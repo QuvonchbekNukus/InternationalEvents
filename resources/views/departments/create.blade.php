@@ -6,7 +6,7 @@
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">CRUD / Departments</p>
+                <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.departments')]) }}</p>
                 <h1 class="page-title">Yangi bo'lim</h1>
                 <p class="page-subtitle">Yangi tarkibiy bo'limni yaratib, qisqa kodi va tavsifini kiriting.</p>
             </div>
