@@ -12,7 +12,7 @@
     <div class="form-grid">
         <label class="field field--span-2">
             <span class="field-label">Sarlavha (UZ)</span>
-            <input type="text" name="title_uz" value="{{ old('title_uz', $document->title_uz) }}" placeholder="Hamkorlik bo'yicha buyruq" required>
+            <input type="text" name="title_uz" value="{{ old('title_uz', $document->title_uz) }}" placeholder="Hamkorlik bo'yicha buyruq">
             @error('title_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -20,7 +20,7 @@
 
         <label class="field">
             <span class="field-label">Sarlavha (RU)</span>
-            <input type="text" name="title_ru" value="{{ old('title_ru', $document->title_ru) }}" placeholder="Приказ по сотрудничеству" required>
+            <input type="text" name="title_ru" value="{{ old('title_ru', $document->title_ru) }}" placeholder="Ruscha sarlavha">
             @error('title_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -28,7 +28,7 @@
 
         <label class="field">
             <span class="field-label">Sarlavha (KRYL)</span>
-            <input type="text" name="title_cryl" value="{{ old('title_cryl', $document->title_cryl) }}" placeholder="Ҳамкорлик бўйича буйруқ" required>
+            <input type="text" name="title_cryl" value="{{ old('title_cryl', $document->title_cryl) }}" placeholder="Kirilcha sarlavha">
             @error('title_cryl')
                 <span class="field-error">{{ $message }}</span>
             @enderror

@@ -38,6 +38,7 @@ class PartnerOrganization extends Model
         'name_cryl',
         'short_name',
         'organization_type_id',
+        'organization_info_document_id',
         'address',
         'city',
         'website',
@@ -55,9 +56,19 @@ class PartnerOrganization extends Model
         return $this->belongsTo(OrganizationType::class);
     }
 
+    public function organizationInfoDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'organization_info_document_id');
+    }
+
     public function partnerContacts(): HasMany
     {
         return $this->hasMany(PartnerContact::class);
+    }
+
+    public function agreements(): HasMany
+    {
+        return $this->hasMany(Agreement::class);
     }
 
     public function visits(): HasMany

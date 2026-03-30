@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agreement;
 use App\Models\Country;
+use App\Models\Document;
+use App\Models\Event;
+use App\Models\Visit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -15,7 +19,7 @@ class CountryController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('permission:view countries', only: ['index']),
+            new Middleware('permission:view countries', only: ['index', 'show']),
             new Middleware('permission:create countries', only: ['create', 'store']),
             new Middleware('permission:edit countries', only: ['edit', 'update']),
             new Middleware('permission:delete countries', only: ['destroy']),
@@ -60,9 +64,49 @@ class CountryController extends Controller implements HasMiddleware
     {
         return view('countries.create', [
             'country' => new Country([
-                'cooperation_status' => 'active',
+                'cooperation_status' => 'faol',
             ]),
             'statuses' => Country::STATUS_LABELS,
+        ]);
+    }
+
+    public function show(Request $request, Country $country): View
+    {
+        $country->loadMissing([]);
+
+        $canViewPartnerOrganizations = (bool) $request->user()?->can('view partner organizations');
+        $canViewAgreements = (bool) $request->user()?->can('view agreements')
+            || (bool) $request->user()?->can('view own agreements');
+        $canViewVisits = (bool) $request->user()?->can('view visits')
+            || (bool) $request->user()?->can('view own visits');
+        $canViewEvents = (bool) $request->user()?->can('view events')
+            || (bool) $request->user()?->can('view own events');
+        $canViewDocuments = (bool) $request->user()?->can('view documents')
+            || (bool) $request->user()?->can('view own documents');
+
+        $partnerOrganizations = $canViewPartnerOrganizations
+            ? $country->partnerOrganizations()
+                ->with(['organizationType:id,name_uz,name_ru,name_cryl'])
+                ->withCount('partnerContacts')
+                ->orderByRaw('coalesce(name_uz, name_ru, name_cryl) asc')
+                ->get()
+            : collect();
+
+        return view('countries.show', [
+            'country' => $country,
+            'statuses' => Country::STATUS_LABELS,
+            'partnerOrganizations' => $partnerOrganizations,
+            'agreements' => $this->visibleAgreements($request, $country),
+            'visits' => $this->visibleVisits($request, $country),
+            'events' => $this->visibleEvents($request, $country),
+            'documents' => $this->visibleDocuments($request, $country),
+            'relatedAccess' => [
+                'partner_organizations' => $canViewPartnerOrganizations,
+                'agreements' => $canViewAgreements,
+                'visits' => $canViewVisits,
+                'events' => $canViewEvents,
+                'documents' => $canViewDocuments,
+            ],
         ]);
     }
 
@@ -145,5 +189,115 @@ class CountryController extends Controller implements HasMiddleware
         $validated['flag_path'] = null;
 
         return $validated;
+    }
+
+    private function visibleAgreements(Request $request, Country $country)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->can('view agreements') && ! $user->can('view own agreements'))) {
+            return collect();
+        }
+
+        $query = $country->agreements()->with([
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'agreementType:id,name_uz,name_ru,name_cryl',
+            'agreementDirection:id,name_uz,name_ru,name_cryl',
+        ]);
+
+        if (! $user->can('view agreements') && $user->can('view own agreements')) {
+            $query->where(function ($agreementQuery) use ($user) {
+                $agreementQuery
+                    ->where('responsible_user_id', $user->id)
+                    ->orWhere('created_by', $user->id);
+            });
+        }
+
+        return $query
+            ->orderByDesc('signed_date')
+            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->get();
+    }
+
+    private function visibleVisits(Request $request, Country $country)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->can('view visits') && ! $user->can('view own visits'))) {
+            return collect();
+        }
+
+        $query = $country->visits()->with([
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'visitType:id,name_uz,name_ru,name_cryl',
+        ]);
+
+        if (! $user->can('view visits') && $user->can('view own visits')) {
+            $query->where(function ($visitQuery) use ($user) {
+                $visitQuery
+                    ->where('responsible_user_id', $user->id)
+                    ->orWhere('created_by', $user->id);
+            });
+        }
+
+        return $query
+            ->orderByDesc('start_date')
+            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->get();
+    }
+
+    private function visibleEvents(Request $request, Country $country)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->can('view events') && ! $user->can('view own events'))) {
+            return collect();
+        }
+
+        $query = $country->events()->with([
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'eventType:id,name_uz,name_ru,name_cryl',
+            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
+        ]);
+
+        if (! $user->can('view events') && $user->can('view own events')) {
+            $query->where(function ($eventQuery) use ($user) {
+                $eventQuery
+                    ->where('responsible_user_id', $user->id)
+                    ->orWhere('created_by', $user->id);
+            });
+        }
+
+        return $query
+            ->orderByDesc('start_datetime')
+            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->get();
+    }
+
+    private function visibleDocuments(Request $request, Country $country)
+    {
+        $user = $request->user();
+
+        if (! $user || (! $user->can('view documents') && ! $user->can('view own documents'))) {
+            return collect();
+        }
+
+        $query = $country->documents()->with([
+            'documentType:id,name_uz,name_ru,name_cryl',
+            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
+            'visit:id,title_uz,title_ru,title_cryl',
+            'event:id,title_uz,title_ru,title_cryl',
+            'uploader:id,first_name,middle_name,last_name',
+        ]);
+
+        if (! $user->can('view documents') && $user->can('view own documents')) {
+            $query->where('uploaded_by', $user->id);
+        }
+
+        return $query
+            ->orderByDesc('created_at')
+            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl, file_name) asc')
+            ->get();
     }
 }

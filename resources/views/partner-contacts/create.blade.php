@@ -8,7 +8,7 @@
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_contacts')]) }}</p>
                 <h1 class="page-title">Yangi hamkor kontakt</h1>
-                <p class="page-subtitle">Hamkor tashkilot uchun asosiy yoki oddiy kontakt ma'lumotlarini kiriting.</p>
+                <p class="page-subtitle">Hamkor tashkilot uchun asosiy yoki oddiy kontaktning F.I.Sh, tug'ilgan sana, aloqa va fayl ma'lumotlarini kiriting.</p>
             </div>
         </div>
 

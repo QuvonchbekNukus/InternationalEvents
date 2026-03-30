@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('documents', function (Blueprint $table) {
             $table->id();
-            $table->string('title_ru');
-            $table->string('title_uz');
-            $table->string('title_cryl');
+            $table->string('title_ru')->nullable();
+            $table->string('title_uz')->nullable();
+            $table->string('title_cryl')->nullable();
             $table->string('document_number')->nullable();
             $table->foreignId('document_type_id')->nullable()->constrained()->nullOnDelete();
             $table->string('file_name');

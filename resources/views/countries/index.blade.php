@@ -63,14 +63,16 @@
                         @foreach ($countries as $country)
                             @php
                                 $statusClass = match ($country->cooperation_status) {
-                                    'planned' => 'is-planned',
-                                    'completed' => 'is-completed',
+                                    'rejada' => 'is-planned',
+                                    'tugatilgan' => 'is-completed',
                                     default => 'is-active',
                                 };
                             @endphp
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $country->display_name }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('countries.show', $country) }}">{{ $country->display_name }}</a>
+                                    </span>
                                     <span class="row-subtitle">{{ $country->name_ru }}{{ $country->name_cryl ? ' / '.$country->name_cryl : '' }}</span>
                                 </td>
                                 <td>

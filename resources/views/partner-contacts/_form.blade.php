@@ -2,7 +2,7 @@
     $isPrimary = (bool) old('is_primary', $partnerContact->exists ? $partnerContact->is_primary : false);
 @endphp
 
-<form class="resource-form" method="POST" action="{{ $action }}">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
     @csrf
 
     @if ($method !== 'POST')
@@ -50,6 +50,14 @@
         </label>
 
         <label class="field">
+            <span class="field-label">Tug'ilgan sana</span>
+            <input type="date" name="birthday" value="{{ old('birthday', $partnerContact->birthday?->format('Y-m-d')) }}">
+            @error('birthday')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field">
             <span class="field-label">Lavozimi (UZ)</span>
             <input type="text" name="position_uz" value="{{ old('position_uz', $partnerContact->position_uz) }}" placeholder="Bosh mutaxassis">
             @error('position_uz')
@@ -87,6 +95,40 @@
             <input type="text" name="phone" value="{{ old('phone', $partnerContact->phone) }}" placeholder="+998901234567">
             <span class="field-help">Telefon bazada shifrlangan holda saqlanadi.</span>
             @error('phone')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field">
+            <span class="field-label">Foto</span>
+            <input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+            <span class="field-help">Rasm fayli. Maksimal hajm 5 MB.</span>
+            @if ($partnerContact->photoDocument?->file_url)
+                <span class="field-help">
+                    Joriy fayl:
+                    <a href="{{ $partnerContact->photoDocument->file_url }}" download="{{ $partnerContact->photoDocument->file_name }}">
+                        {{ $partnerContact->photoDocument->file_name }}
+                    </a>
+                </span>
+            @endif
+            @error('photo_file')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field">
+            <span class="field-label">CV</span>
+            <input type="file" name="cv_file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <span class="field-help">PDF yoki Word hujjati. Maksimal hajm 50 MB.</span>
+            @if ($partnerContact->cvDocument?->file_url)
+                <span class="field-help">
+                    Joriy fayl:
+                    <a href="{{ $partnerContact->cvDocument->file_url }}" download="{{ $partnerContact->cvDocument->file_name }}">
+                        {{ $partnerContact->cvDocument->file_name }}
+                    </a>
+                </span>
+            @endif
+            @error('cv_file')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

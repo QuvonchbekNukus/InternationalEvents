@@ -13,15 +13,15 @@ class Country extends Model
     use ResolvesLocalizedAttributes;
 
     public const STATUSES = [
-        'active',
-        'planned',
-        'completed',
+        'faol',
+        'rejada',
+        'tugatilgan',
     ];
 
     public const STATUS_LABELS = [
-        'active' => 'Faol',
-        'planned' => 'Rejada',
-        'completed' => 'Yakunlangan',
+        'faol' => 'Faol',
+        'rejada' => 'Rejada',
+        'tugatilgan' => 'Yakunlangan',
     ];
 
     /**

@@ -92,7 +92,9 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $agreement->display_title }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('agreements.show', $agreement) }}">{{ $agreement->display_title }}</a>
+                                    </span>
                                     <span class="row-subtitle">
                                         {{ $agreement->agreement_number ?: __('ui.pages.agreements.index.values.number_missing') }}
                                         {{ ' - ' }}

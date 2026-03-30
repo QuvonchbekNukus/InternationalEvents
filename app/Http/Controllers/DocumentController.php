@@ -22,6 +22,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller implements HasMiddleware
 {
+    private const STORAGE_DISK = 'documents';
+
     public static function middleware(): array
     {
         return [
@@ -184,7 +186,7 @@ class DocumentController extends Controller implements HasMiddleware
         $document->update($validated);
 
         if ($oldPath) {
-            Storage::disk('public')->delete($oldPath);
+            Storage::disk(self::STORAGE_DISK)->delete($oldPath);
         }
 
         return redirect()
@@ -200,7 +202,7 @@ class DocumentController extends Controller implements HasMiddleware
         $document->delete();
 
         if ($filePath) {
-            Storage::disk('public')->delete($filePath);
+            Storage::disk(self::STORAGE_DISK)->delete($filePath);
         }
 
         return redirect()
@@ -218,7 +220,7 @@ class DocumentController extends Controller implements HasMiddleware
             fn (Document $record, $user): bool => (int) $record->uploaded_by === (int) $user->id
         );
 
-        abort_unless($document->file_path && Storage::disk('public')->exists($document->file_path), 404);
+        abort_unless($document->file_path && Storage::disk(self::STORAGE_DISK)->exists($document->file_path), 404);
 
         activity('system')
             ->causedBy($request->user())
@@ -231,7 +233,7 @@ class DocumentController extends Controller implements HasMiddleware
             ])
             ->log('Hujjat yuklab olindi');
 
-        return Storage::disk('public')->download($document->file_path, $document->file_name);
+        return Storage::disk(self::STORAGE_DISK)->download($document->file_path, $document->file_name);
     }
 
     /**
@@ -240,9 +242,9 @@ class DocumentController extends Controller implements HasMiddleware
     private function validatedData(Request $request, bool $requiresFile = false): array
     {
         $validated = $request->validate([
-            'title_ru' => ['required', 'string', 'max:255'],
-            'title_uz' => ['required', 'string', 'max:255'],
-            'title_cryl' => ['required', 'string', 'max:255'],
+            'title_ru' => ['nullable', 'string', 'max:255'],
+            'title_uz' => ['nullable', 'string', 'max:255'],
+            'title_cryl' => ['nullable', 'string', 'max:255'],
             'document_number' => ['nullable', 'string', 'max:255'],
             'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
             'country_id' => ['nullable', 'integer', 'exists:countries,id'],
@@ -313,7 +315,7 @@ class DocumentController extends Controller implements HasMiddleware
      */
     private function uploadedFilePayload(UploadedFile $file): array
     {
-        $filePath = $file->store('documents/'.now()->format('Y/m'), 'public');
+        $filePath = $file->store(now()->format('Y/m'), self::STORAGE_DISK);
 
         return [
             'file_name' => $file->getClientOriginalName(),

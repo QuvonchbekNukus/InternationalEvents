@@ -22,6 +22,9 @@ class PartnerContact extends Model
         'full_name_ru',
         'full_name_uz',
         'full_name_cryl',
+        'birthday',
+        'photo',
+        'cv',
         'position_ru',
         'position_uz',
         'position_cryl',
@@ -37,6 +40,9 @@ class PartnerContact extends Model
      * @var list<string>
      */
     protected array $activityLogExcept = [
+        'birthday',
+        'photo',
+        'cv',
         'email',
         'phone',
     ];
@@ -49,6 +55,7 @@ class PartnerContact extends Model
     protected function casts(): array
     {
         return [
+            'birthday' => 'date',
             'email' => 'encrypted',
             'phone' => 'encrypted',
             'is_primary' => 'boolean',
@@ -58,6 +65,16 @@ class PartnerContact extends Model
     public function partnerOrganization(): BelongsTo
     {
         return $this->belongsTo(PartnerOrganization::class);
+    }
+
+    public function photoDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'photo');
+    }
+
+    public function cvDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'cv');
     }
 
     public function getDisplayNameAttribute(): string

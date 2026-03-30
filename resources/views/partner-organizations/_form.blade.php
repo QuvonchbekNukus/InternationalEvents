@@ -1,4 +1,4 @@
-<form class="resource-form" method="POST" action="{{ $action }}">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
     @csrf
 
     @if ($method !== 'POST')
@@ -88,6 +88,27 @@
             <span class="field-label">Website</span>
             <input type="text" name="website" value="{{ old('website', $partnerOrganization->website) }}" placeholder="example.org">
             @error('website')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field field--span-2">
+            <span class="field-label">Tashkilot info fayli</span>
+            <input
+                type="file"
+                name="organization_info_file"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            >
+            <span class="field-help">Faqat PDF yoki Word hujjati. Maksimal hajm 50 MB.</span>
+            @if ($partnerOrganization->organizationInfoDocument?->file_url)
+                <span class="field-help">
+                    Joriy fayl:
+                    <a href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
+                        {{ $partnerOrganization->organizationInfoDocument->file_name }}
+                    </a>
+                </span>
+            @endif
+            @error('organization_info_file')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

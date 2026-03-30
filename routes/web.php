@@ -55,6 +55,10 @@ Route::middleware('auth')->group(function () {
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('partner-contacts/{partnerContact}/{type}/preview', [PartnerContactController::class, 'previewAttachment'])
+        ->name('partner-contacts.attachments.preview');
+    Route::get('partner-contacts/{partnerContact}/{type}/download', [PartnerContactController::class, 'downloadAttachment'])
+        ->name('partner-contacts.attachments.download');
 
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('departments', DepartmentController::class)->except(['show']);
@@ -73,6 +77,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('visits', VisitController::class)->except(['show']);
     Route::resource('visit-types', VisitTypeController::class)->except(['show']);
 
+    Route::get('countries/{country}', [CountryController::class, 'show'])->name('countries.show');
+    Route::get('partner-organizations/{partnerOrganization}', [PartnerOrganizationController::class, 'show'])->name('partner-organizations.show');
+    Route::get('partner-contacts/{partnerContact}', [PartnerContactController::class, 'show'])->name('partner-contacts.show');
     Route::get('agreements/{agreement}', [AgreementController::class, 'show'])->name('agreements.show');
     Route::get('events/{event}', [EventController::class, 'show'])->name('events.show');
     Route::get('visits/{visit}', [VisitController::class, 'show'])->name('visits.show');

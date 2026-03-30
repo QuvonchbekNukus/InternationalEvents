@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('full_name_ru');
             $table->string('full_name_uz');
             $table->string('full_name_cryl');
+            $table->date('birthday')->nullable();
+            $table->foreignId('photo')->nullable()->constrained('documents')->nullOnDelete();
+            $table->foreignId('cv')->nullable()->constrained('documents')->nullOnDelete();
             $table->string('position_ru')->nullable();
             $table->string('position_uz')->nullable();
             $table->string('position_cryl')->nullable();

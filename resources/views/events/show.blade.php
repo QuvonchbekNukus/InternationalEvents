@@ -113,17 +113,35 @@
                 <div class="detail-list">
                     <article class="detail-list__item">
                         <span class="detail-list__label">{{ __('ui.details.events.fields.country') }}</span>
-                        <strong>{{ $event->country?->display_name ?: '-' }}</strong>
+                        <strong>
+                            @if ($event->country && auth()->user()?->can('view countries'))
+                                <a class="row-title-link" href="{{ route('countries.show', $event->country) }}">{{ $event->country->display_name }}</a>
+                            @else
+                                {{ $event->country?->display_name ?: '-' }}
+                            @endif
+                        </strong>
                     </article>
 
                     <article class="detail-list__item">
                         <span class="detail-list__label">{{ __('ui.details.events.fields.partner_organization') }}</span>
-                        <strong>{{ $event->partnerOrganization?->display_name ?: __('ui.common.values.unassigned') }}</strong>
+                        <strong>
+                            @if ($event->partnerOrganization && auth()->user()?->can('view partner organizations'))
+                                <a class="row-title-link" href="{{ route('partner-organizations.show', $event->partnerOrganization) }}">{{ $event->partnerOrganization->display_name }}</a>
+                            @else
+                                {{ $event->partnerOrganization?->display_name ?: __('ui.common.values.unassigned') }}
+                            @endif
+                        </strong>
                     </article>
 
                     <article class="detail-list__item">
                         <span class="detail-list__label">{{ __('ui.details.events.fields.agreement') }}</span>
-                        <strong>{{ $event->agreement?->display_title ?: __('ui.common.values.unassigned') }}</strong>
+                        <strong>
+                            @if ($event->agreement)
+                                <a class="row-title-link" href="{{ route('agreements.show', $event->agreement) }}">{{ $event->agreement->display_title }}</a>
+                            @else
+                                {{ __('ui.common.values.unassigned') }}
+                            @endif
+                        </strong>
                     </article>
 
                     <article class="detail-list__item">

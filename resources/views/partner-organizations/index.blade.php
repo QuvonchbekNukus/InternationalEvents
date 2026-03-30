@@ -83,7 +83,9 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $partnerOrganization->display_name }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('partner-organizations.show', $partnerOrganization) }}">{{ $partnerOrganization->display_name }}</a>
+                                    </span>
                                     <span class="row-subtitle">
                                         {{ $partnerOrganization->short_name ?: "Qisqa nom yo'q" }}
                                         @if ($partnerOrganization->website)

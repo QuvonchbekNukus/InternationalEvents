@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->decimal('default_zoom', 4, 1)->nullable();
-            $table->enum('cooperation_status', ['faol', 'rejada', 'tugatilgan'])->default('active');
+            $table->enum('cooperation_status', ['faol', 'rejada', 'tugatilgan'])->default('faol');
             $table->string('boundary_geojson_path')->nullable();
             $table->string('flag_path')->nullable();
             $table->text('notes')->nullable();

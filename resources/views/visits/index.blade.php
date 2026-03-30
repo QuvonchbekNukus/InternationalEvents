@@ -93,7 +93,9 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $visit->display_title }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('visits.show', $visit) }}">{{ $visit->display_title }}</a>
+                                    </span>
                                     <span class="row-subtitle">{{ $visit->title_ru }}{{ $visit->title_cryl ? ' / '.$visit->title_cryl : '' }}</span>
                                 </td>
                                 <td>

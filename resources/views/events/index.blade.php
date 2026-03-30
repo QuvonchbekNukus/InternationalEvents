@@ -92,7 +92,9 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $event->display_title }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('events.show', $event) }}">{{ $event->display_title }}</a>
+                                    </span>
                                     <span class="row-subtitle">{{ $event->title_ru }}{{ $event->title_cryl ? ' / '.$event->title_cryl : '' }}</span>
                                 </td>
                                 <td>

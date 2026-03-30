@@ -6,7 +6,6 @@ use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class Document extends Model
 {
@@ -113,7 +112,8 @@ class Document extends Model
 
     public function getDisplayTitleAttribute(): string
     {
-        return $this->firstAvailableLocalizedValue('title');
+        return $this->firstAvailableLocalizedValue('title')
+            ?: ($this->document_number ?: $this->file_name ?: '');
     }
 
     public function getFileUrlAttribute(): ?string
@@ -122,7 +122,7 @@ class Document extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->file_path);
+        return '/documents/'.ltrim(str_replace('\\', '/', $this->file_path), '/');
     }
 
     public function getFileSizeHumanAttribute(): ?string

@@ -3,7 +3,7 @@
 return [
     'nav' => [
         'top_navigation' => 'Yuqori navigatsiya',
-        'brand_title' => 'Milliy Gvardiya',
+        'brand_title' => 'Xalqaro Hamkorlik Axborot tizimi',
         'brand_subtitle' => 'Xalqaro Aloqalar Tizimi',
         'search_label' => 'Global qidiruv',
         'search_placeholder' => 'Qidirish...',

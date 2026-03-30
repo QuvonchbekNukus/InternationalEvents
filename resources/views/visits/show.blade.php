@@ -86,12 +86,24 @@
                 <div class="detail-list">
                     <article class="detail-list__item">
                         <span class="detail-list__label">{{ __('ui.details.visits.fields.country') }}</span>
-                        <strong>{{ $visit->country?->display_name ?: '-' }}</strong>
+                        <strong>
+                            @if ($visit->country && auth()->user()?->can('view countries'))
+                                <a class="row-title-link" href="{{ route('countries.show', $visit->country) }}">{{ $visit->country->display_name }}</a>
+                            @else
+                                {{ $visit->country?->display_name ?: '-' }}
+                            @endif
+                        </strong>
                     </article>
 
                     <article class="detail-list__item">
                         <span class="detail-list__label">{{ __('ui.details.visits.fields.partner_organization') }}</span>
-                        <strong>{{ $visit->partnerOrganization?->display_name ?: __('ui.common.values.unassigned') }}</strong>
+                        <strong>
+                            @if ($visit->partnerOrganization && auth()->user()?->can('view partner organizations'))
+                                <a class="row-title-link" href="{{ route('partner-organizations.show', $visit->partnerOrganization) }}">{{ $visit->partnerOrganization->display_name }}</a>
+                            @else
+                                {{ $visit->partnerOrganization?->display_name ?: __('ui.common.values.unassigned') }}
+                            @endif
+                        </strong>
                     </article>
 
                     <article class="detail-list__item">

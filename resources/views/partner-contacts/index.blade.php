@@ -8,7 +8,7 @@
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_contacts')]) }}</p>
                 <h1 class="page-title">{{ __('ui.sidebar.partner_contacts') }}</h1>
-                <p class="page-subtitle">Hamkor tashkilotlarga biriktirilgan asosiy va yordamchi kontaktlar ro'yxati.</p>
+                <p class="page-subtitle">Hamkor tashkilotlarga biriktirilgan asosiy va yordamchi kontaktlar, aloqa, tug'ilgan sana va biriktirilgan fayllar ma'lumotlari.</p>
             </div>
 
             @can('create partner contacts')
@@ -22,7 +22,7 @@
         <form class="toolbar" method="GET" action="{{ route('partner-contacts.index') }}">
             <label class="toolbar-search" aria-label="Hamkor kontakt qidirish">
                 <i class="material-icons" aria-hidden="true">search</i>
-                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="F.I.Sh, lavozim yoki tashkilot bo'yicha qidiring">
+                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="F.I.Sh, tug'ilgan sana, lavozim yoki tashkilot bo'yicha qidiring">
             </label>
 
             <select class="toolbar-select" name="partner_organization_id" aria-label="Hamkor tashkilot bo'yicha filter">
@@ -60,6 +60,7 @@
                         <tr>
                             <th>Kontakt</th>
                             <th>Tashkilot</th>
+                            <th>Tug'ilgan sana</th>
                             <th>Lavozim</th>
                             <th>Aloqa</th>
                             <th>Holat</th>
@@ -70,14 +71,35 @@
                         @foreach ($partnerContacts as $partnerContact)
                             <tr>
                                 <td>
-                                    <span class="row-title">{{ $partnerContact->display_name }}</span>
+                                    <span class="row-title">
+                                        <a class="row-title-link" href="{{ route('partner-contacts.show', $partnerContact) }}">{{ $partnerContact->display_name }}</a>
+                                    </span>
                                     <span class="row-subtitle">{{ $partnerContact->full_name_ru }} / {{ $partnerContact->full_name_cryl }}</span>
+                                    @if ($partnerContact->photoDocument || $partnerContact->cvDocument)
+                                        <span class="row-subtitle">
+                                            @if ($partnerContact->photoDocument?->file_url)
+                                                <a href="{{ $partnerContact->photoDocument->file_url }}" target="_blank" rel="noopener">Foto</a>
+                                            @endif
+                                            @if ($partnerContact->photoDocument?->file_url && $partnerContact->cvDocument?->file_url)
+                                                /
+                                            @endif
+                                            @if ($partnerContact->cvDocument?->file_url)
+                                                <a href="{{ $partnerContact->cvDocument->file_url }}" target="_blank" rel="noopener">CV</a>
+                                            @endif
+                                        </span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $partnerContact->partnerOrganization?->display_name ?: '-' }}</span>
                                     <span class="row-subtitle">
                                         {{ $partnerContact->partnerOrganization?->country?->display_name ?: "Davlat yo'q" }}
                                     </span>
+                                </td>
+                                <td>
+                                    <span class="row-title">{{ $partnerContact->birthday?->format('d.m.Y') ?: "Kiritilmagan" }}</span>
+                                    @if ($partnerContact->birthday)
+                                        <span class="row-subtitle">{{ $partnerContact->birthday->age }} yosh</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $partnerContact->display_position ?: "Lavozim kiritilmagan" }}</span>
