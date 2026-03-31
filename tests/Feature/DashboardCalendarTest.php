@@ -4,7 +4,11 @@ namespace Tests\Feature;
 
 use App\Models\Country;
 use App\Models\Event;
+use App\Models\PartnerContact;
+use App\Models\PartnerOrganization;
 use App\Models\User;
+use App\Models\Visit;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -98,6 +102,279 @@ class DashboardCalendarTest extends TestCase
         $response->assertOk();
         $response->assertSee('Mening tadbirim');
         $response->assertDontSee('Begona tadbir');
+    }
+
+    public function test_dashboard_displays_active_visits_for_users_with_visit_access(): void
+    {
+        $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewVisitsPermission);
+
+        $country = $this->createCountry('TR', 'TUR');
+
+        Visit::create([
+            'title_ru' => 'Delegatsiya',
+            'title_uz' => 'Xizmat tashrifi',
+            'title_cryl' => 'Xizmat tashrifi',
+            'country_id' => $country->id,
+            'start_date' => '2026-03-21',
+            'end_date' => '2026-03-23',
+            'status' => 'ongoing',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['month' => '2026-03']));
+
+        $response->assertOk();
+        $response->assertSee('Xizmat tashrifi');
+        $response->assertSee('Tashriflar');
+    }
+
+    public function test_dashboard_exports_canonical_calendar_fields_and_grouped_filters(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+        $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
+        $viewPartnerContactsPermission = Permission::findOrCreate('view partner contacts', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+        $user->givePermissionTo($viewVisitsPermission);
+        $user->givePermissionTo($viewPartnerContactsPermission);
+
+        $country = $this->createCountry('AZ', 'AZE');
+        $organization = PartnerOrganization::create([
+            'country_id' => $country->id,
+            'name_ru' => 'Canonical partner',
+            'name_uz' => 'Canonical hamkor',
+            'name_cryl' => 'Canonical hamkor',
+            'short_name' => 'CH',
+            'status' => 'faol',
+        ]);
+
+        $event = Event::create([
+            'title_ru' => 'Canonical event',
+            'title_uz' => 'Canonical tadbir',
+            'title_cryl' => 'Canonical tadbir',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-03-10 09:00:00',
+            'end_datetime' => '2026-03-10 18:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $visit = Visit::create([
+            'title_ru' => 'Canonical visit',
+            'title_uz' => 'Canonical tashrif',
+            'title_cryl' => 'Canonical tashrif',
+            'country_id' => $country->id,
+            'start_date' => '2026-03-11',
+            'end_date' => '2026-03-11',
+            'status' => 'completed',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $partnerContact = PartnerContact::create([
+            'partner_organization_id' => $organization->id,
+            'full_name_ru' => 'Canonical contact',
+            'full_name_uz' => 'Canonical kontakt',
+            'full_name_cryl' => 'Canonical kontakt',
+            'birthday' => '1992-03-12',
+            'position_uz' => 'Coordinator',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['month' => '2026-03']));
+
+        $response->assertOk();
+        $response->assertSee('data-calendar-filter-group="type"', false);
+        $response->assertSee('data-calendar-filter-group="status"', false);
+        $response->assertSee('data-calendar-filter-value="all"', false);
+        $response->assertSee('data-calendar-filter-value="event"', false);
+        $response->assertSee('data-calendar-filter-value="visit"', false);
+        $response->assertSee('data-calendar-filter-value="birthday"', false);
+        $response->assertSee('data-calendar-filter-value="planned"', false);
+        $response->assertSee('data-calendar-filter-value="completed"', false);
+        $response->assertSee('role="radio"', false);
+        $response->assertSee('"type":"event"', false);
+        $response->assertSee('"type":"visit"', false);
+        $response->assertSee('"type":"birthday"', false);
+        $response->assertSee('"status":"planned"', false);
+        $response->assertSee('"status":"completed"', false);
+        $response->assertSee('"status":null', false);
+        $response->assertSee('"is_recurring":false', false);
+        $response->assertSee('"is_recurring":true', false);
+        $response->assertSee('"recurrence_type":"yearly"', false);
+        $response->assertDontSee('"kind":"event"', false);
+        $response->assertDontSee('"state":"planned"', false);
+        $response->assertSee('"source_id":'.$event->id, false);
+        $response->assertSee('"source_id":'.$visit->id, false);
+        $response->assertSee('"source_id":'.$partnerContact->id, false);
+        $response->assertSee('"start_date":"2026-03-10"', false);
+        $response->assertSee('"end_date":"2026-03-10"', false);
+        $response->assertSee('"start_date":"2026-03-11"', false);
+        $response->assertSee('"end_date":"2026-03-11"', false);
+        $response->assertSee('"start_date":"2026-03-12"', false);
+        $response->assertSee('"end_date":"2026-03-12"', false);
+    }
+
+    public function test_dashboard_keeps_selected_april_month_when_current_day_is_31st(): void
+    {
+        CarbonImmutable::setTestNow('2026-03-31 12:00:00');
+
+        try {
+            $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+
+            $user = User::factory()->create();
+            $user->givePermissionTo($viewEventsPermission);
+
+            $country = $this->createCountry('DE', 'DEU');
+
+            Event::create([
+                'title_ru' => 'Aprelskiy forum',
+                'title_uz' => 'Aprel forumi',
+                'title_cryl' => 'Aprel forumi',
+                'country_id' => $country->id,
+                'start_datetime' => '2026-04-10 09:00:00',
+                'end_datetime' => '2026-04-10 18:00:00',
+                'format' => 'offline',
+                'status' => 'rejada',
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
+            ]);
+
+            $response = $this
+                ->actingAs($user)
+                ->get(route('dashboard', ['month' => '2026-04']));
+
+            $response->assertOk();
+            $response->assertSee('Aprel 2026');
+            $response->assertSee('Aprel forumi');
+            $response->assertDontSee('May 2026');
+        } finally {
+            CarbonImmutable::setTestNow();
+        }
+    }
+
+    public function test_dashboard_splits_multi_day_events_across_week_boundaries(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+
+        $country = $this->createCountry('FR', 'FRA');
+
+        Event::create([
+            'title_ru' => 'Mejdunarodniy forum',
+            'title_uz' => 'Xalqaro forum',
+            'title_cryl' => 'Xalqaro forum',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-03-27 09:00:00',
+            'end_datetime' => '2026-04-02 18:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['month' => '2026-03']));
+
+        $response->assertOk();
+        $response->assertSee('Xalqaro forum');
+        $response->assertSee('grid-column: 5 / span 3');
+        $response->assertSee('grid-column: 1 / span 4');
+    }
+
+    public function test_dashboard_displays_completed_events_and_visits_with_completed_filter(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+        $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+        $user->givePermissionTo($viewVisitsPermission);
+
+        $country = $this->createCountry('KG', 'KGZ');
+
+        Event::create([
+            'title_ru' => 'Zavershenniy event',
+            'title_uz' => 'Tugagan tadbir',
+            'title_cryl' => 'Tugаган tadbir',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-03-05 09:00:00',
+            'end_datetime' => '2026-03-07 18:00:00',
+            'format' => 'offline',
+            'status' => 'tugatilgan',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        Visit::create([
+            'title_ru' => 'Zavershenniy vizit',
+            'title_uz' => 'Tugatilgan tashrif',
+            'title_cryl' => 'Tugatilgan tashrif',
+            'country_id' => $country->id,
+            'start_date' => '2026-03-06',
+            'end_date' => '2026-03-06',
+            'status' => 'completed',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['month' => '2026-03']));
+
+        $response->assertOk();
+        $response->assertSee('Tugagan tadbir');
+        $response->assertSee('Tugatilgan tashrif');
+        $response->assertSee('Tugatilgan');
+    }
+
+    public function test_dashboard_displays_partner_contact_birthdays_in_calendar(): void
+    {
+        $viewPartnerContactsPermission = Permission::findOrCreate('view partner contacts', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewPartnerContactsPermission);
+
+        $country = $this->createCountry('TJ', 'TJK');
+        $organization = PartnerOrganization::create([
+            'country_id' => $country->id,
+            'name_ru' => 'Partner organization',
+            'name_uz' => 'Hamkor tashkilot',
+            'name_cryl' => 'Hamkor tashkilot',
+            'short_name' => 'HT',
+            'status' => 'faol',
+        ]);
+
+        PartnerContact::create([
+            'partner_organization_id' => $organization->id,
+            'full_name_ru' => 'Kontakt birthday',
+            'full_name_uz' => 'Sherik kontakti',
+            'full_name_cryl' => 'Sherik kontakti',
+            'birthday' => '1990-03-05',
+            'position_uz' => 'Maslahatchi',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->get(route('dashboard', ['month' => '2026-03']));
+
+        $response->assertOk();
+        $response->assertSee("Tug'ilgan kunlar");
+        $response->assertSee('Sherik kontakti');
+        $response->assertSee('Hamkor tashkilot');
     }
 
     private function createCountry(string $iso2, string $iso3): Country

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\PartnerContact;
+use App\Models\Visit;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -11,6 +13,16 @@ use Illuminate\View\View;
 class DashboardController extends Controller
 {
     private const DEFAULT_WEEKDAY_LABELS = ['Du', 'Se', 'Cho', 'Pay', 'Ju', 'Sha', 'Yak'];
+
+    private const DEFAULT_WEEKDAY_NAMES = [
+        1 => 'Dushanba',
+        2 => 'Seshanba',
+        3 => 'Chorshanba',
+        4 => 'Payshanba',
+        5 => 'Juma',
+        6 => 'Shanba',
+        7 => 'Yakshanba',
+    ];
 
     private const DEFAULT_MONTH_LABELS = [
         1 => 'Yanvar',
@@ -27,15 +39,29 @@ class DashboardController extends Controller
         12 => 'Dekabr',
     ];
 
-    private const EVENT_COLOR_KEYS = [
-        'sky',
-        'emerald',
-        'amber',
-        'violet',
-        'rose',
-        'cyan',
-        'lime',
-    ];
+    private const DISPLAY_EVENT_STATUSES = ['rejada', 'hozirda', 'tugatilgan'];
+
+    private const DISPLAY_VISIT_STATUSES = ['planned', 'ongoing', 'completed'];
+
+    private const CALENDAR_FILTER_GROUP_TYPE = 'type';
+
+    private const CALENDAR_FILTER_GROUP_STATUS = 'status';
+
+    private const CALENDAR_ITEM_TYPE_EVENT = 'event';
+
+    private const CALENDAR_ITEM_TYPE_VISIT = 'visit';
+
+    private const CALENDAR_ITEM_TYPE_BIRTHDAY = 'birthday';
+
+    private const CALENDAR_STATUS_PLANNED = 'planned';
+
+    private const CALENDAR_STATUS_ONGOING = 'ongoing';
+
+    private const CALENDAR_STATUS_COMPLETED = 'completed';
+
+    private const CALENDAR_RECURRENCE_YEARLY = 'yearly';
+
+    private const DAY_PREVIEW_LIMIT = 2;
 
     public function __invoke(Request $request): View
     {
@@ -44,99 +70,130 @@ class DashboardController extends Controller
         ]);
     }
 
-    /**
-     * @return array{
-     *     has_access: bool,
-     *     month_key: string,
-     *     month_label: string,
-     *     day_labels: list<string>,
-     *     prev_url: string,
-     *     next_url: string,
-     *     events_url: ?string,
-     *     event_count: int,
-     *     weeks: array<int, array{days: array<int, array{date: string, day_number: int, is_current_month: bool, is_today: bool}>, lanes: array<int, array<int, array{url: string, title: string, color: string, tooltip: string, start_column: int, span: int, starts_before: bool, ends_after: bool}>>}>,
-     * }
-     */
     private function buildEventCalendar(Request $request): array
     {
         $month = $this->resolveMonth($request);
         $monthStart = $month->startOfMonth();
         $monthEnd = $month->endOfMonth();
+        $calendarStart = $monthStart->startOfWeek(CarbonImmutable::MONDAY);
+        $calendarEnd = $monthEnd->endOfWeek(CarbonImmutable::SUNDAY);
+        $texts = $this->resolveCalendarTexts();
 
         $calendar = [
             'has_access' => false,
             'month_key' => $monthStart->format('Y-m'),
             'month_label' => $this->formatMonthLabel($monthStart),
+            'subtitle' => $texts['subtitle'],
             'day_labels' => $this->resolveWeekdayLabels(),
             'prev_url' => route('dashboard', ['month' => $monthStart->subMonth()->format('Y-m')]),
             'next_url' => route('dashboard', ['month' => $monthStart->addMonth()->format('Y-m')]),
-            'events_url' => null,
-            'event_count' => 0,
+            'listing_url' => null,
+            'listing_label' => $texts['all_events'],
+            'count_label' => $this->replaceCountPlaceholder($texts['item_count'], 0),
+            'item_count' => 0,
+            'items' => [],
+            'summary' => $this->buildCalendarSummary(collect(), $texts),
+            'filters' => $this->buildCalendarFilters(collect(), $texts),
             'weeks' => [],
+            'day_lookup' => [],
+            'selected_date' => null,
+            'selected_day' => null,
+            'texts' => $texts,
         ];
 
         $user = $request->user();
+        $canViewEvents = (bool) $user?->can('view events') || (bool) $user?->can('view own events');
+        $canViewVisits = (bool) $user?->can('view visits') || (bool) $user?->can('view own visits');
+        $canViewPartnerContacts = (bool) $user?->can('view partner contacts');
 
-        if (! $user?->can('view events') && ! $user?->can('view own events')) {
+        if (! $canViewEvents && ! $canViewVisits && ! $canViewPartnerContacts) {
             return $calendar;
         }
 
         $calendar['has_access'] = true;
-        $calendar['events_url'] = route('events.index');
+        $calendar['listing_url'] = $canViewEvents
+            ? route('events.index')
+            : ($canViewVisits ? route('visits.index') : route('partner-contacts.index'));
+        $calendar['listing_label'] = $canViewEvents
+            ? $texts['all_events']
+            : ($canViewVisits ? $texts['all_visits'] : $texts['all_contacts']);
 
-        $eventsQuery = Event::query()
-            ->with([
-                'country:id,name_uz,name_ru,name_cryl,iso2',
-                'eventType:id,name_uz,name_ru,name_cryl',
-            ])
-            ->where(function ($query) use ($monthStart, $monthEnd): void {
-                $query
-                    ->whereBetween('start_datetime', [$monthStart->startOfDay(), $monthEnd->endOfDay()])
-                    ->orWhere(function ($rangeQuery) use ($monthStart, $monthEnd): void {
-                        $rangeQuery
-                            ->whereNotNull('end_datetime')
-                            ->where('start_datetime', '<=', $monthEnd->endOfDay())
-                            ->where('end_datetime', '>=', $monthStart->startOfDay());
-                    });
-            });
+        $items = collect();
 
-        $this->applyOwnScope(
-            $request,
-            $eventsQuery,
-            'view events',
-            'view own events',
-            function ($query, $authUser): void {
-                $query->where(function ($eventQuery) use ($authUser): void {
-                    $eventQuery
-                        ->where('responsible_user_id', $authUser->id)
-                        ->orWhere('created_by', $authUser->id);
-                });
-            }
-        );
-
-        $events = $eventsQuery
-            ->orderBy('start_datetime')
-            ->orderBy('title_uz')
-            ->get();
-
-        $calendar['event_count'] = $events->count();
-
-        $colorMap = [];
-        foreach ($events as $event) {
-            $colorMap[$event->getKey()] = self::EVENT_COLOR_KEYS[abs(crc32((string) $event->getKey())) % count(self::EVENT_COLOR_KEYS)];
+        if ($canViewEvents) {
+            $items = $items->concat($this->fetchEventCalendarItems($request, $monthStart, $monthEnd, $texts));
         }
 
-        $calendarStart = $monthStart->startOfWeek(CarbonImmutable::MONDAY);
-        $calendarEnd = $monthEnd->endOfWeek(CarbonImmutable::SUNDAY);
+        if ($canViewVisits) {
+            $items = $items->concat($this->fetchVisitCalendarItems($request, $monthStart, $monthEnd, $texts));
+        }
+
+        if ($canViewPartnerContacts) {
+            $items = $items->concat($this->fetchBirthdayCalendarItems($calendarStart, $calendarEnd, $texts));
+        }
+
+        $items = $items
+            ->sort(fn (array $left, array $right): int => $this->compareCalendarItems($left, $right))
+            ->values();
+
+        $calendar['item_count'] = $items->count();
+        $calendar['items'] = $items
+            ->map(fn (array $item): array => $this->exportCalendarItem($item))
+            ->values()
+            ->all();
+        $calendar['count_label'] = $this->replaceCountPlaceholder($texts['item_count'], $items->count());
+        $calendar['summary'] = $this->buildCalendarSummary($items, $texts);
+        $calendar['filters'] = $this->buildCalendarFilters($items, $texts);
+
+        $dayLookup = $this->buildCalendarDayLookup($calendarStart, $calendarEnd, $monthStart, $items, $texts);
+        $selectedDate = $this->resolveSelectedCalendarDate($dayLookup, $monthStart, $monthEnd);
 
         for ($weekStart = $calendarStart; $weekStart->lte($calendarEnd); $weekStart = $weekStart->addWeek()) {
             $weekEnd = $weekStart->endOfWeek(CarbonImmutable::SUNDAY);
+            $days = [];
+
+            for ($dayOffset = 0; $dayOffset < 7; $dayOffset++) {
+                $day = $weekStart->addDays($dayOffset);
+                $dayData = $dayLookup[$day->toDateString()];
+
+                $days[] = [
+                    'date' => $dayData['date'],
+                    'day_number' => $day->day,
+                    'label' => $dayData['label'],
+                    'is_current_month' => $dayData['is_current_month'],
+                    'is_today' => $dayData['is_today'],
+                    'is_selected' => $dayData['date'] === $selectedDate,
+                    'item_count' => $dayData['item_count'],
+                    'preview_items' => $dayData['preview_items'],
+                    'hidden_count' => $dayData['hidden_count'],
+                ];
+            }
 
             $calendar['weeks'][] = [
-                'days' => $this->buildWeekDays($weekStart, $monthStart),
-                'lanes' => $this->buildWeekLanes($events, $weekStart, $weekEnd, $colorMap),
+                'days' => $days,
+                'span_lanes' => $this->buildWeekSpanLanes($items, $weekStart, $weekEnd),
             ];
         }
+
+        $calendar['day_lookup'] = array_map(
+            fn (array $day): array => [
+                'date' => $day['date'],
+                'label' => $day['label'],
+                'is_current_month' => $day['is_current_month'],
+                'item_count' => $day['item_count'],
+                'items' => $day['items'],
+            ],
+            $dayLookup
+        );
+        $calendar['selected_date'] = $selectedDate;
+        $calendar['selected_day'] = $selectedDate !== null
+            ? [
+                'date' => $dayLookup[$selectedDate]['date'],
+                'label' => $dayLookup[$selectedDate]['label'],
+                'item_count' => $dayLookup[$selectedDate]['item_count'],
+                'items' => $dayLookup[$selectedDate]['items'],
+            ]
+            : null;
 
         return $calendar;
     }
@@ -147,7 +204,7 @@ class DashboardController extends Controller
 
         if ($requestedMonth !== '') {
             try {
-                return CarbonImmutable::createFromFormat('Y-m', $requestedMonth)->startOfMonth();
+                return CarbonImmutable::createFromFormat('!Y-m', $requestedMonth)->startOfMonth();
             } catch (\Throwable) {
                 // Fall back to the current month when the query value is malformed.
             }
@@ -181,72 +238,462 @@ class DashboardController extends Controller
     }
 
     /**
-     * @return array<int, array{date: string, day_number: int, is_current_month: bool, is_today: bool}>
+     * @return Collection<int, array<string, mixed>>
      */
-    private function buildWeekDays(CarbonImmutable $weekStart, CarbonImmutable $monthStart): array
-    {
-        $days = [];
-        $today = CarbonImmutable::now();
+    private function fetchEventCalendarItems(
+        Request $request,
+        CarbonImmutable $monthStart,
+        CarbonImmutable $monthEnd,
+        array $texts
+    ): Collection {
+        $eventsQuery = Event::query()
+            ->with([
+                'country:id,name_uz,name_ru,name_cryl,iso2',
+                'eventType:id,name_uz,name_ru,name_cryl',
+            ])
+            ->whereIn('status', self::DISPLAY_EVENT_STATUSES)
+            ->where(function ($query) use ($monthStart, $monthEnd): void {
+                $query
+                    ->whereBetween('start_datetime', [$monthStart->startOfDay(), $monthEnd->endOfDay()])
+                    ->orWhere(function ($rangeQuery) use ($monthStart, $monthEnd): void {
+                        $rangeQuery
+                            ->whereNotNull('end_datetime')
+                            ->where('start_datetime', '<=', $monthEnd->endOfDay())
+                            ->where('end_datetime', '>=', $monthStart->startOfDay());
+                    });
+            });
 
-        for ($dayOffset = 0; $dayOffset < 7; $dayOffset++) {
-            $day = $weekStart->addDays($dayOffset);
+        $this->applyOwnScope(
+            $request,
+            $eventsQuery,
+            'view events',
+            'view own events',
+            function ($query, $authUser): void {
+                $query->where(function ($eventQuery) use ($authUser): void {
+                    $eventQuery
+                        ->where('responsible_user_id', $authUser->id)
+                        ->orWhere('created_by', $authUser->id);
+                });
+            }
+        );
 
-            $days[] = [
-                'date' => $day->toDateString(),
-                'day_number' => $day->day,
-                'is_current_month' => $day->month === $monthStart->month,
-                'is_today' => $day->isSameDay($today),
-            ];
-        }
-
-        return $days;
+        return $eventsQuery
+            ->orderBy('start_datetime')
+            ->orderBy('title_uz')
+            ->get()
+            ->map(fn (Event $event): array => $this->mapEventCalendarItem($event, $texts));
     }
 
     /**
-     * @param Collection<int, Event> $events
-     * @param array<int, string> $colorMap
-     * @return array<int, array<int, array{url: string, title: string, color: string, tooltip: string, start_column: int, span: int, starts_before: bool, ends_after: bool}>>
+     * @return Collection<int, array<string, mixed>>
      */
-    private function buildWeekLanes(
-        Collection $events,
+    private function fetchVisitCalendarItems(
+        Request $request,
+        CarbonImmutable $monthStart,
+        CarbonImmutable $monthEnd,
+        array $texts
+    ): Collection {
+        $visitsQuery = Visit::query()
+            ->with([
+                'country:id,name_uz,name_ru,name_cryl,iso2',
+                'visitType:id,name_uz,name_ru,name_cryl',
+            ])
+            ->whereIn('status', self::DISPLAY_VISIT_STATUSES)
+            ->where(function ($query) use ($monthStart, $monthEnd): void {
+                $query
+                    ->whereBetween('start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                    ->orWhere(function ($rangeQuery) use ($monthStart, $monthEnd): void {
+                        $rangeQuery
+                            ->whereNotNull('end_date')
+                            ->where('start_date', '<=', $monthEnd->toDateString())
+                            ->where('end_date', '>=', $monthStart->toDateString());
+                    });
+            });
+
+        $this->applyOwnScope(
+            $request,
+            $visitsQuery,
+            'view visits',
+            'view own visits',
+            function ($query, $authUser): void {
+                $query->where(function ($visitQuery) use ($authUser): void {
+                    $visitQuery
+                        ->where('responsible_user_id', $authUser->id)
+                        ->orWhere('created_by', $authUser->id);
+                });
+            }
+        );
+
+        return $visitsQuery
+            ->orderBy('start_date')
+            ->orderBy('title_uz')
+            ->get()
+            ->map(fn (Visit $visit): array => $this->mapVisitCalendarItem($visit, $texts));
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function fetchBirthdayCalendarItems(
+        CarbonImmutable $calendarStart,
+        CarbonImmutable $calendarEnd,
+        array $texts
+    ): Collection {
+        $visibleMonths = [];
+        $visibleYears = [];
+
+        for ($cursor = $calendarStart; $cursor->lte($calendarEnd); $cursor = $cursor->addDay()) {
+            $visibleMonths[$cursor->month] = true;
+            $visibleYears[$cursor->year] = true;
+        }
+
+        return PartnerContact::query()
+            ->with([
+                'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+            ])
+            ->whereNotNull('birthday')
+            ->where(function ($query) use ($visibleMonths): void {
+                $monthKeys = array_values(array_keys($visibleMonths));
+
+                foreach ($monthKeys as $index => $monthNumber) {
+                    if ($index === 0) {
+                        $query->whereMonth('birthday', $monthNumber);
+                        continue;
+                    }
+
+                    $query->orWhereMonth('birthday', $monthNumber);
+                }
+            })
+            ->orderBy('full_name_uz')
+            ->get()
+            ->flatMap(function (PartnerContact $partnerContact) use ($calendarStart, $calendarEnd, $visibleYears, $texts): array {
+                $birthday = CarbonImmutable::instance($partnerContact->birthday);
+                $items = [];
+
+                foreach (array_keys($visibleYears) as $year) {
+                    $occurrence = $this->resolveBirthdayOccurrence($birthday, (int) $year);
+
+                    if (! $occurrence->betweenIncluded($calendarStart, $calendarEnd)) {
+                        continue;
+                    }
+
+                    $items[] = $this->mapBirthdayCalendarItem($partnerContact, $birthday, $occurrence, $texts);
+                }
+
+                return $items;
+            })
+            ->sort(fn (array $left, array $right): int => $this->compareCalendarItems($left, $right))
+            ->values();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapEventCalendarItem(Event $event, array $texts): array
+    {
+        $start = CarbonImmutable::instance($event->start_datetime);
+        $end = CarbonImmutable::instance($event->end_datetime ?? $event->start_datetime);
+        $state = $this->resolveEventState($event->status);
+
+        return [
+            'id' => 'event-'.$event->getKey(),
+            'source_id' => $event->getKey(),
+            'type' => self::CALENDAR_ITEM_TYPE_EVENT,
+            'type_label' => $texts['filter_events'],
+            'status' => $state,
+            'status_label' => $texts['filter_'.$state],
+            'duration_label' => $start->isSameDay($end) ? $texts['duration_single'] : $texts['duration_multi'],
+            'icon' => 'event',
+            'tone' => sprintf('event-%s', $state),
+            'title' => $event->display_title,
+            'url' => route('events.show', $event),
+            'tooltip' => $this->formatTooltip([
+                $event->display_title,
+                $texts['filter_events'],
+                $texts['filter_'.$state],
+                $this->formatDateTimeRange($start, $end),
+                $event->eventType?->display_name,
+                $event->country?->display_name,
+            ]),
+            'meta' => implode(' | ', array_filter([
+                $event->eventType?->display_name,
+                $event->country?->display_name,
+            ])),
+            'schedule' => $this->formatDateTimeRange($start, $end),
+            'schedule_icon' => 'schedule',
+            'sort_priority' => $this->resolveStatePriority($state),
+            'kind_priority' => 0,
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
+            'is_recurring' => false,
+            'recurrence_type' => null,
+            'start_cursor' => $start->startOfDay(),
+            'end_cursor' => $end->startOfDay(),
+            'start_sort' => $start->getTimestamp(),
+            'is_multi_day' => ! $start->isSameDay($end),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapVisitCalendarItem(Visit $visit, array $texts): array
+    {
+        $start = CarbonImmutable::instance($visit->start_date)->startOfDay();
+        $end = CarbonImmutable::instance($visit->end_date ?? $visit->start_date)->startOfDay();
+        $state = $this->resolveVisitState($visit->status);
+
+        return [
+            'id' => 'visit-'.$visit->getKey(),
+            'source_id' => $visit->getKey(),
+            'type' => self::CALENDAR_ITEM_TYPE_VISIT,
+            'type_label' => $texts['filter_visits'],
+            'status' => $state,
+            'status_label' => $texts['filter_'.$state],
+            'duration_label' => $start->isSameDay($end) ? $texts['duration_single'] : $texts['duration_multi'],
+            'icon' => 'flight_takeoff',
+            'tone' => sprintf('visit-%s', $state),
+            'title' => $visit->display_title,
+            'url' => route('visits.show', $visit),
+            'tooltip' => $this->formatTooltip([
+                $visit->display_title,
+                $texts['filter_visits'],
+                $texts['filter_'.$state],
+                $this->formatDateRange($start, $end),
+                $visit->visitType?->display_name,
+                $visit->country?->display_name,
+            ]),
+            'meta' => implode(' | ', array_filter([
+                $visit->visitType?->display_name,
+                $visit->country?->display_name,
+                $visit->direction ? (Visit::DIRECTION_LABELS[$visit->direction] ?? null) : null,
+            ])),
+            'schedule' => $this->formatDateRange($start, $end),
+            'schedule_icon' => 'event_available',
+            'sort_priority' => $this->resolveStatePriority($state),
+            'kind_priority' => 1,
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
+            'is_recurring' => false,
+            'recurrence_type' => null,
+            'start_cursor' => $start,
+            'end_cursor' => $end,
+            'start_sort' => $start->getTimestamp(),
+            'is_multi_day' => ! $start->isSameDay($end),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function mapBirthdayCalendarItem(
+        PartnerContact $partnerContact,
+        CarbonImmutable $birthday,
+        CarbonImmutable $occurrence,
+        array $texts
+    ): array {
+        $age = max($occurrence->year - $birthday->year, 0);
+
+        return [
+            'id' => 'birthday-'.$partnerContact->getKey().'-'.$occurrence->format('Ymd'),
+            'source_id' => $partnerContact->getKey(),
+            'type' => self::CALENDAR_ITEM_TYPE_BIRTHDAY,
+            'type_label' => $texts['birthday_label'],
+            'status' => null,
+            'status_label' => null,
+            'duration_label' => $texts['birthday_recurring'],
+            'icon' => 'cake',
+            'tone' => 'birthday',
+            'title' => $partnerContact->display_name,
+            'url' => route('partner-contacts.show', $partnerContact),
+            'tooltip' => $this->formatTooltip([
+                $partnerContact->display_name,
+                $texts['birthday_label'],
+                $this->formatBirthdaySchedule($occurrence, $birthday, $age, $texts),
+                $partnerContact->partnerOrganization?->display_name,
+            ]),
+            'meta' => implode(' | ', array_filter([
+                $partnerContact->partnerOrganization?->display_name,
+                $partnerContact->display_position,
+            ])),
+            'schedule' => $this->formatBirthdaySchedule($occurrence, $birthday, $age, $texts),
+            'schedule_icon' => 'cake',
+            'sort_priority' => -1,
+            'kind_priority' => 2,
+            'start_date' => $occurrence->toDateString(),
+            'end_date' => $occurrence->toDateString(),
+            'is_recurring' => true,
+            'recurrence_type' => self::CALENDAR_RECURRENCE_YEARLY,
+            'start_cursor' => $occurrence,
+            'end_cursor' => $occurrence,
+            'start_sort' => $occurrence->getTimestamp(),
+            'is_multi_day' => false,
+        ];
+    }
+
+    private function resolveEventState(?string $status): string
+    {
+        return match ($status) {
+            'hozirda' => self::CALENDAR_STATUS_ONGOING,
+            'tugatilgan' => self::CALENDAR_STATUS_COMPLETED,
+            default => self::CALENDAR_STATUS_PLANNED,
+        };
+    }
+
+    private function resolveVisitState(?string $status): string
+    {
+        return match ($status) {
+            'ongoing' => self::CALENDAR_STATUS_ONGOING,
+            'completed' => self::CALENDAR_STATUS_COMPLETED,
+            default => self::CALENDAR_STATUS_PLANNED,
+        };
+    }
+
+    private function resolveStatePriority(string $state): int
+    {
+        return match ($state) {
+            self::CALENDAR_STATUS_ONGOING => 0,
+            self::CALENDAR_STATUS_PLANNED => 1,
+            default => 2,
+        };
+    }
+
+    private function resolveBirthdayOccurrence(CarbonImmutable $birthday, int $year): CarbonImmutable
+    {
+        $monthStart = CarbonImmutable::create($year, $birthday->month, 1)->startOfDay();
+        $day = min($birthday->day, $monthStart->endOfMonth()->day);
+
+        return CarbonImmutable::create($year, $birthday->month, $day)->startOfDay();
+    }
+
+    private function compareCalendarItems(array $left, array $right): int
+    {
+        return [
+            $left['sort_priority'],
+            $left['kind_priority'],
+            $left['start_sort'],
+            $left['is_multi_day'] ? 0 : 1,
+            mb_strtolower((string) $left['title']),
+        ] <=> [
+            $right['sort_priority'],
+            $right['kind_priority'],
+            $right['start_sort'],
+            $right['is_multi_day'] ? 0 : 1,
+            mb_strtolower((string) $right['title']),
+        ];
+    }
+
+    /**
+     * @param Collection<int, array<string, mixed>> $items
+     * @return array<string, array<string, mixed>>
+     */
+    private function buildCalendarDayLookup(
+        CarbonImmutable $calendarStart,
+        CarbonImmutable $calendarEnd,
+        CarbonImmutable $monthStart,
+        Collection $items,
+        array $texts
+    ): array {
+        $groupedItems = [];
+
+        foreach ($items as $item) {
+            $cursor = $item['start_cursor']->max($calendarStart);
+            $endCursor = $item['end_cursor']->min($calendarEnd);
+
+            while ($cursor->lte($endCursor)) {
+                $groupedItems[$cursor->toDateString()][] = $this->exportCalendarItem($item);
+                $cursor = $cursor->addDay();
+            }
+        }
+
+        $lookup = [];
+        $today = CarbonImmutable::now();
+
+        for ($day = $calendarStart; $day->lte($calendarEnd); $day = $day->addDay()) {
+            $dateKey = $day->toDateString();
+            $dayItems = $groupedItems[$dateKey] ?? [];
+            $previewableItems = array_values(array_filter(
+                $dayItems,
+                fn (array $item): bool => ($item['is_multi_day'] ?? false) === false
+            ));
+
+            $lookup[$dateKey] = [
+                'date' => $dateKey,
+                'label' => $this->formatDayLabel($day),
+                'is_current_month' => $day->month === $monthStart->month,
+                'is_today' => $day->isSameDay($today),
+                'item_count' => count($dayItems),
+                'preview_items' => array_slice(array_map(
+                    fn (array $item): array => [
+                        'type' => $item['type'],
+                        'title' => $item['title'],
+                        'icon' => $item['icon'],
+                        'tone' => $item['tone'],
+                        'tooltip' => $item['tooltip'],
+                    ],
+                    $previewableItems
+                ), 0, self::DAY_PREVIEW_LIMIT),
+                'hidden_count' => max(count($previewableItems) - self::DAY_PREVIEW_LIMIT, 0),
+                'items' => $dayItems,
+                'count_label' => count($dayItems) > 0
+                    ? $this->replaceCountPlaceholder($texts['item_count'], count($dayItems))
+                    : $texts['empty_count'],
+            ];
+        }
+
+        return $lookup;
+    }
+
+    /**
+     * @param Collection<int, array<string, mixed>> $items
+     * @return array<int, array<int, array<string, mixed>>>
+     */
+    private function buildWeekSpanLanes(
+        Collection $items,
         CarbonImmutable $weekStart,
-        CarbonImmutable $weekEnd,
-        array $colorMap
+        CarbonImmutable $weekEnd
     ): array {
         $laneEndColumns = [];
         $lanes = [];
 
-        foreach ($events as $event) {
-            $eventStart = CarbonImmutable::instance($event->start_datetime)->startOfDay();
-            $eventEnd = CarbonImmutable::instance($event->end_datetime ?? $event->start_datetime)->startOfDay();
-
-            if ($eventEnd->lt($weekStart) || $eventStart->gt($weekEnd)) {
+        foreach ($items as $item) {
+            if (! ($item['is_multi_day'] ?? false)) {
                 continue;
             }
 
-            $segmentStart = $eventStart->max($weekStart);
-            $segmentEnd = $eventEnd->min($weekEnd);
+            $itemStart = $item['start_cursor'];
+            $itemEnd = $item['end_cursor'];
+
+            if ($itemEnd->lt($weekStart) || $itemStart->gt($weekEnd)) {
+                continue;
+            }
+
+            $segmentStart = $itemStart->max($weekStart);
+            $segmentEnd = $itemEnd->min($weekEnd);
             $startColumn = $weekStart->diffInDays($segmentStart) + 1;
             $span = $segmentStart->diffInDays($segmentEnd) + 1;
 
             $segment = [
-                'url' => route('events.show', $event),
-                'title' => $event->display_title,
-                'color' => $colorMap[$event->getKey()] ?? self::EVENT_COLOR_KEYS[0],
-                'tooltip' => $this->buildEventTooltip($event),
+                'id' => $item['id'],
+                'title' => $item['title'],
+                'url' => $item['url'],
+                'icon' => $item['icon'],
+                'tone' => $item['tone'],
+                'tooltip' => $item['tooltip'],
+                'type' => $item['type'],
+                'status' => $item['status'],
+                'status_label' => $item['status_label'],
+                'type_label' => $item['type_label'],
+                'duration_label' => $item['duration_label'],
                 'start_column' => $startColumn,
                 'span' => $span,
-                'starts_before' => $eventStart->lt($weekStart),
-                'ends_after' => $eventEnd->gt($weekEnd),
+                'starts_before' => $itemStart->lt($weekStart),
+                'ends_after' => $itemEnd->gt($weekEnd),
             ];
 
             $laneIndex = $this->resolveLaneIndex($laneEndColumns, $startColumn);
             $laneEndColumns[$laneIndex] = $startColumn + $span - 1;
             $lanes[$laneIndex][] = $segment;
-        }
-
-        if ($lanes === []) {
-            return [[]];
         }
 
         ksort($lanes);
@@ -268,21 +715,291 @@ class DashboardController extends Controller
         return count($laneEndColumns);
     }
 
-    private function buildEventTooltip(Event $event): string
+    /**
+     * @return array<string, mixed>
+     */
+    private function exportCalendarItem(array $item): array
     {
-        $start = CarbonImmutable::instance($event->start_datetime);
-        $end = CarbonImmutable::instance($event->end_datetime ?? $event->start_datetime);
-        $range = $start->format('d.m.Y H:i');
+        return [
+            'id' => $item['id'],
+            'source_id' => $item['source_id'],
+            'type' => $item['type'],
+            'type_label' => $item['type_label'],
+            'status' => $item['status'],
+            'status_label' => $item['status_label'],
+            'duration_label' => $item['duration_label'],
+            'icon' => $item['icon'],
+            'tone' => $item['tone'],
+            'title' => $item['title'],
+            'url' => $item['url'],
+            'tooltip' => $item['tooltip'],
+            'meta' => $item['meta'],
+            'schedule' => $item['schedule'],
+            'schedule_icon' => $item['schedule_icon'],
+            'start_date' => $item['start_date'],
+            'end_date' => $item['end_date'],
+            'is_recurring' => $item['is_recurring'],
+            'recurrence_type' => $item['recurrence_type'],
+            'is_multi_day' => $item['is_multi_day'],
+        ];
+    }
 
-        if (! $start->equalTo($end)) {
-            $range .= ' - '.$end->format('d.m.Y H:i');
+    /**
+     * @param Collection<int, array<string, mixed>> $items
+     * @return array<int, array{key: string, label: string, count: int, icon: string, tone: string}>
+     */
+    private function buildCalendarSummary(Collection $items, array $texts): array
+    {
+        return [
+            [
+                'key' => 'events',
+                'label' => $texts['stat_events'],
+                'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_EVENT)->count(),
+                'icon' => 'event',
+                'tone' => 'event',
+            ],
+            [
+                'key' => 'ongoing',
+                'label' => $texts['stat_ongoing'],
+                'count' => $items->where('status', self::CALENDAR_STATUS_ONGOING)->count(),
+                'icon' => 'autorenew',
+                'tone' => 'ongoing',
+            ],
+            [
+                'key' => 'planned',
+                'label' => $texts['stat_planned'],
+                'count' => $items->where('status', self::CALENDAR_STATUS_PLANNED)->count(),
+                'icon' => 'schedule',
+                'tone' => 'planned',
+            ],
+            [
+                'key' => 'visits',
+                'label' => $texts['stat_visits'],
+                'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_VISIT)->count(),
+                'icon' => 'flight_takeoff',
+                'tone' => 'visit',
+            ],
+            [
+                'key' => 'birthdays',
+                'label' => $texts['stat_birthdays'],
+                'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_BIRTHDAY)->count(),
+                'icon' => 'cake',
+                'tone' => 'birthday',
+            ],
+        ];
+    }
+
+    /**
+     * @param Collection<int, array<string, mixed>> $items
+     * @return array{
+     *     types: array<int, array{key: string, group: string, value: string, label: string, count: int, icon: string}>,
+     *     statuses: array<int, array{key: string, group: string, value: string, label: string, count: int, icon: string}>
+     * }
+     */
+    private function buildCalendarFilters(Collection $items, array $texts): array
+    {
+        return [
+            'types' => [
+                [
+                    'key' => 'event',
+                    'group' => self::CALENDAR_FILTER_GROUP_TYPE,
+                    'value' => self::CALENDAR_ITEM_TYPE_EVENT,
+                    'label' => $texts['filter_events'],
+                    'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_EVENT)->count(),
+                    'icon' => 'event',
+                ],
+                [
+                    'key' => 'visit',
+                    'group' => self::CALENDAR_FILTER_GROUP_TYPE,
+                    'value' => self::CALENDAR_ITEM_TYPE_VISIT,
+                    'label' => $texts['filter_visits'],
+                    'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_VISIT)->count(),
+                    'icon' => 'flight_takeoff',
+                ],
+                [
+                    'key' => 'birthday',
+                    'group' => self::CALENDAR_FILTER_GROUP_TYPE,
+                    'value' => self::CALENDAR_ITEM_TYPE_BIRTHDAY,
+                    'label' => $texts['filter_birthdays'],
+                    'count' => $items->where('type', self::CALENDAR_ITEM_TYPE_BIRTHDAY)->count(),
+                    'icon' => 'cake',
+                ],
+            ],
+            'statuses' => [
+                [
+                    'key' => 'all',
+                    'group' => self::CALENDAR_FILTER_GROUP_STATUS,
+                    'value' => 'all',
+                    'label' => $texts['filter_all'],
+                    'count' => $items->count(),
+                    'icon' => 'grid_view',
+                ],
+                [
+                    'key' => 'planned',
+                    'group' => self::CALENDAR_FILTER_GROUP_STATUS,
+                    'value' => self::CALENDAR_STATUS_PLANNED,
+                    'label' => $texts['filter_planned'],
+                    'count' => $items->where('status', self::CALENDAR_STATUS_PLANNED)->count(),
+                    'icon' => 'schedule',
+                ],
+                [
+                    'key' => 'ongoing',
+                    'group' => self::CALENDAR_FILTER_GROUP_STATUS,
+                    'value' => self::CALENDAR_STATUS_ONGOING,
+                    'label' => $texts['filter_ongoing'],
+                    'count' => $items->where('status', self::CALENDAR_STATUS_ONGOING)->count(),
+                    'icon' => 'autorenew',
+                ],
+                [
+                    'key' => 'completed',
+                    'group' => self::CALENDAR_FILTER_GROUP_STATUS,
+                    'value' => self::CALENDAR_STATUS_COMPLETED,
+                    'label' => $texts['filter_completed'],
+                    'count' => $items->where('status', self::CALENDAR_STATUS_COMPLETED)->count(),
+                    'icon' => 'task_alt',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string, array<string, mixed>> $dayLookup
+     */
+    private function resolveSelectedCalendarDate(
+        array $dayLookup,
+        CarbonImmutable $monthStart,
+        CarbonImmutable $monthEnd
+    ): ?string {
+        $today = CarbonImmutable::now();
+
+        if ($today->betweenIncluded($monthStart, $monthEnd)) {
+            $todayKey = $today->toDateString();
+
+            if (isset($dayLookup[$todayKey])) {
+                return $todayKey;
+            }
         }
 
-        $meta = array_filter([
-            $event->eventType?->display_name,
-            $event->country?->display_name,
-        ]);
+        foreach ($dayLookup as $day) {
+            if ($day['is_current_month'] && $day['item_count'] > 0) {
+                return $day['date'];
+            }
+        }
 
-        return trim($event->display_title.' | '.implode(' | ', $meta).' | '.$range, ' |');
+        return $monthStart->toDateString();
+    }
+
+    private function formatDayLabel(CarbonImmutable $day): string
+    {
+        $weekdayLabel = self::DEFAULT_WEEKDAY_NAMES[$day->dayOfWeekIso] ?? '';
+        $monthLabel = $this->formatMonthLabel($day->startOfMonth());
+
+        return trim(sprintf('%d %s, %s', $day->day, strtok($monthLabel, ' '), $weekdayLabel), ', ');
+    }
+
+    private function formatDateTimeRange(CarbonImmutable $start, CarbonImmutable $end): string
+    {
+        if ($start->isSameDay($end)) {
+            return $start->format('d.m.Y H:i').' - '.$end->format('H:i');
+        }
+
+        return $start->format('d.m.Y H:i').' - '.$end->format('d.m.Y H:i');
+    }
+
+    private function formatDateRange(CarbonImmutable $start, CarbonImmutable $end): string
+    {
+        if ($start->isSameDay($end)) {
+            return $start->format('d.m.Y');
+        }
+
+        return $start->format('d.m.Y').' - '.$end->format('d.m.Y');
+    }
+
+    /**
+     * @param array<int, string|null> $parts
+     */
+    private function formatTooltip(array $parts): string
+    {
+        return implode(' | ', array_values(array_filter($parts)));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function resolveCalendarTexts(): array
+    {
+        return [
+            'subtitle' => $this->translateOrFallback(
+                'ui.dashboard.calendar.subtitle_compact',
+                "Bir kunlik va ko'p kunlik tadbirlar, tashriflar hamda hamkorlarning tug'ilgan kunlari kun va hafta kesimida aniq ko'rinishda beriladi."
+            ),
+            'all_events' => $this->translateOrFallback('ui.dashboard.calendar.all_events', 'Barcha tadbirlar'),
+            'all_visits' => $this->translateOrFallback('ui.dashboard.calendar.all_visits', 'Barcha tashriflar'),
+            'all_contacts' => $this->translateOrFallback('ui.dashboard.calendar.all_contacts', 'Hamkor kontaktlar'),
+            'item_count' => $this->translateOrFallback('ui.dashboard.calendar.item_count', ':count ta yozuv'),
+            'empty_count' => $this->translateOrFallback('ui.dashboard.calendar.empty_count', "Bo'sh kun"),
+            'empty_state' => $this->translateOrFallback(
+                'ui.dashboard.calendar.empty_active',
+                "Tanlangan oy bo'yicha ko'rsatish uchun tadbir yoki tashrif topilmadi."
+            ),
+            'empty_filtered' => $this->translateOrFallback(
+                'ui.dashboard.calendar.empty_filtered',
+                "Tanlangan filtr bo'yicha bu sana uchun yozuv topilmadi."
+            ),
+            'detail_eyebrow' => $this->translateOrFallback('ui.dashboard.calendar.detail_eyebrow', 'Kun tafsiloti'),
+            'detail_empty' => $this->translateOrFallback(
+                'ui.dashboard.calendar.detail_empty',
+                "Bu sana uchun ko'rsatish mumkin bo'lgan yozuv yo'q."
+            ),
+            'more_items' => $this->translateOrFallback('ui.dashboard.calendar.more_items', '+:count'),
+            'duration_single' => $this->translateOrFallback('ui.dashboard.calendar.duration.single', 'Bir kunlik'),
+            'duration_multi' => $this->translateOrFallback('ui.dashboard.calendar.duration.multi', "Ko'p kunlik"),
+            'birthday_label' => $this->translateOrFallback('ui.dashboard.calendar.birthday.label', "Tug'ilgan kun"),
+            'birthday_recurring' => $this->translateOrFallback('ui.dashboard.calendar.birthday.recurring', 'Har yili'),
+            'birthday_age_suffix' => $this->translateOrFallback('ui.dashboard.calendar.birthday.age_suffix', 'yosh'),
+            'filter_all' => $this->translateOrFallback('ui.dashboard.calendar.filters.all', 'Barchasi'),
+            'filter_events' => $this->translateOrFallback('ui.dashboard.calendar.filters.events', 'Tadbirlar'),
+            'filter_visits' => $this->translateOrFallback('ui.dashboard.calendar.filters.visits', 'Tashriflar'),
+            'filter_birthdays' => $this->translateOrFallback('ui.dashboard.calendar.filters.birthdays', "Tug'ilgan kunlar"),
+            'filter_planned' => $this->translateOrFallback('ui.dashboard.calendar.filters.planned', 'Rejalashtirilgan'),
+            'filter_ongoing' => $this->translateOrFallback('ui.dashboard.calendar.filters.ongoing', 'Jarayonda'),
+            'filter_completed' => $this->translateOrFallback('ui.dashboard.calendar.filters.completed', 'Tugatilgan'),
+            'stat_events' => $this->translateOrFallback('ui.dashboard.calendar.stats.events', 'Tadbirlar'),
+            'stat_ongoing' => $this->translateOrFallback('ui.dashboard.calendar.stats.ongoing', 'Jarayonda'),
+            'stat_planned' => $this->translateOrFallback('ui.dashboard.calendar.stats.planned', 'Rejalashtirilgan'),
+            'stat_visits' => $this->translateOrFallback('ui.dashboard.calendar.stats.visits', 'Tashriflar'),
+            'stat_birthdays' => $this->translateOrFallback('ui.dashboard.calendar.stats.birthdays', "Tug'ilgan kunlar"),
+        ];
+    }
+
+    private function translateOrFallback(string $key, string $fallback): string
+    {
+        $translated = trans($key);
+
+        return is_string($translated) && $translated !== $key
+            ? $translated
+            : $fallback;
+    }
+
+    private function replaceCountPlaceholder(string $template, int $count): string
+    {
+        return str_replace(':count', (string) $count, $template);
+    }
+
+    private function formatBirthdaySchedule(
+        CarbonImmutable $occurrence,
+        CarbonImmutable $birthday,
+        int $age,
+        array $texts
+    ): string {
+        $ageText = $birthday->year > 0 && $age > 0
+            ? $age.' '.$texts['birthday_age_suffix']
+            : null;
+
+        return implode(' | ', array_filter([
+            $occurrence->format('d.m.Y'),
+            $texts['birthday_recurring'],
+            $ageText,
+        ]));
     }
 }

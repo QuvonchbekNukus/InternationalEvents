@@ -12,8 +12,8 @@
             </div>
 
             @can('create ranks')
-                <a class="btn btn--primary" href="{{ route('ranks.create') }}">
-                    <i class="material-icons" aria-hidden="true">military_tech</i>
+                <a class="btn btn--primary is-create-action" href="{{ route('ranks.create') }}">
+                    <i class="material-icons" aria-hidden="true">add</i>
                     <span>Yangi unvon</span>
                 </a>
             @endcan
