@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesOwnedDocuments;
 use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Visit extends Model
 {
+    use DeletesOwnedDocuments;
     use LogsModelActivity;
     use ResolvesLocalizedAttributes;
 
@@ -123,6 +125,11 @@ class Visit extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
+    }
+
+    protected function ownedDocumentsQuery()
+    {
+        return $this->documents();
     }
 
     public function getDisplayTitleAttribute(): string

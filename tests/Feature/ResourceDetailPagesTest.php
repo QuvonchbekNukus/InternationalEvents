@@ -183,6 +183,24 @@ class ResourceDetailPagesTest extends TestCase
             'is_confidential' => false,
         ]);
 
+        Document::query()->create([
+            'title_uz' => 'Event Attachment',
+            'title_ru' => 'Event Attachment RU',
+            'title_cryl' => 'Event Attachment CY',
+            'file_name' => 'event-attachment.pdf',
+            'file_path' => 'tests/event-attachment.pdf',
+            'file_ext' => 'pdf',
+            'file_size' => 6144,
+            'mime_type' => 'application/pdf',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'agreement_id' => $agreement->id,
+            'event_id' => $event->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
         $this->actingAs($user)
             ->get(route('countries.show', $country))
             ->assertOk()
@@ -191,6 +209,18 @@ class ResourceDetailPagesTest extends TestCase
             ->assertSee('Annual Forum')
             ->assertSee('Delegation Visit')
             ->assertSee('Overview File');
+
+        $this->actingAs($user)
+            ->get(route('agreements.show', $agreement))
+            ->assertOk()
+            ->assertSee('Framework Agreement')
+            ->assertSee('overview.docx');
+
+        $this->actingAs($user)
+            ->get(route('events.show', $event))
+            ->assertOk()
+            ->assertSee('Annual Forum')
+            ->assertSee('event-attachment.pdf');
 
         $this->actingAs($user)
             ->get(route('partner-organizations.show', $partnerOrganization))

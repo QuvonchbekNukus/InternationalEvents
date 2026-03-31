@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesOwnedDocuments;
 use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PartnerContact extends Model
 {
+    use DeletesOwnedDocuments;
     use LogsModelActivity;
     use ResolvesLocalizedAttributes;
 
@@ -75,6 +78,16 @@ class PartnerContact extends Model
     public function cvDocument(): BelongsTo
     {
         return $this->belongsTo(Document::class, 'cv');
+    }
+
+    protected function ownedDocumentsQuery(): Builder
+    {
+        $documentIds = array_values(array_unique(array_filter([
+            $this->photo,
+            $this->cv,
+        ])));
+
+        return Document::query()->whereKey($documentIds);
     }
 
     public function getDisplayNameAttribute(): string

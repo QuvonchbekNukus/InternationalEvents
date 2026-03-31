@@ -197,13 +197,7 @@ class DocumentController extends Controller implements HasMiddleware
     public function destroy(Document $document): RedirectResponse
     {
         $documentTitle = $document->display_title;
-        $filePath = $document->file_path;
-
         $document->delete();
-
-        if ($filePath) {
-            Storage::disk(self::STORAGE_DISK)->delete($filePath);
-        }
 
         return redirect()
             ->route('documents.index')

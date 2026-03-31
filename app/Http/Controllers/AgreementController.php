@@ -7,19 +7,25 @@ use App\Models\AgreementDirection;
 use App\Models\AgreementType;
 use App\Models\Country;
 use App\Models\Department;
+use App\Models\Document;
 use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AgreementController extends Controller implements HasMiddleware
 {
+    private const STORAGE_DISK = 'documents';
+
     public static function middleware(): array
     {
         return [
@@ -141,7 +147,13 @@ class AgreementController extends Controller implements HasMiddleware
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
-        $agreement = Agreement::create($validated);
+        $agreement = DB::transaction(function () use ($request, $validated) {
+            $agreement = Agreement::query()->create($validated);
+            $this->syncAgreementDocuments($request, $agreement->refresh(), (int) $request->user()->id);
+
+            return $agreement->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
             $agreement,
             null,
@@ -176,6 +188,8 @@ class AgreementController extends Controller implements HasMiddleware
             'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
+            'documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,agreement_id,uploaded_by,created_at',
+            'documents.uploader:id,first_name,middle_name,last_name',
         ]);
 
         return view('agreements.show', [
@@ -194,6 +208,26 @@ class AgreementController extends Controller implements HasMiddleware
             fn (Agreement $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
                 || (int) $record->created_by === (int) $user->id
         );
+
+        $agreement->load([
+            'documents' => fn ($query) => $query
+                ->whereNull('event_id')
+                ->whereNull('visit_id')
+                ->select([
+                    'id',
+                    'title_uz',
+                    'title_ru',
+                    'title_cryl',
+                    'file_name',
+                    'file_ext',
+                    'file_size',
+                    'file_path',
+                    'mime_type',
+                    'agreement_id',
+                    'uploaded_by',
+                    'created_at',
+                ]),
+        ]);
 
         return view('agreements.edit', [
             'agreement' => $agreement,
@@ -216,9 +250,15 @@ class AgreementController extends Controller implements HasMiddleware
         $validated = $this->validatedData($request, $agreement);
         $validated['updated_by'] = $request->user()?->id;
 
-        $agreement->update($validated);
+        $agreement = DB::transaction(function () use ($request, $agreement, $validated) {
+            $agreement->update($validated);
+            $this->syncAgreementDocuments($request, $agreement->refresh(), (int) $request->user()->id);
+
+            return $agreement->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
-            $agreement->fresh(),
+            $agreement,
             $previousResponsibleUserId,
             $agreement->responsible_user_id,
             $request->user(),
@@ -269,7 +309,11 @@ class AgreementController extends Controller implements HasMiddleware
             'responsible_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'responsible_department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'description' => ['nullable', 'string'],
+            'agreement_files' => ['nullable', 'array'],
+            'agreement_files.*' => ['file', 'max:51200'],
         ]);
+
+        unset($validated['agreement_files']);
 
         if (($validated['partner_organization_id'] ?? null) !== null) {
             $organizationCountryId = PartnerOrganization::query()
@@ -305,6 +349,85 @@ class AgreementController extends Controller implements HasMiddleware
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'statuses' => Agreement::STATUS_LABELS,
+        ];
+    }
+
+    private function syncAgreementDocuments(Request $request, Agreement $agreement, int $uploadedBy): void
+    {
+        if (! $request->hasFile('agreement_files')) {
+            $this->syncAgreementDocumentMetadata($agreement);
+            return;
+        }
+
+        $this->agreementDocumentsQuery($agreement)
+            ->get()
+            ->each(fn (Document $document) => $document->delete());
+
+        foreach ($request->file('agreement_files', []) as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            Document::query()->create(array_merge(
+                $this->agreementDocumentMetadata($agreement),
+                $this->uploadedFilePayload($file),
+                [
+                    'uploaded_by' => $uploadedBy,
+                    'status' => 'faol',
+                    'is_confidential' => false,
+                ],
+            ));
+        }
+    }
+
+    private function syncAgreementDocumentMetadata(Agreement $agreement): void
+    {
+        $this->agreementDocumentsQuery($agreement)->update([
+            'country_id' => $agreement->country_id,
+            'partner_organization_id' => $agreement->partner_organization_id,
+        ]);
+    }
+
+    private function agreementDocumentsQuery(Agreement $agreement)
+    {
+        return $agreement->documents()
+            ->whereNull('event_id')
+            ->whereNull('visit_id');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function agreementDocumentMetadata(Agreement $agreement): array
+    {
+        return [
+            'title_ru' => null,
+            'title_uz' => null,
+            'title_cryl' => null,
+            'document_number' => null,
+            'document_type_id' => null,
+            'country_id' => $agreement->country_id,
+            'partner_organization_id' => $agreement->partner_organization_id,
+            'agreement_id' => $agreement->id,
+            'visit_id' => null,
+            'event_id' => null,
+            'description' => 'Kelishuv uchun biriktirilgan fayl',
+        ];
+    }
+
+    /**
+     * @return array{file_name: string, file_path: string, file_ext: ?string, file_size: int, mime_type: ?string}
+     */
+    private function uploadedFilePayload(UploadedFile $file): array
+    {
+        $filePath = $file->store(now()->format('Y/m'), self::STORAGE_DISK);
+
+        return [
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+            'file_ext' => $file->getClientOriginalExtension() ?: null,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getClientMimeType(),
         ];
     }
 }

@@ -172,6 +172,117 @@
                     </article>
                 </div>
             </section>
+
+            <section class="content-card detail-card detail-card--full">
+                @php
+                    $documents = $event->documents->sortByDesc('created_at');
+                    $imageDocuments = $documents->filter(fn ($document) => $document->is_image && $document->file_url);
+                    $otherDocuments = $documents->reject(fn ($document) => $document->is_image && $document->file_url);
+                @endphp
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Biriktirilgan fayllar</p>
+                        <h2 class="section-title">Tadbir hujjatlari</h2>
+                    </div>
+                </div>
+
+                @if ($documents->isNotEmpty())
+                    @if ($imageDocuments->isNotEmpty())
+                        <div class="attachment-section">
+                            <p class="attachment-section__label">Rasm previewlari</p>
+
+                            <div class="document-gallery">
+                                @foreach ($imageDocuments as $document)
+                                    <article class="document-card">
+                                        <a class="document-card__media" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                            <img
+                                                class="document-card__image"
+                                                src="{{ $document->file_url }}"
+                                                alt="{{ $document->display_title ?: $document->file_name }}"
+                                                loading="lazy"
+                                            >
+                                        </a>
+
+                                        <div class="document-card__body">
+                                            <div class="document-card__meta">
+                                                <strong>{{ $document->display_title }}</strong>
+                                                <span>
+                                                    {{ $document->file_name }}
+                                                    {{ ' | ' }}
+                                                    {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                                    @if ($document->file_size_human)
+                                                        {{ ' | '.$document->file_size_human }}
+                                                    @endif
+                                                </span>
+                                                <span>
+                                                    {{ $document->uploader?->full_name ?: __('ui.common.values.unknown') }}
+                                                    @if ($document->created_at)
+                                                        {{ ' | '.$document->created_at->format('d.m.Y H:i') }}
+                                                    @endif
+                                                </span>
+                                            </div>
+
+                                            <div class="detail-actions-inline">
+                                                <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                                    <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                                    <span>Ochish</span>
+                                                </a>
+                                                <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                                    <i class="material-icons" aria-hidden="true">download</i>
+                                                    <span>Faylni olish</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($otherDocuments->isNotEmpty())
+                        <div class="attachment-section">
+                            <p class="attachment-section__label">Boshqa biriktirmalar</p>
+
+                            <div class="stack-list">
+                                @foreach ($otherDocuments as $document)
+                                    <article class="stack-list__item">
+                                        <strong>{{ $document->display_title }}</strong>
+                                        <span>
+                                            {{ $document->file_name }}
+                                            {{ ' | ' }}
+                                            {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                            @if ($document->file_size_human)
+                                                {{ ' | '.$document->file_size_human }}
+                                            @endif
+                                        </span>
+                                        <span>
+                                            {{ $document->uploader?->full_name ?: __('ui.common.values.unknown') }}
+                                            @if ($document->created_at)
+                                                {{ ' | '.$document->created_at->format('d.m.Y H:i') }}
+                                            @endif
+                                        </span>
+                                        @if ($document->file_url)
+                                            <div class="detail-actions-inline">
+                                                <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                                    <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                                    <span>Ochish</span>
+                                                </a>
+                                                <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                                    <i class="material-icons" aria-hidden="true">download</i>
+                                                    <span>Faylni olish</span>
+                                                </a>
+                                            </div>
+                                        @endif
+                                    </article>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <p class="detail-empty">Tadbir uchun hali fayl biriktirilmagan.</p>
+                @endif
+            </section>
         </div>
     </div>
 @endsection

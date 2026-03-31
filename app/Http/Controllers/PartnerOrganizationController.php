@@ -187,17 +187,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         }
 
         $partnerOrganizationName = $partnerOrganization->display_name;
-        $organizationInfoDocument = $partnerOrganization->organizationInfoDocument;
         $partnerOrganization->delete();
-
-        if ($organizationInfoDocument) {
-            $filePath = $organizationInfoDocument->file_path;
-            $organizationInfoDocument->delete();
-
-            if ($filePath) {
-                Storage::disk(self::STORAGE_DISK)->delete($filePath);
-            }
-        }
 
         return redirect()
             ->route('partner-organizations.index')

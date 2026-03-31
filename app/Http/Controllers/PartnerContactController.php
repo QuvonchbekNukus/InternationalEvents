@@ -154,22 +154,8 @@ class PartnerContactController extends Controller implements HasMiddleware
 
     public function destroy(PartnerContact $partnerContact): RedirectResponse
     {
-        $attachmentDocuments = collect([
-            $this->attachmentDocument($partnerContact, 'photo'),
-            $this->attachmentDocument($partnerContact, 'cv'),
-        ])->filter()->unique('id');
-
         $partnerContactName = $partnerContact->display_name;
         $partnerContact->delete();
-
-        $attachmentDocuments->each(function (Document $document): void {
-            $filePath = $document->file_path;
-            $document->delete();
-
-            if ($filePath) {
-                Storage::disk(self::STORAGE_DISK)->delete($filePath);
-            }
-        });
 
         return redirect()
             ->route('partner-contacts.index')

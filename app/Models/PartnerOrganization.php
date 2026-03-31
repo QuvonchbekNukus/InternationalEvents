@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\DeletesOwnedDocuments;
 use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Support\Str;
 
 class PartnerOrganization extends Model
 {
+    use DeletesOwnedDocuments;
     use LogsModelActivity;
     use ResolvesLocalizedAttributes;
 
@@ -84,6 +86,14 @@ class PartnerOrganization extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
+    }
+
+    protected function ownedDocumentsQuery()
+    {
+        return $this->documents()
+            ->whereNull('agreement_id')
+            ->whereNull('visit_id')
+            ->whereNull('event_id');
     }
 
     public function getDisplayNameAttribute(): string

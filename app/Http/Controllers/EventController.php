@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Agreement;
 use App\Models\Country;
 use App\Models\Department;
+use App\Models\Document;
 use App\Models\Event;
 use App\Models\EventType;
 use App\Models\PartnerOrganization;
@@ -12,14 +13,19 @@ use App\Models\User;
 use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EventController extends Controller implements HasMiddleware
 {
+    private const STORAGE_DISK = 'documents';
+
     public static function middleware(): array
     {
         return [
@@ -147,7 +153,13 @@ class EventController extends Controller implements HasMiddleware
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
-        $event = Event::create($validated);
+        $event = DB::transaction(function () use ($request, $validated) {
+            $event = Event::query()->create($validated);
+            $this->syncEventDocuments($request, $event->refresh(), (int) $request->user()->id);
+
+            return $event->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
             $event,
             null,
@@ -182,6 +194,8 @@ class EventController extends Controller implements HasMiddleware
             'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
+            'documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,event_id,uploaded_by,created_at',
+            'documents.uploader:id,first_name,middle_name,last_name',
         ]);
 
         return view('events.show', [
@@ -201,6 +215,8 @@ class EventController extends Controller implements HasMiddleware
             fn (Event $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
                 || (int) $record->created_by === (int) $user->id
         );
+
+        $event->load('documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,event_id,uploaded_by,created_at');
 
         return view('events.edit', [
             'event' => $event,
@@ -223,9 +239,15 @@ class EventController extends Controller implements HasMiddleware
         $validated = $this->validatedData($request);
         $validated['updated_by'] = $request->user()?->id;
 
-        $event->update($validated);
+        $event = DB::transaction(function () use ($request, $event, $validated) {
+            $event->update($validated);
+            $this->syncEventDocuments($request, $event->refresh(), (int) $request->user()->id);
+
+            return $event->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
-            $event->fresh(),
+            $event,
             $previousResponsibleUserId,
             $event->responsible_user_id,
             $request->user(),
@@ -275,7 +297,11 @@ class EventController extends Controller implements HasMiddleware
             'result_summary_uz' => ['nullable', 'string'],
             'result_summary_cryl' => ['nullable', 'string'],
             'control_due_date' => ['nullable', 'date'],
+            'event_files' => ['nullable', 'array'],
+            'event_files.*' => ['file', 'max:51200'],
         ]);
+
+        unset($validated['event_files']);
 
         if (($validated['partner_organization_id'] ?? null) !== null) {
             $organizationCountryId = PartnerOrganization::query()
@@ -324,6 +350,79 @@ class EventController extends Controller implements HasMiddleware
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'formats' => Event::FORMAT_LABELS,
             'statuses' => Event::STATUS_LABELS,
+        ];
+    }
+
+    private function syncEventDocuments(Request $request, Event $event, int $uploadedBy): void
+    {
+        if (! $request->hasFile('event_files')) {
+            $this->syncEventDocumentMetadata($event);
+            return;
+        }
+
+        $event->documents()
+            ->get()
+            ->each(fn (Document $document) => $document->delete());
+
+        foreach ($request->file('event_files', []) as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            Document::query()->create(array_merge(
+                $this->eventDocumentMetadata($event),
+                $this->uploadedFilePayload($file),
+                [
+                    'uploaded_by' => $uploadedBy,
+                    'status' => 'faol',
+                    'is_confidential' => false,
+                ],
+            ));
+        }
+    }
+
+    private function syncEventDocumentMetadata(Event $event): void
+    {
+        $event->documents()->update([
+            'country_id' => $event->country_id,
+            'partner_organization_id' => $event->partner_organization_id,
+            'agreement_id' => $event->agreement_id,
+        ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function eventDocumentMetadata(Event $event): array
+    {
+        return [
+            'title_ru' => null,
+            'title_uz' => null,
+            'title_cryl' => null,
+            'document_number' => null,
+            'document_type_id' => null,
+            'country_id' => $event->country_id,
+            'partner_organization_id' => $event->partner_organization_id,
+            'agreement_id' => $event->agreement_id,
+            'visit_id' => null,
+            'event_id' => $event->id,
+            'description' => 'Tadbir uchun biriktirilgan fayl',
+        ];
+    }
+
+    /**
+     * @return array{file_name: string, file_path: string, file_ext: ?string, file_size: int, mime_type: ?string}
+     */
+    private function uploadedFilePayload(UploadedFile $file): array
+    {
+        $filePath = $file->store(now()->format('Y/m'), self::STORAGE_DISK);
+
+        return [
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+            'file_ext' => $file->getClientOriginalExtension() ?: null,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getClientMimeType(),
         ];
     }
 }

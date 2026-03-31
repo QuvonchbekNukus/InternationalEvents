@@ -1,4 +1,4 @@
-<form class="resource-form" method="POST" action="{{ $action }}">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
     @csrf
 
     @if ($method !== 'POST')
@@ -218,6 +218,80 @@
             @error('description')
                 <span class="field-error">{{ $message }}</span>
             @enderror
+        </label>
+
+        <label class="field field--span-2">
+            <span class="field-label">Biriktiriladigan fayllar</span>
+            <input type="file" name="event_files[]" multiple>
+            <span class="field-help">Tadbirga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi.</span>
+            @error('event_files')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            @error('event_files.*')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            @if ($event->exists && $event->documents->isNotEmpty())
+                <span class="field-help">Mavjud fayllar:</span>
+                <div class="stack-list">
+                    @foreach ($event->documents as $document)
+                        <article class="stack-list__item">
+                            @if ($document->is_image && $document->file_url)
+                                <div class="detail-media detail-media--compact">
+                                    <a href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                        <img
+                                            class="detail-media__thumb"
+                                            src="{{ $document->file_url }}"
+                                            alt="{{ $document->file_name }}"
+                                            loading="lazy"
+                                        >
+                                    </a>
+
+                                    <div class="detail-media__body">
+                                        <strong>{{ $document->file_name }}</strong>
+                                        <span>
+                                            {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                            @if ($document->file_size_human)
+                                                {{ ' | '.$document->file_size_human }}
+                                            @endif
+                                        </span>
+
+                                        <div class="detail-actions-inline">
+                                            <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                                <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                                <span>Ochish</span>
+                                            </a>
+                                            <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                                <i class="material-icons" aria-hidden="true">download</i>
+                                                <span>Faylni olish</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <strong>{{ $document->file_name }}</strong>
+                                <span>
+                                    {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                    @if ($document->file_size_human)
+                                        {{ ' | '.$document->file_size_human }}
+                                    @endif
+                                </span>
+                                @if ($document->file_url)
+                                    <div class="detail-actions-inline">
+                                        <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                            <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                            <span>Ochish</span>
+                                        </a>
+                                        <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                            <i class="material-icons" aria-hidden="true">download</i>
+                                            <span>Faylni olish</span>
+                                        </a>
+                                    </div>
+                                @endif
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
         </label>
     </div>
 

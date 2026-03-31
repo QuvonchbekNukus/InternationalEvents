@@ -6,11 +6,14 @@ use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Document extends Model
 {
     use LogsModelActivity;
     use ResolvesLocalizedAttributes;
+
+    private const STORAGE_DISK = 'documents';
 
     public const STATUSES = [
         'qoralama',
@@ -75,6 +78,17 @@ class Document extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::deleted(function (Document $document): void {
+            $filePath = $document->getOriginal('file_path') ?: $document->file_path;
+
+            if ($filePath) {
+                Storage::disk(self::STORAGE_DISK)->delete($filePath);
+            }
+        });
+    }
+
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class);
@@ -123,6 +137,23 @@ class Document extends Model
         }
 
         return '/documents/'.ltrim(str_replace('\\', '/', $this->file_path), '/');
+    }
+
+    public function getIsImageAttribute(): bool
+    {
+        if ($this->mime_type && str_starts_with(strtolower($this->mime_type), 'image/')) {
+            return true;
+        }
+
+        return in_array(strtolower((string) $this->file_ext), [
+            'jpg',
+            'jpeg',
+            'png',
+            'gif',
+            'webp',
+            'bmp',
+            'svg',
+        ], true);
     }
 
     public function getFileSizeHumanAttribute(): ?string
