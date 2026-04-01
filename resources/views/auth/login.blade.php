@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
+    @php($typographyCssVersion = filemtime(public_path('css/typography.css')))
+    @php($themeCssVersion = filemtime(public_path('css/theme.css')))
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('ui.auth.login.page_title') }}</title>
+    <link rel="stylesheet" href="{{ asset('css/typography.css').'?v='.$typographyCssVersion }}">
     @vite(['resources/css/auth/login.css', 'resources/js/auth/login.js'])
+    <link rel="stylesheet" href="{{ asset('css/theme.css').'?v='.$themeCssVersion }}">
 </head>
 <body class="login-page" data-login-background="{{ asset('design/login.png') }}">
     <div class="login-container">

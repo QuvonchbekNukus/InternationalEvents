@@ -107,6 +107,25 @@
                         {{ $partnerOrganization->organizationInfoDocument->file_name }}
                     </a>
                 </span>
+                <div class="detail-actions-inline">
+                    <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" target="_blank" rel="noopener">
+                        <i class="material-icons" aria-hidden="true">open_in_new</i>
+                        <span>Ochish</span>
+                    </a>
+                    <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
+                        <i class="material-icons" aria-hidden="true">file_download</i>
+                        <span>Faylni olish</span>
+                    </a>
+                    <button
+                        class="action-pill action-pill--danger"
+                        type="submit"
+                        form="partner-organization-info-delete-{{ $partnerOrganization->id }}"
+                        onclick="return confirm('Ushbu tashkilot info faylini o\\'chirishni tasdiqlaysizmi?')"
+                    >
+                        <i class="material-icons" aria-hidden="true">delete</i>
+                        <span>Faylni o'chirish</span>
+                    </button>
+                </div>
             @endif
             @error('organization_info_file')
                 <span class="field-error">{{ $message }}</span>
@@ -138,3 +157,15 @@
         </button>
     </div>
 </form>
+
+@if ($partnerOrganization->exists && $partnerOrganization->organizationInfoDocument)
+    <form
+        id="partner-organization-info-delete-{{ $partnerOrganization->id }}"
+        method="POST"
+        action="{{ route('partner-organizations.organization-info.destroy', $partnerOrganization) }}"
+        hidden
+    >
+        @csrf
+        @method('DELETE')
+    </form>
+@endif

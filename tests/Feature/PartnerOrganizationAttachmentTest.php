@@ -130,6 +130,58 @@ class PartnerOrganizationAttachmentTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{4}\/\d{2}\/.+$/', $document->file_path);
     }
 
+    public function test_partner_organization_edit_can_delete_existing_info_file_and_storage_file(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view partner organizations',
+            'edit partner organizations',
+        ]);
+
+        $country = $this->createCountry();
+
+        $partnerOrganization = PartnerOrganization::query()->create([
+            'country_id' => $country->id,
+            'name_ru' => 'Delete Organization RU',
+            'name_uz' => 'Delete Organization',
+            'name_cryl' => 'Delete Organization CY',
+            'status' => 'faol',
+        ]);
+
+        Storage::disk('documents')->put('2026/04/organization-delete.pdf', 'delete-me');
+
+        $document = Document::query()->create([
+            'title_uz' => 'Delete Organization info fayli',
+            'title_ru' => 'Delete Organization info file',
+            'title_cryl' => 'Delete Organization info fayli',
+            'file_name' => 'organization-delete.pdf',
+            'file_path' => '2026/04/organization-delete.pdf',
+            'file_ext' => 'pdf',
+            'file_size' => 8,
+            'mime_type' => 'application/pdf',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $partnerOrganization->update([
+            'organization_info_document_id' => $document->id,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('partner-organizations.organization-info.destroy', $partnerOrganization))
+            ->assertRedirect(route('partner-organizations.edit', $partnerOrganization));
+
+        $partnerOrganization->refresh();
+
+        $this->assertNull($partnerOrganization->organization_info_document_id);
+        $this->assertDatabaseMissing('documents', ['id' => $document->id]);
+        Storage::disk('documents')->assertMissing('2026/04/organization-delete.pdf');
+    }
+
     /**
      * @param  list<string>  $permissions
      */

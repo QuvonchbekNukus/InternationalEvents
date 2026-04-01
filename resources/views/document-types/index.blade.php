@@ -32,7 +32,7 @@
 
             @if ($search !== '')
                 <a class="btn btn--ghost" href="{{ route('document-types.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>Tozalash</span>
                 </a>
             @endif

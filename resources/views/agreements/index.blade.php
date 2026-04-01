@@ -60,7 +60,7 @@
 
             @if (collect($filters)->filter()->isNotEmpty())
                 <a class="btn btn--ghost" href="{{ route('agreements.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>{{ __('ui.common.actions.clear') }}</span>
                 </a>
             @endif

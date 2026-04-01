@@ -29,7 +29,7 @@ class DocumentController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:view documents|view own documents', only: ['index', 'download']),
             new Middleware('permission:create documents', only: ['create', 'store']),
-            new Middleware('permission:edit documents|edit own documents', only: ['edit', 'update']),
+            new Middleware('permission:edit documents|edit own documents', only: ['edit', 'update', 'destroyFile']),
             new Middleware('permission:delete documents', only: ['destroy']),
         ];
     }
@@ -192,6 +192,24 @@ class DocumentController extends Controller implements HasMiddleware
         return redirect()
             ->route('documents.index')
             ->with('status', "Hujjat {$document->display_title} yangilandi.");
+    }
+
+    public function destroyFile(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnedRecord(
+            $request,
+            $document,
+            'edit documents',
+            'edit own documents',
+            fn (Document $record, $user): bool => (int) $record->uploaded_by === (int) $user->id
+        );
+
+        $documentTitle = $document->display_title;
+        $document->delete();
+
+        return redirect()
+            ->route('documents.index')
+            ->with('status', "Hujjat {$documentTitle} fayli bilan birga o'chirildi.");
     }
 
     public function destroy(Document $document): RedirectResponse

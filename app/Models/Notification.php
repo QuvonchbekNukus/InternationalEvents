@@ -89,7 +89,7 @@ class Notification extends Model
     public function getTypeIconAttribute(): string
     {
         return match ($this->type) {
-            'success' => 'task_alt',
+            'success' => 'check_circle',
             'warning' => 'warning',
             'danger' => 'priority_high',
             default => 'notifications',

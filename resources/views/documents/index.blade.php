@@ -13,7 +13,7 @@
 
             @can('create documents')
                 <a class="btn btn--primary" href="{{ route('documents.create') }}">
-                    <i class="material-icons" aria-hidden="true">upload_file</i>
+                    <i class="material-icons" aria-hidden="true">note_add</i>
                     <span>Yangi hujjat</span>
                 </a>
             @endcan
@@ -52,7 +52,7 @@
 
             @if (collect($filters)->filter(fn ($value) => $value !== '' && $value !== null)->isNotEmpty())
                 <a class="btn btn--ghost" href="{{ route('documents.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>Tozalash</span>
                 </a>
             @endif
@@ -126,7 +126,7 @@
                                 <td>
                                     <div class="row-actions">
                                         <a class="action-pill" href="{{ route('documents.download', $document) }}">
-                                            <i class="material-icons" aria-hidden="true">download</i>
+                                            <i class="material-icons" aria-hidden="true">file_download</i>
                                             <span>Fayl</span>
                                         </a>
 

@@ -193,7 +193,7 @@
         <label class="field field--span-2">
             <span class="field-label">Biriktiriladigan fayllar</span>
             <input type="file" name="agreement_files[]" multiple>
-            <span class="field-help">Kelishuvga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi.</span>
+            <span class="field-help">Kelishuvga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
             @error('agreement_files')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -205,6 +205,7 @@
                 <div class="stack-list">
                     @foreach ($agreement->documents as $document)
                         <article class="stack-list__item">
+                            @php($deleteFormId = "agreement-attachment-delete-{$agreement->id}-{$document->id}")
                             <strong>{{ $document->file_name }}</strong>
                             <span>
                                 {{ strtoupper($document->file_ext ?: 'fayl') }}
@@ -219,9 +220,18 @@
                                         <span>Ochish</span>
                                     </a>
                                     <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
-                                        <i class="material-icons" aria-hidden="true">download</i>
+                                        <i class="material-icons" aria-hidden="true">file_download</i>
                                         <span>Faylni olish</span>
                                     </a>
+                                    <button
+                                        class="action-pill action-pill--danger"
+                                        type="submit"
+                                        form="{{ $deleteFormId }}"
+                                        onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                    >
+                                        <i class="material-icons" aria-hidden="true">delete</i>
+                                        <span>Faylni o'chirish</span>
+                                    </button>
                                 </div>
                             @endif
                         </article>
@@ -239,6 +249,20 @@
         </button>
     </div>
 </form>
+
+@if ($agreement->exists && $agreement->documents->isNotEmpty())
+    @foreach ($agreement->documents as $document)
+        <form
+            id="agreement-attachment-delete-{{ $agreement->id }}-{{ $document->id }}"
+            method="POST"
+            action="{{ route('agreements.attachments.destroy', [$agreement, $document]) }}"
+            hidden
+        >
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
+@endif
 
 @once
     @push('scripts')

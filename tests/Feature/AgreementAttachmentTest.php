@@ -142,6 +142,58 @@ class AgreementAttachmentTest extends TestCase
         Storage::disk('documents')->assertExists($newDocument->file_path);
     }
 
+    public function test_agreement_edit_can_delete_existing_attachment_and_storage_file(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view agreements',
+            'edit agreements',
+        ]);
+
+        [$country, $partnerOrganization] = $this->createCountryAndOrganization('C');
+
+        $agreement = Agreement::query()->create([
+            'agreement_number' => 'AG-003',
+            'title_ru' => 'Agreement Delete RU',
+            'title_uz' => 'Agreement Delete UZ',
+            'title_cryl' => 'Agreement Delete CY',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'status' => 'draft',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        Storage::disk('documents')->put('2026/04/agreement-delete.pdf', 'delete-me');
+
+        $document = Document::query()->create([
+            'title_ru' => null,
+            'title_uz' => null,
+            'title_cryl' => null,
+            'document_number' => null,
+            'document_type_id' => null,
+            'file_name' => 'agreement-delete.pdf',
+            'file_path' => '2026/04/agreement-delete.pdf',
+            'file_ext' => 'pdf',
+            'file_size' => 9,
+            'mime_type' => 'application/pdf',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'agreement_id' => $agreement->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('agreements.attachments.destroy', [$agreement, $document]))
+            ->assertRedirect(route('agreements.edit', $agreement));
+
+        $this->assertDatabaseMissing('documents', ['id' => $document->id]);
+        Storage::disk('documents')->assertMissing('2026/04/agreement-delete.pdf');
+    }
+
     /**
      * @param  list<string>  $permissions
      */

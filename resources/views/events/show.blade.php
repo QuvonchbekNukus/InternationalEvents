@@ -229,7 +229,7 @@
                                                     <span>Ochish</span>
                                                 </a>
                                                 <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
-                                                    <i class="material-icons" aria-hidden="true">download</i>
+                                                    <i class="material-icons" aria-hidden="true">file_download</i>
                                                     <span>Faylni olish</span>
                                                 </a>
                                             </div>
@@ -269,7 +269,7 @@
                                                     <span>Ochish</span>
                                                 </a>
                                                 <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
-                                                    <i class="material-icons" aria-hidden="true">download</i>
+                                                    <i class="material-icons" aria-hidden="true">file_download</i>
                                                     <span>Faylni olish</span>
                                                 </a>
                                             </div>

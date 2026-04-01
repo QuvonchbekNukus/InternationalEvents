@@ -41,9 +41,10 @@ Route::post('/locale', function (Request $request) {
     return back()->cookie('locale', $validated['locale'], 60 * 24 * 365);
 })->name('locale.switch');
 
-Route::get('/dashboard', DashboardController::class)
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard/calendar', [DashboardController::class, 'calendar'])->name('dashboard.calendar');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -55,10 +56,17 @@ Route::middleware('auth')->group(function () {
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::delete('documents/{document}/file', [DocumentController::class, 'destroyFile'])->name('documents.file.destroy');
+    Route::delete('agreements/{agreement}/attachments/{document}', [AgreementController::class, 'destroyAttachment'])->name('agreements.attachments.destroy');
+    Route::delete('events/{event}/attachments/{document}', [EventController::class, 'destroyAttachment'])->name('events.attachments.destroy');
+    Route::delete('partner-organizations/{partnerOrganization}/organization-info-file', [PartnerOrganizationController::class, 'destroyOrganizationInfoDocument'])
+        ->name('partner-organizations.organization-info.destroy');
     Route::get('partner-contacts/{partnerContact}/{type}/preview', [PartnerContactController::class, 'previewAttachment'])
         ->name('partner-contacts.attachments.preview');
     Route::get('partner-contacts/{partnerContact}/{type}/download', [PartnerContactController::class, 'downloadAttachment'])
         ->name('partner-contacts.attachments.download');
+    Route::delete('partner-contacts/{partnerContact}/{type}', [PartnerContactController::class, 'destroyAttachment'])
+        ->name('partner-contacts.attachments.destroy');
 
     Route::resource('users', UserController::class)->except(['show']);
     Route::resource('departments', DepartmentController::class)->except(['show']);

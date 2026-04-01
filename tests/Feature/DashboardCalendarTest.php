@@ -214,6 +214,16 @@ class DashboardCalendarTest extends TestCase
         $response->assertSee('"recurrence_type":"yearly"', false);
         $response->assertDontSee('"kind":"event"', false);
         $response->assertDontSee('"state":"planned"', false);
+        $response->assertSee("let activeTypeFilter = 'all';", false);
+        $response->assertSee("const matchesTypeFilter = (item, typeFilter = activeTypeFilter) => typeFilter === 'all'", false);
+        $response->assertSee("const refreshFilteredState = () => {", false);
+        $response->assertSee("const addDaysToIsoDate = (isoDate, days = 1) => {", false);
+        $response->assertSee("const filteredItemsForDate = (date) => {", false);
+        $response->assertSee('data-calendar-endpoint=', false);
+        $response->assertSee('const requestCalendar = async (monthKey) => {', false);
+        $response->assertDontSee('form.requestSubmit();', false);
+        $response->assertDontSee("cursor = nextDay.toISOString().slice(0, 10);", false);
+        $response->assertDontSee("const activeTypeFilters = new Set();", false);
         $response->assertSee('"source_id":'.$event->id, false);
         $response->assertSee('"source_id":'.$visit->id, false);
         $response->assertSee('"source_id":'.$partnerContact->id, false);
@@ -223,6 +233,55 @@ class DashboardCalendarTest extends TestCase
         $response->assertSee('"end_date":"2026-03-11"', false);
         $response->assertSee('"start_date":"2026-03-12"', false);
         $response->assertSee('"end_date":"2026-03-12"', false);
+    }
+
+    public function test_dashboard_calendar_endpoint_returns_async_payload(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+
+        $country = $this->createCountry('GB', 'GBR');
+
+        Event::create([
+            'title_ru' => 'Async event',
+            'title_uz' => 'Asinxron tadbir',
+            'title_cryl' => 'Asinxron tadbir',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-04-09 09:00:00',
+            'end_datetime' => '2026-04-11 18:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->getJson(route('dashboard.calendar', ['month' => '2026-04']));
+
+        $response->assertOk();
+        $response->assertJsonPath('eventCalendar.month_key', '2026-04');
+        $response->assertJsonPath('eventCalendar.month_label', 'Aprel 2026');
+        $response->assertJsonPath('eventCalendar.items.0.title', 'Asinxron tadbir');
+        $response->assertJsonStructure([
+            'eventCalendar' => [
+                'month_key',
+                'month_label',
+                'prev_url',
+                'next_url',
+                'count_label',
+                'items',
+                'weeks',
+                'day_lookup',
+                'filters',
+                'selected_date',
+                'texts',
+            ],
+            'calendarMonthOptions',
+            'calendarYearOptions',
+        ]);
     }
 
     public function test_dashboard_keeps_selected_april_month_when_current_day_is_31st(): void

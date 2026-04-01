@@ -28,7 +28,7 @@
 
     <div class="topbar-center">
         <label class="topbar-search" aria-label="{{ __('ui.nav.search_label') }}">
-            <i class="material-icons topbar-icon" aria-hidden="true">search</i>
+            <i class="material-icons app-icon app-icon--md topbar-icon" aria-hidden="true">search</i>
             <input type="text" placeholder="{{ __('ui.nav.search_placeholder') }}" />
         </label>
     </div>
@@ -40,7 +40,7 @@
 
                 <div class="topbar-locale">
                     <span class="topbar-locale-mark" aria-hidden="true">
-                        <i class="material-icons topbar-icon">translate</i>
+                        <i class="material-icons app-icon app-icon--md topbar-icon">translate</i>
                     </span>
 
                     <span class="topbar-locale-copy">
@@ -55,7 +55,7 @@
                     </span>
 
                     <span class="topbar-locale-arrow" aria-hidden="true">
-                        <i class="material-icons topbar-icon">expand_more</i>
+                        <i class="material-icons app-icon app-icon--md topbar-icon">expand_more</i>
                     </span>
 
                     <select
@@ -80,7 +80,7 @@
                 data-topbar-notification
                 aria-label="{{ __('ui.nav.notifications') }}"
             >
-                <i class="material-icons topbar-icon" aria-hidden="true">notifications</i>
+                <i class="material-icons app-icon app-icon--md topbar-icon" aria-hidden="true">notifications</i>
                 @if ($unreadNotificationsCount > 0)
                     <span class="topbar-badge">{{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}</span>
                 @endif
@@ -88,7 +88,7 @@
 
             <a class="profile-chip" href="{{ route('profile.edit') }}" aria-label="{{ __('ui.nav.profile') }}">
                 <span class="profile-avatar" aria-hidden="true">
-                    <i class="material-icons topbar-icon">account_circle</i>
+                    <i class="material-icons app-icon app-icon--md topbar-icon">account_circle</i>
                 </span>
 
                 <span class="profile-copy">
@@ -102,7 +102,7 @@
 
                 <button class="topbar-logout" type="submit" aria-label="{{ __('ui.nav.logout') }}">
                     <span class="topbar-logout-mark" aria-hidden="true">
-                        <i class="material-icons topbar-icon">exit_to_app</i>
+                        <i class="material-icons app-icon app-icon--md topbar-icon">exit_to_app</i>
                     </span>
                     <span>{{ __('ui.nav.logout') }}</span>
                 </button>

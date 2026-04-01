@@ -1,4 +1,4 @@
-<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data" data-event-form>
     @csrf
 
     @if ($method !== 'POST')
@@ -45,7 +45,7 @@
 
         <label class="field">
             <span class="field-label">Davlat</span>
-            <select name="country_id" required>
+            <select name="country_id" required data-event-country-select>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
                     <option value="{{ $country->id }}" @selected((string) old('country_id', $event->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
@@ -58,10 +58,16 @@
 
         <label class="field">
             <span class="field-label">Hamkor tashkilot</span>
-            <select name="partner_organization_id">
+            <select name="partner_organization_id" data-event-organization-select>
                 <option value="">Biriktirilmagan</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
-                    <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $event->partner_organization_id) === (string) $partnerOrganization->id)>{{ $partnerOrganization->display_name }}</option>
+                    <option
+                        value="{{ $partnerOrganization->id }}"
+                        data-country-id="{{ $partnerOrganization->country_id }}"
+                        @selected((string) old('partner_organization_id', $event->partner_organization_id) === (string) $partnerOrganization->id)
+                    >
+                        {{ $partnerOrganization->display_name }}
+                    </option>
                 @endforeach
             </select>
             @error('partner_organization_id')
@@ -71,10 +77,16 @@
 
         <label class="field">
             <span class="field-label">Kelishuv</span>
-            <select name="agreement_id">
+            <select name="agreement_id" data-event-agreement-select>
                 <option value="">Biriktirilmagan</option>
                 @foreach ($agreements as $agreement)
-                    <option value="{{ $agreement->id }}" @selected((string) old('agreement_id', $event->agreement_id) === (string) $agreement->id)>{{ $agreement->display_title }}</option>
+                    <option
+                        value="{{ $agreement->id }}"
+                        data-country-id="{{ $agreement->country_id }}"
+                        @selected((string) old('agreement_id', $event->agreement_id) === (string) $agreement->id)
+                    >
+                        {{ $agreement->display_title }}
+                    </option>
                 @endforeach
             </select>
             @error('agreement_id')
@@ -223,7 +235,7 @@
         <label class="field field--span-2">
             <span class="field-label">Biriktiriladigan fayllar</span>
             <input type="file" name="event_files[]" multiple>
-            <span class="field-help">Tadbirga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi.</span>
+            <span class="field-help">Tadbirga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
             @error('event_files')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -235,6 +247,7 @@
                 <div class="stack-list">
                     @foreach ($event->documents as $document)
                         <article class="stack-list__item">
+                            @php($deleteFormId = "event-attachment-delete-{$event->id}-{$document->id}")
                             @if ($document->is_image && $document->file_url)
                                 <div class="detail-media detail-media--compact">
                                     <a href="{{ $document->file_url }}" target="_blank" rel="noopener">
@@ -261,9 +274,18 @@
                                                 <span>Ochish</span>
                                             </a>
                                             <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
-                                                <i class="material-icons" aria-hidden="true">download</i>
+                                                <i class="material-icons" aria-hidden="true">file_download</i>
                                                 <span>Faylni olish</span>
                                             </a>
+                                            <button
+                                                class="action-pill action-pill--danger"
+                                                type="submit"
+                                                form="{{ $deleteFormId }}"
+                                                onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                            >
+                                                <i class="material-icons" aria-hidden="true">delete</i>
+                                                <span>Faylni o'chirish</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -282,9 +304,18 @@
                                             <span>Ochish</span>
                                         </a>
                                         <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
-                                            <i class="material-icons" aria-hidden="true">download</i>
+                                            <i class="material-icons" aria-hidden="true">file_download</i>
                                             <span>Faylni olish</span>
                                         </a>
+                                        <button
+                                            class="action-pill action-pill--danger"
+                                            type="submit"
+                                            form="{{ $deleteFormId }}"
+                                            onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                        >
+                                            <i class="material-icons" aria-hidden="true">delete</i>
+                                            <span>Faylni o'chirish</span>
+                                        </button>
                                     </div>
                                 @endif
                             @endif
@@ -303,3 +334,80 @@
         </button>
     </div>
 </form>
+
+@once
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('[data-event-form]').forEach((form) => {
+                    const countrySelect = form.querySelector('[data-event-country-select]');
+                    const organizationSelect = form.querySelector('[data-event-organization-select]');
+                    const agreementSelect = form.querySelector('[data-event-agreement-select]');
+
+                    if (!countrySelect) {
+                        return;
+                    }
+
+                    const syncSelectOptions = (select, preserveSelectedMismatch = false) => {
+                        if (!select) {
+                            return;
+                        }
+
+                        const selectedCountryId = countrySelect.value;
+                        const currentValue = select.value;
+
+                        Array.from(select.options).forEach((option) => {
+                            if (!option.value) {
+                                option.hidden = false;
+                                option.disabled = false;
+                                return;
+                            }
+
+                            const matchesCountry = selectedCountryId === '' || option.dataset.countryId === selectedCountryId;
+                            const keepSelectedMismatch = preserveSelectedMismatch && option.value === currentValue;
+                            const shouldShow = matchesCountry || keepSelectedMismatch;
+
+                            option.hidden = !shouldShow;
+                            option.disabled = !shouldShow;
+                        });
+
+                        if (!preserveSelectedMismatch && currentValue !== '') {
+                            const selectedOption = select.options[select.selectedIndex];
+
+                            if (
+                                selectedOption &&
+                                selectedOption.value !== '' &&
+                                selectedCountryId !== '' &&
+                                selectedOption.dataset.countryId !== selectedCountryId
+                            ) {
+                                select.value = '';
+                            }
+                        }
+                    };
+
+                    const syncLinkedSelects = (preserveSelectedMismatch = false) => {
+                        syncSelectOptions(organizationSelect, preserveSelectedMismatch);
+                        syncSelectOptions(agreementSelect, preserveSelectedMismatch);
+                    };
+
+                    syncLinkedSelects(true);
+                    countrySelect.addEventListener('change', () => syncLinkedSelects(false));
+                });
+            });
+        </script>
+    @endpush
+@endonce
+
+@if ($event->exists && $event->documents->isNotEmpty())
+    @foreach ($event->documents as $document)
+        <form
+            id="event-attachment-delete-{{ $event->id }}-{{ $document->id }}"
+            method="POST"
+            action="{{ route('events.attachments.destroy', [$event, $document]) }}"
+            hidden
+        >
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
+@endif

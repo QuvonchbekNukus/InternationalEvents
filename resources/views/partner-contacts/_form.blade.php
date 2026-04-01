@@ -110,6 +110,25 @@
                         {{ $partnerContact->photoDocument->file_name }}
                     </a>
                 </span>
+                <div class="detail-actions-inline">
+                    <a class="action-pill" href="{{ route('partner-contacts.attachments.preview', ['partnerContact' => $partnerContact, 'type' => 'photo']) }}" target="_blank" rel="noopener">
+                        <i class="material-icons" aria-hidden="true">open_in_new</i>
+                        <span>Ochish</span>
+                    </a>
+                    <a class="action-pill" href="{{ route('partner-contacts.attachments.download', ['partnerContact' => $partnerContact, 'type' => 'photo']) }}">
+                        <i class="material-icons" aria-hidden="true">file_download</i>
+                        <span>Faylni olish</span>
+                    </a>
+                    <button
+                        class="action-pill action-pill--danger"
+                        type="submit"
+                        form="partner-contact-attachment-delete-{{ $partnerContact->id }}-photo"
+                        onclick="return confirm('Joriy fotoni o\\'chirishni tasdiqlaysizmi?')"
+                    >
+                        <i class="material-icons" aria-hidden="true">delete</i>
+                        <span>Fotoni o'chirish</span>
+                    </button>
+                </div>
             @endif
             @error('photo_file')
                 <span class="field-error">{{ $message }}</span>
@@ -127,6 +146,25 @@
                         {{ $partnerContact->cvDocument->file_name }}
                     </a>
                 </span>
+                <div class="detail-actions-inline">
+                    <a class="action-pill" href="{{ route('partner-contacts.attachments.preview', ['partnerContact' => $partnerContact, 'type' => 'cv']) }}" target="_blank" rel="noopener">
+                        <i class="material-icons" aria-hidden="true">open_in_new</i>
+                        <span>Ochish</span>
+                    </a>
+                    <a class="action-pill" href="{{ route('partner-contacts.attachments.download', ['partnerContact' => $partnerContact, 'type' => 'cv']) }}">
+                        <i class="material-icons" aria-hidden="true">file_download</i>
+                        <span>Faylni olish</span>
+                    </a>
+                    <button
+                        class="action-pill action-pill--danger"
+                        type="submit"
+                        form="partner-contact-attachment-delete-{{ $partnerContact->id }}-cv"
+                        onclick="return confirm('Joriy CV faylini o\\'chirishni tasdiqlaysizmi?')"
+                    >
+                        <i class="material-icons" aria-hidden="true">delete</i>
+                        <span>CV ni o'chirish</span>
+                    </button>
+                </div>
             @endif
             @error('cv_file')
                 <span class="field-error">{{ $message }}</span>
@@ -156,3 +194,27 @@
         </button>
     </div>
 </form>
+
+@if ($partnerContact->exists && $partnerContact->photoDocument)
+    <form
+        id="partner-contact-attachment-delete-{{ $partnerContact->id }}-photo"
+        method="POST"
+        action="{{ route('partner-contacts.attachments.destroy', ['partnerContact' => $partnerContact, 'type' => 'photo']) }}"
+        hidden
+    >
+        @csrf
+        @method('DELETE')
+    </form>
+@endif
+
+@if ($partnerContact->exists && $partnerContact->cvDocument)
+    <form
+        id="partner-contact-attachment-delete-{{ $partnerContact->id }}-cv"
+        method="POST"
+        action="{{ route('partner-contacts.attachments.destroy', ['partnerContact' => $partnerContact, 'type' => 'cv']) }}"
+        hidden
+    >
+        @csrf
+        @method('DELETE')
+    </form>
+@endif

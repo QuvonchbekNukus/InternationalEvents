@@ -9,13 +9,31 @@
         $roleLabel = $currentRole && $translatedRole === "ui.roles.$currentRole"
             ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole))
             : $translatedRole;
+        $dashboardMap = [
+            'eyebrow' => 'Hamkorlik xaritasi',
+            'title' => 'Leaflet bilan interaktiv xarita',
+            'subtitle' => "Xaritaga marker, popup va keyingi bosqichda real lokatsiyalarni ulash uchun reusable blok tayyorlandi.",
+            'height' => 360,
+            'center' => [41.3111, 69.2797],
+            'zoom' => 5,
+            'markers' => [
+                [
+                    'lat' => 41.3111,
+                    'lng' => 69.2797,
+                    'title' => "Toshkent",
+                    'description' => "Leaflet integratsiyasi uchun boshlang'ich nuqta.",
+                    'openPopup' => true,
+                ],
+            ],
+            'chips' => ['Leaflet', 'OpenStreetMap', 'Reusable component'],
+        ];
         $resourceCards = [
             [
                 'permission' => 'view users',
                 'title' => __('ui.dashboard.cards.users.title'),
                 'count' => \App\Models\User::count(),
                 'description' => __('ui.dashboard.cards.users.description'),
-                'icon' => 'groups',
+                'icon' => 'group',
                 'route' => route('users.index'),
                 'action' => __('ui.dashboard.cards.users.action'),
             ],
@@ -24,7 +42,7 @@
                 'title' => __('ui.dashboard.cards.departments.title'),
                 'count' => \App\Models\Department::count(),
                 'description' => __('ui.dashboard.cards.departments.description'),
-                'icon' => 'apartment',
+                'icon' => 'business_center',
                 'route' => route('departments.index'),
                 'action' => __('ui.dashboard.cards.departments.action'),
             ],
@@ -33,7 +51,7 @@
                 'title' => __('ui.dashboard.cards.ranks.title'),
                 'count' => \App\Models\Rank::count(),
                 'description' => __('ui.dashboard.cards.ranks.description'),
-                'icon' => 'military_tech',
+                'icon' => 'stars',
                 'route' => route('ranks.index'),
                 'action' => __('ui.dashboard.cards.ranks.action'),
             ],
@@ -51,7 +69,7 @@
                 'title' => __('ui.dashboard.cards.agreements.title'),
                 'count' => \App\Models\Agreement::count(),
                 'description' => __('ui.dashboard.cards.agreements.description'),
-                'icon' => 'feed',
+                'icon' => 'description',
                 'route' => route('agreements.index'),
                 'action' => __('ui.dashboard.cards.agreements.action'),
             ],
@@ -60,7 +78,7 @@
                 'title' => __('ui.dashboard.cards.agreement_types.title'),
                 'count' => \App\Models\AgreementType::count(),
                 'description' => __('ui.dashboard.cards.agreement_types.description'),
-                'icon' => 'description',
+                'icon' => 'toc',
                 'route' => route('agreement-types.index'),
                 'action' => __('ui.dashboard.cards.agreement_types.action'),
             ],
@@ -69,7 +87,7 @@
                 'title' => __('ui.dashboard.cards.agreement_directions.title'),
                 'count' => \App\Models\AgreementDirection::count(),
                 'description' => __('ui.dashboard.cards.agreement_directions.description'),
-                'icon' => 'alt_route',
+                'icon' => 'timeline',
                 'route' => route('agreement-directions.index'),
                 'action' => __('ui.dashboard.cards.agreement_directions.action'),
             ],
@@ -96,7 +114,7 @@
                 'title' => __('ui.dashboard.cards.partner_contacts.title'),
                 'count' => \App\Models\PartnerContact::count(),
                 'description' => __('ui.dashboard.cards.partner_contacts.description'),
-                'icon' => 'contact_phone',
+                'icon' => 'contacts',
                 'route' => route('partner-contacts.index'),
                 'action' => __('ui.dashboard.cards.partner_contacts.action'),
             ],
@@ -114,7 +132,7 @@
             </div>
 
             <div class="context-chip">
-                <i class="material-icons" aria-hidden="true">shield</i>
+                <i class="material-icons app-icon app-icon--md" aria-hidden="true">verified_user</i>
                 <span>{{ $roleLabel }}</span>
             </div>
         </div>
@@ -124,8 +142,8 @@
                 @if (auth()->user()?->can($card['permission']))
                     <article class="stat-card">
                         <div class="stat-card__head">
-                            <span class="stat-icon">
-                                <i class="material-icons" aria-hidden="true">{{ $card['icon'] }}</i>
+                            <span class="stat-icon app-icon-box app-icon-box--lg">
+                                <i class="material-icons app-icon app-icon--lg" aria-hidden="true">{{ $card['icon'] }}</i>
                             </span>
                             <a class="text-link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
                         </div>
@@ -138,31 +156,24 @@
             @endforeach
         </div>
 
+        <x-leaflet-map
+            :eyebrow="$dashboardMap['eyebrow']"
+            :title="$dashboardMap['title']"
+            :subtitle="$dashboardMap['subtitle']"
+            :height="$dashboardMap['height']"
+            :center="$dashboardMap['center']"
+            :zoom="$dashboardMap['zoom']"
+            :markers="$dashboardMap['markers']"
+            :chips="$dashboardMap['chips']"
+        />
+
         @if (($eventCalendar['has_access'] ?? false) === true)
             @php
                 $calendarTexts = $eventCalendar['texts'] ?? [];
                 $selectedDay = $eventCalendar['selected_day'] ?? null;
                 $calendarMonth = \Carbon\CarbonImmutable::createFromFormat('!Y-m', $eventCalendar['month_key']);
-                $calendarMonthOptions = trans('ui.dashboard.calendar.months');
-                if (! is_array($calendarMonthOptions) || count($calendarMonthOptions) !== 12) {
-                    $calendarMonthOptions = [
-                        1 => 'Yanvar',
-                        2 => 'Fevral',
-                        3 => 'Mart',
-                        4 => 'Aprel',
-                        5 => 'May',
-                        6 => 'Iyun',
-                        7 => 'Iyul',
-                        8 => 'Avgust',
-                        9 => 'Sentyabr',
-                        10 => 'Oktyabr',
-                        11 => 'Noyabr',
-                        12 => 'Dekabr',
-                    ];
-                }
-                $calendarYearOptions = range($calendarMonth->year - 5, $calendarMonth->year + 5);
             @endphp
-            <section class="content-card dashboard-calendar-card">
+            <section class="content-card dashboard-calendar-card" data-calendar-card data-calendar-endpoint="{{ $calendarDataUrl }}">
                 <div class="section-heading dashboard-calendar-card__head">
                     <div class="dashboard-calendar-card__intro">
                         <p class="eyebrow">{{ __('ui.dashboard.calendar.eyebrow') }}</p>
@@ -177,7 +188,12 @@
 
                     <div class="dashboard-calendar-card__controls">
                         <div class="dashboard-calendar-card__month-nav">
-                            <a class="btn btn--ghost dashboard-calendar-card__nav" href="{{ $eventCalendar['prev_url'] }}" aria-label="{{ __('ui.dashboard.calendar.previous_month') }}">
+                            <a
+                                class="btn btn--ghost dashboard-calendar-card__nav"
+                                href="{{ $eventCalendar['prev_url'] }}"
+                                aria-label="{{ __('ui.dashboard.calendar.previous_month') }}"
+                                data-calendar-nav="prev"
+                            >
                                 <i class="material-icons" aria-hidden="true">chevron_left</i>
                             </a>
 
@@ -217,35 +233,26 @@
                                 </form>
                             </div>
 
-                            <a class="btn btn--ghost dashboard-calendar-card__nav" href="{{ $eventCalendar['next_url'] }}" aria-label="{{ __('ui.dashboard.calendar.next_month') }}">
+                            <a
+                                class="btn btn--ghost dashboard-calendar-card__nav"
+                                href="{{ $eventCalendar['next_url'] }}"
+                                aria-label="{{ __('ui.dashboard.calendar.next_month') }}"
+                                data-calendar-nav="next"
+                            >
                                 <i class="material-icons" aria-hidden="true">chevron_right</i>
                             </a>
                         </div>
 
                         @if ($eventCalendar['listing_url'])
-                            <a class="btn btn--ghost dashboard-calendar-card__link" href="{{ $eventCalendar['listing_url'] }}">
-                                <i class="material-icons" aria-hidden="true">calendar_month</i>
-                                <span>{{ $eventCalendar['listing_label'] }}</span>
+                            <a class="btn btn--ghost dashboard-calendar-card__link" href="{{ $eventCalendar['listing_url'] }}" data-calendar-listing-link>
+                                <i class="material-icons" aria-hidden="true">event_note</i>
+                                <span data-calendar-listing-label>{{ $eventCalendar['listing_label'] }}</span>
                             </a>
                         @endif
                     </div>
                 </div>
 
                 <div class="dashboard-calendar-card__toolbar">
-                    <div class="dashboard-calendar-card__stats" aria-label="Tadbirlar moduli statistikasi">
-                        @foreach ($eventCalendar['summary'] as $stat)
-                            <article class="dashboard-calendar-card__stat dashboard-calendar-card__stat--{{ $stat['tone'] }}" data-calendar-summary-key="{{ $stat['key'] }}">
-                                <span class="dashboard-calendar-card__stat-icon">
-                                    <i class="material-icons" aria-hidden="true">{{ $stat['icon'] }}</i>
-                                </span>
-                                <div class="dashboard-calendar-card__stat-copy">
-                                    <strong data-calendar-summary-count>{{ $stat['count'] }}</strong>
-                                    <span>{{ $stat['label'] }}</span>
-                                </div>
-                            </article>
-                        @endforeach
-                    </div>
-
                     <div class="dashboard-calendar-card__filter-layout" aria-label="Tadbirlar moduli filterlari">
                         <div class="dashboard-calendar-card__filter-group">
                             <div class="dashboard-calendar-card__filter-head">
@@ -304,18 +311,20 @@
                     </div>
                 </div>
 
-                @if (($eventCalendar['item_count'] ?? 0) > 0)
-                    <div
-                        class="event-calendar-compact"
-                        data-calendar-module
-                        data-selected-date="{{ $eventCalendar['selected_date'] }}"
-                        data-count-template="{{ $calendarTexts['item_count'] }}"
-                        data-empty-count-label="{{ $calendarTexts['empty_count'] }}"
-                        data-more-template="{{ $calendarTexts['more_items'] }}"
-                        data-detail-empty="{{ $calendarTexts['detail_empty'] }}"
-                        data-detail-filter-empty="{{ $calendarTexts['empty_filtered'] }}"
-                        aria-label="{{ __('ui.dashboard.calendar.aria') }}"
-                    >
+                <div class="dashboard-calendar-card__async-feedback" data-calendar-feedback hidden role="status" aria-live="polite"></div>
+
+                <div
+                    class="event-calendar-compact"
+                    data-calendar-module
+                    data-selected-date="{{ $eventCalendar['selected_date'] }}"
+                    data-month-label="{{ $eventCalendar['month_label'] }}"
+                    data-count-template="{{ $calendarTexts['item_count'] }}"
+                    data-empty-count-label="{{ $calendarTexts['empty_count'] }}"
+                    data-more-template="{{ $calendarTexts['more_items'] }}"
+                    data-detail-empty="{{ $calendarTexts['detail_empty'] }}"
+                    data-detail-filter-empty="{{ $calendarTexts['empty_filtered'] }}"
+                    aria-label="{{ __('ui.dashboard.calendar.aria') }}"
+                >
                         <div class="event-calendar-compact__main">
                             <div class="event-calendar-compact__weekdays">
                                 @foreach ($eventCalendar['day_labels'] as $dayLabel)
@@ -350,7 +359,7 @@
 
                                                     <span class="event-calendar-compact__items" data-day-preview>
                                                         @foreach ($day['preview_items'] as $item)
-                                                            <span class="event-calendar-compact__item event-calendar-compact__item--{{ $item['tone'] }}" data-calendar-item-type="{{ $item['type'] }}" title="{{ $item['tooltip'] }}">
+                                                            <span class="event-calendar-compact__item event-calendar-compact__item--{{ $item['tone'] }} {{ $item['type'] }}-chip" data-calendar-item-type="{{ $item['type'] }}" title="{{ $item['tooltip'] }}">
                                                                 <i class="material-icons" aria-hidden="true">{{ $item['icon'] }}</i>
                                                                 <span>{{ $item['title'] }}</span>
                                                             </span>
@@ -370,11 +379,12 @@
                                                     <div class="event-calendar-compact__lane" data-calendar-lane>
                                                         @foreach ($lane as $segment)
                                                             <a
-                                                                class="event-calendar-compact__span event-calendar-compact__span--{{ $segment['tone'] }} {{ $segment['starts_before'] ? 'is-continued-left' : 'is-start' }} {{ $segment['ends_after'] ? 'is-continued-right' : 'is-end' }}"
+                                                                class="event-calendar-compact__span event-calendar-compact__span--{{ $segment['tone'] }} {{ $segment['type'] }}-span {{ $segment['starts_before'] ? 'is-continued-left' : 'is-start' }} {{ $segment['ends_after'] ? 'is-continued-right' : 'is-end' }}"
                                                                 href="{{ $segment['url'] }}"
                                                                 title="{{ $segment['tooltip'] }}"
                                                                 style="grid-column: {{ $segment['start_column'] }} / span {{ $segment['span'] }}"
                                                                 data-calendar-span
+                                                                data-item-id="{{ $segment['id'] }}"
                                                                 data-type="{{ $segment['type'] }}"
                                                                 data-status="{{ $segment['status'] ?? '' }}"
                                                             >
@@ -409,19 +419,19 @@
 
                             <div class="event-calendar-compact__detail-body" data-calendar-detail-body>
                                 @foreach (($selectedDay['items'] ?? []) as $item)
-                                    <a class="event-calendar-compact__detail-item event-calendar-compact__detail-item--{{ $item['tone'] }}" data-calendar-item-type="{{ $item['type'] }}" href="{{ $item['url'] }}">
+                                    <a class="event-calendar-compact__detail-item event-calendar-compact__detail-item--{{ $item['tone'] }}" data-calendar-item-type="{{ $item['type'] }}" data-status="{{ $item['status'] ?? '' }}" href="{{ $item['url'] }}">
                                         <div class="event-calendar-compact__detail-surface">
                                             <div class="event-calendar-compact__detail-tags">
-                                                <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--type event-calendar-compact__detail-tag--type-{{ $item['type'] }}">
+                                                <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--type event-calendar-compact__detail-tag--type-{{ $item['type'] }} {{ $item['type'] }}-chip">
                                                     <i class="material-icons" aria-hidden="true">{{ $item['icon'] }}</i>
                                                     <span>{{ $item['type_label'] }}</span>
                                                 </span>
                                                 @if (($item['status_label'] ?? null) !== null)
-                                                    <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--muted">
+                                                    <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--status event-calendar-compact__detail-tag--status-{{ $item['status'] }}">
                                                         {{ $item['status_label'] }}
                                                     </span>
                                                 @endif
-                                                <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--muted">
+                                                <span class="event-calendar-compact__detail-tag event-calendar-compact__detail-tag--duration">
                                                     {{ $item['duration_label'] }}
                                                 </span>
                                             </div>
@@ -459,12 +469,21 @@
                         <script type="application/json" data-calendar-items>
                             @json($eventCalendar['items'] ?? [])
                         </script>
-                    </div>
-                @else
-                    <div class="table-empty">
-                        {{ $calendarTexts['empty_state'] }}
-                    </div>
-                @endif
+                        <script type="application/json" data-calendar-payload>
+                            @json($eventCalendar)
+                        </script>
+                        <script type="application/json" data-calendar-period-options>
+                            @json([
+                                'months' => $calendarMonthOptions,
+                                'years' => $calendarYearOptions,
+                            ])
+                        </script>
+                </div>
+
+                <div class="dashboard-calendar-card__loading" data-calendar-loading hidden>
+                    <span class="dashboard-calendar-card__spinner" aria-hidden="true"></span>
+                    <span>Kalendardagi ma'lumotlar yangilanmoqda...</span>
+                </div>
             </section>
         @endif
 
@@ -475,42 +494,153 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.querySelectorAll('[data-calendar-period-form]').forEach((form) => {
-                    const hiddenInput = form.querySelector('[data-calendar-period-value]');
-                    const monthSelect = form.querySelector('[data-calendar-period-month]');
-                    const yearSelect = form.querySelector('[data-calendar-period-year]');
-
-                    if (!hiddenInput || !monthSelect || !yearSelect) {
-                        return;
+                const replaceCount = (template, count, fallback = '') => {
+                    if (typeof template === 'string' && template !== '') {
+                        return template.replace(':count', String(count));
                     }
 
-                    const submitPeriod = () => {
-                        hiddenInput.value = `${yearSelect.value}-${String(monthSelect.value).padStart(2, '0')}`;
-                        form.requestSubmit();
+                    return fallback !== '' ? fallback : String(count);
+                };
+
+                const resolveCalendarItemType = (item) => item?.type ?? 'unknown';
+                const resolveCalendarItemStatus = (item) => item?.status ?? null;
+                const resolveCalendarItemId = (item) => String(item?.id ?? '');
+
+                const parseJsonScript = (scriptElement, fallback) => {
+                    if (!scriptElement) {
+                        return fallback;
+                    }
+
+                    try {
+                        const parsed = JSON.parse(scriptElement.textContent || '');
+
+                        return parsed ?? fallback;
+                    } catch (error) {
+                        console.error('Calendar JSON parse failed.', error);
+
+                        return fallback;
+                    }
+                };
+
+                const parseIsoDate = (isoDate) => {
+                    if (typeof isoDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+                        return null;
+                    }
+
+                    const [year, month, day] = isoDate.split('-').map(Number);
+                    const utcDate = new Date(Date.UTC(year, month - 1, day));
+
+                    return Number.isNaN(utcDate.getTime()) ? null : utcDate;
+                };
+
+                const formatIsoDate = (date) => {
+                    if (!date || Number.isNaN(date.getTime())) {
+                        return '';
+                    }
+
+                    return [
+                        date.getUTCFullYear(),
+                        String(date.getUTCMonth() + 1).padStart(2, '0'),
+                        String(date.getUTCDate()).padStart(2, '0'),
+                    ].join('-');
+                };
+
+                const addDaysToIsoDate = (isoDate, days = 1) => {
+                    const date = parseIsoDate(isoDate);
+
+                    if (!date) {
+                        return '';
+                    }
+
+                    date.setUTCDate(date.getUTCDate() + days);
+
+                    return formatIsoDate(date);
+                };
+
+                const parseMonthKey = (monthKey) => {
+                    if (typeof monthKey !== 'string' || !/^\d{4}-\d{2}$/.test(monthKey)) {
+                        return null;
+                    }
+
+                    const date = parseIsoDate(`${monthKey}-01`);
+
+                    if (!date) {
+                        return null;
+                    }
+
+                    return {
+                        year: String(date.getUTCFullYear()),
+                        month: String(date.getUTCMonth() + 1).padStart(2, '0'),
                     };
+                };
 
-                    monthSelect.addEventListener('change', submitPeriod);
-                    yearSelect.addEventListener('change', submitPeriod);
-                });
-            });
-        </script>
-    @endpush
-@endif
+                const buildMonthKey = (year, month) => {
+                    if (year === '' || month === '') {
+                        return '';
+                    }
 
-@if (($eventCalendar['has_access'] ?? false) === true && ($eventCalendar['item_count'] ?? 0) > 0)
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                const modules = document.querySelectorAll('[data-calendar-module]');
+                    return `${String(year)}-${String(month).padStart(2, '0')}`;
+                };
 
-                const replaceCount = (template, count) => template.replace(':count', String(count));
+                const normalizeMonthOptions = (monthOptions, fallback = {}) => {
+                    const source = monthOptions && typeof monthOptions === 'object' ? monthOptions : fallback;
 
-                const resolveCalendarItemType = (item) => item.type ?? 'unknown';
-                const resolveCalendarItemStatus = (item) => item.status ?? null;
+                    return Object.entries(source)
+                        .map(([value, label]) => ({
+                            value: String(value).padStart(2, '0'),
+                            label: String(label),
+                        }))
+                        .sort((left, right) => Number(left.value) - Number(right.value));
+                };
+
+                const normalizeYearOptions = (yearOptions, fallback = []) => {
+                    const source = Array.isArray(yearOptions) && yearOptions.length > 0 ? yearOptions : fallback;
+
+                    return source.map((year) => String(year));
+                };
+
+                const buildBaseDayLookup = (calendar, monthLabel) => {
+                    const rawLookup = calendar?.day_lookup && typeof calendar.day_lookup === 'object'
+                        ? calendar.day_lookup
+                        : {};
+                    const lookup = {};
+
+                    Object.entries(rawLookup).forEach(([date, rawDay]) => {
+                        const items = Array.isArray(rawDay?.items) ? rawDay.items : [];
+
+                        lookup[date] = {
+                            date,
+                            label: rawDay?.label || date || monthLabel || '',
+                            is_current_month: Boolean(rawDay?.is_current_month),
+                            item_count: Number(rawDay?.item_count ?? items.length ?? 0),
+                            items,
+                        };
+                    });
+
+                    (Array.isArray(calendar?.weeks) ? calendar.weeks : []).forEach((week) => {
+                        (Array.isArray(week?.days) ? week.days : []).forEach((day) => {
+                            const date = day?.date || '';
+
+                            if (date === '' || lookup[date]) {
+                                return;
+                            }
+
+                            lookup[date] = {
+                                date,
+                                label: day?.label || date || monthLabel || '',
+                                is_current_month: Boolean(day?.is_current_month),
+                                item_count: Number(day?.item_count ?? 0),
+                                items: [],
+                            };
+                        });
+                    });
+
+                    return lookup;
+                };
 
                 const createIcon = (name) => {
                     const icon = document.createElement('i');
-                    icon.className = 'material-icons';
+                    icon.className = 'material-icons app-icon app-icon--sm';
                     icon.setAttribute('aria-hidden', 'true');
                     icon.textContent = name;
 
@@ -519,8 +649,9 @@
 
                 const createPreviewItem = (item) => {
                     const chip = document.createElement('span');
-                    chip.className = `event-calendar-compact__item event-calendar-compact__item--${item.tone}`;
-                    chip.dataset.calendarItemType = resolveCalendarItemType(item);
+                    const itemType = resolveCalendarItemType(item);
+                    chip.className = `event-calendar-compact__item event-calendar-compact__item--${item.tone} ${itemType}-chip`;
+                    chip.dataset.calendarItemType = itemType;
                     chip.title = item.tooltip;
 
                     chip.append(createIcon(item.icon));
@@ -532,11 +663,163 @@
                     return chip;
                 };
 
+                const createDayButton = (day, countTemplate, emptyCountLabel, moreTemplate) => {
+                    const button = document.createElement('button');
+                    const buttonClasses = ['event-calendar-compact__day'];
+
+                    if (!day.is_current_month) {
+                        buttonClasses.push('is-muted');
+                    }
+
+                    if (day.is_today) {
+                        buttonClasses.push('is-today');
+                    }
+
+                    if (day.is_selected) {
+                        buttonClasses.push('is-selected');
+                    }
+
+                    if ((day.item_count ?? 0) > 0) {
+                        buttonClasses.push('has-items');
+                    }
+
+                    button.type = 'button';
+                    button.className = buttonClasses.join(' ');
+                    button.dataset.calendarDay = '';
+                    button.dataset.date = day.date;
+                    button.dataset.currentMonth = day.is_current_month ? 'true' : 'false';
+                    button.setAttribute(
+                        'aria-label',
+                        `${day.label}, ${(day.item_count ?? 0) > 0 ? replaceCount(countTemplate, day.item_count) : emptyCountLabel}`
+                    );
+                    button.setAttribute('aria-pressed', day.is_selected ? 'true' : 'false');
+
+                    const head = document.createElement('span');
+                    head.className = 'event-calendar-compact__day-head';
+
+                    const time = document.createElement('time');
+                    time.dateTime = day.date;
+                    time.textContent = String(day.day_number ?? '');
+
+                    const count = document.createElement('span');
+                    count.className = 'event-calendar-compact__day-count';
+                    count.dataset.dayCount = '';
+                    count.textContent = String(day.item_count ?? 0);
+                    count.hidden = (day.item_count ?? 0) === 0;
+
+                    head.append(time, count);
+
+                    const preview = document.createElement('span');
+                    preview.className = 'event-calendar-compact__items';
+                    preview.dataset.dayPreview = '';
+                    (Array.isArray(day.preview_items) ? day.preview_items : []).forEach((item) => {
+                        preview.append(createPreviewItem(item));
+                    });
+
+                    const more = document.createElement('span');
+                    more.className = 'event-calendar-compact__more';
+                    more.dataset.dayMore = '';
+                    more.hidden = (day.hidden_count ?? 0) === 0;
+                    more.textContent = (day.hidden_count ?? 0) > 0
+                        ? replaceCount(moreTemplate, day.hidden_count)
+                        : '';
+
+                    button.append(head, preview, more);
+
+                    return button;
+                };
+
+                const createSpanSegment = (segment) => {
+                    const link = document.createElement('a');
+                    const itemType = resolveCalendarItemType(segment);
+                    const classes = [
+                        'event-calendar-compact__span',
+                        `event-calendar-compact__span--${segment.tone}`,
+                        `${itemType}-span`,
+                        segment.starts_before ? 'is-continued-left' : 'is-start',
+                        segment.ends_after ? 'is-continued-right' : 'is-end',
+                    ];
+
+                    link.className = classes.join(' ');
+                    link.href = segment.url || '#';
+                    link.title = segment.tooltip || '';
+                    link.style.gridColumn = `${segment.start_column} / span ${segment.span}`;
+                    link.dataset.calendarSpan = '';
+                    link.dataset.itemId = resolveCalendarItemId(segment);
+                    link.dataset.type = itemType;
+                    link.dataset.status = resolveCalendarItemStatus(segment) ?? '';
+
+                    const prefix = document.createElement('span');
+                    prefix.className = 'event-calendar-compact__span-prefix';
+                    prefix.append(createIcon(segment.icon));
+
+                    const title = document.createElement('span');
+                    title.className = 'event-calendar-compact__span-title';
+                    title.textContent = segment.title || '';
+
+                    const meta = document.createElement('span');
+                    meta.className = 'event-calendar-compact__span-meta';
+                    meta.textContent = segment.status_label || segment.type_label || '';
+
+                    link.append(prefix, title, meta);
+
+                    return link;
+                };
+
+                const createWeekSection = (week, module) => {
+                    const section = document.createElement('section');
+                    const lanes = Array.isArray(week?.span_lanes) ? week.span_lanes : [];
+                    const laneCount = lanes.length;
+                    const laneHeight = laneCount > 0 ? (laneCount * 30) + ((laneCount - 1) * 6) : 0;
+
+                    section.className = 'event-calendar-compact__week';
+                    section.style.setProperty('--week-lane-height', `${laneHeight}px`);
+
+                    const days = document.createElement('div');
+                    days.className = 'event-calendar-compact__days';
+
+                    (Array.isArray(week?.days) ? week.days : []).forEach((day) => {
+                        days.append(
+                            createDayButton(
+                                day,
+                                module.dataset.countTemplate || '',
+                                module.dataset.emptyCountLabel || '',
+                                module.dataset.moreTemplate || ''
+                            )
+                        );
+                    });
+
+                    section.append(days);
+
+                    if (laneCount > 0) {
+                        const lanesWrap = document.createElement('div');
+                        lanesWrap.className = 'event-calendar-compact__lanes';
+
+                        lanes.forEach((laneSegments) => {
+                            const lane = document.createElement('div');
+                            lane.className = 'event-calendar-compact__lane';
+                            lane.dataset.calendarLane = '';
+
+                            (Array.isArray(laneSegments) ? laneSegments : []).forEach((segment) => {
+                                lane.append(createSpanSegment(segment));
+                            });
+
+                            lanesWrap.append(lane);
+                        });
+
+                        section.append(lanesWrap);
+                    }
+
+                    return section;
+                };
+
                 const createDetailItem = (item) => {
+                    const itemType = resolveCalendarItemType(item);
                     const link = document.createElement('a');
                     link.className = `event-calendar-compact__detail-item event-calendar-compact__detail-item--${item.tone}`;
-                    link.dataset.calendarItemType = resolveCalendarItemType(item);
-                    link.href = item.url;
+                    link.dataset.calendarItemType = itemType;
+                    link.dataset.status = resolveCalendarItemStatus(item) ?? '';
+                    link.href = item.url || '#';
 
                     const surface = document.createElement('div');
                     surface.className = 'event-calendar-compact__detail-surface';
@@ -545,21 +828,21 @@
                     tags.className = 'event-calendar-compact__detail-tags';
 
                     const kindTag = document.createElement('span');
-                    kindTag.className = `event-calendar-compact__detail-tag event-calendar-compact__detail-tag--type event-calendar-compact__detail-tag--type-${resolveCalendarItemType(item)}`;
+                    kindTag.className = `event-calendar-compact__detail-tag event-calendar-compact__detail-tag--type event-calendar-compact__detail-tag--type-${itemType} ${itemType}-chip`;
                     kindTag.append(createIcon(item.icon));
                     const kindLabel = document.createElement('span');
                     kindLabel.textContent = item.type_label;
                     kindTag.append(kindLabel);
 
                     const durationTag = document.createElement('span');
-                    durationTag.className = 'event-calendar-compact__detail-tag event-calendar-compact__detail-tag--muted';
+                    durationTag.className = 'event-calendar-compact__detail-tag event-calendar-compact__detail-tag--duration';
                     durationTag.textContent = item.duration_label;
 
                     tags.append(kindTag);
 
                     if (item.status_label) {
                         const stateTag = document.createElement('span');
-                        stateTag.className = 'event-calendar-compact__detail-tag event-calendar-compact__detail-tag--muted';
+                        stateTag.className = `event-calendar-compact__detail-tag event-calendar-compact__detail-tag--status event-calendar-compact__detail-tag--status-${resolveCalendarItemStatus(item) ?? 'unknown'}`;
                         stateTag.textContent = item.status_label;
                         tags.append(stateTag);
                     }
@@ -599,46 +882,199 @@
                     return link;
                 };
 
-                modules.forEach((module) => {
-                    const script = module.querySelector('[data-calendar-day-lookup]');
-                    const itemsScript = module.querySelector('[data-calendar-items]');
+                document.querySelectorAll('[data-calendar-card]').forEach((calendarCard) => {
+                    const module = calendarCard.querySelector('[data-calendar-module]');
+                    const payloadScript = module?.querySelector('[data-calendar-payload]');
+                    const periodOptionsScript = module?.querySelector('[data-calendar-period-options]');
+                    const form = calendarCard.querySelector('[data-calendar-period-form]');
+                    const hiddenInput = form?.querySelector('[data-calendar-period-value]');
+                    const monthSelect = form?.querySelector('[data-calendar-period-month]');
+                    const yearSelect = form?.querySelector('[data-calendar-period-year]');
+                    const prevNav = calendarCard.querySelector('[data-calendar-nav="prev"]');
+                    const nextNav = calendarCard.querySelector('[data-calendar-nav="next"]');
+                    const loading = calendarCard.querySelector('[data-calendar-loading]');
+                    const feedback = calendarCard.querySelector('[data-calendar-feedback]');
+                    const endpoint = calendarCard.dataset.calendarEndpoint || form?.action || '';
+                    const initialPeriodOptions = parseJsonScript(periodOptionsScript, {});
+                    let eventCalendar = parseJsonScript(payloadScript, {});
+                    let monthOptions = initialPeriodOptions?.months ?? {};
+                    let yearOptions = Array.isArray(initialPeriodOptions?.years) ? initialPeriodOptions.years : [];
+                    let calendarItems = Array.isArray(eventCalendar?.items) ? eventCalendar.items : [];
+                    let dayButtons = Array.from(module?.querySelectorAll('[data-calendar-day]') ?? []);
+                    let spanLanes = Array.from(module?.querySelectorAll('[data-calendar-lane]') ?? []);
+                    const typeFilterButtons = Array.from(calendarCard.querySelectorAll('[data-calendar-filter-group="type"]'));
+                    const statusFilterButtons = Array.from(calendarCard.querySelectorAll('[data-calendar-filter-group="status"]'));
+                    const summaryCards = Array.from(calendarCard.querySelectorAll('[data-calendar-summary-key]'));
+                    const totalCountBadge = calendarCard.querySelector('[data-calendar-total-count]');
+                    const weekdaysContainer = module?.querySelector('.event-calendar-compact__weekdays');
+                    const weeksContainer = module?.querySelector('.event-calendar-compact__weeks');
+                    const detailDate = module?.querySelector('[data-calendar-detail-date]');
+                    const detailCount = module?.querySelector('[data-calendar-detail-count]');
+                    const detailBody = module?.querySelector('[data-calendar-detail-body]');
+                    const detailEmpty = module?.querySelector('[data-calendar-detail-empty]');
+                    const listingLink = calendarCard.querySelector('[data-calendar-listing-link]');
+                    const listingLabel = calendarCard.querySelector('[data-calendar-listing-label]');
 
-                    if (!script || !itemsScript) {
+                    if (
+                        !module
+                        || !payloadScript
+                        || !periodOptionsScript
+                        || !form
+                        || !hiddenInput
+                        || !monthSelect
+                        || !yearSelect
+                        || !prevNav
+                        || !nextNav
+                        || !weekdaysContainer
+                        || !weeksContainer
+                        || !detailDate
+                        || !detailCount
+                        || !detailBody
+                        || !detailEmpty
+                    ) {
                         return;
                     }
 
-                    const dayLookup = JSON.parse(script.textContent || '{}');
-                    const calendarItems = JSON.parse(itemsScript.textContent || '[]');
-                    const calendarCard = module.closest('.dashboard-calendar-card');
-                    const dayButtons = Array.from(module.querySelectorAll('[data-calendar-day]'));
-                    const spanLanes = Array.from(module.querySelectorAll('[data-calendar-lane]'));
-                    const typeFilterButtons = Array.from(calendarCard.querySelectorAll('[data-calendar-filter-group="type"]'));
-                    const statusFilterButtons = Array.from(calendarCard.querySelectorAll('[data-calendar-filter-group="status"]'));
-                    const filterButtons = [...typeFilterButtons, ...statusFilterButtons];
-                    const summaryCards = Array.from(calendarCard.querySelectorAll('[data-calendar-summary-key]'));
-                    const totalCountBadge = calendarCard.querySelector('[data-calendar-total-count]');
-                    const detailDate = module.querySelector('[data-calendar-detail-date]');
-                    const detailCount = module.querySelector('[data-calendar-detail-count]');
-                    const detailBody = module.querySelector('[data-calendar-detail-body]');
-                    const detailEmpty = module.querySelector('[data-calendar-detail-empty]');
+                    let baseDayLookup = buildBaseDayLookup(eventCalendar, eventCalendar?.month_label || module.dataset.monthLabel || '');
 
-                    const activeTypeFilters = new Set();
+                    const createEmptyDayEntry = (date) => ({
+                        date,
+                        label: baseDayLookup[date]?.label || date || module.dataset.monthLabel || '',
+                        is_current_month: baseDayLookup[date]?.is_current_month ?? false,
+                        item_count: 0,
+                        items: [],
+                    });
+
+                    let activeTypeFilter = 'all';
                     let activeStatusFilter = 'all';
                     let selectedDate = module.dataset.selectedDate || dayButtons[0]?.dataset.date || '';
+                    let filteredItems = calendarItems;
+                    let filteredDayLookup = {};
+                    let filteredItemIdSet = new Set(
+                        calendarItems
+                            .map((item) => resolveCalendarItemId(item))
+                            .filter(Boolean)
+                    );
+                    let isLoading = false;
+                    let requestVersion = 0;
+                    let pendingRequest = null;
 
-                    const isDefaultFilterState = () => activeTypeFilters.size === 0 && activeStatusFilter === 'all';
+                    const isDefaultFilterState = () => activeTypeFilter === 'all' && activeStatusFilter === 'all';
 
-                    const matchesTypeFilters = (item, typeFilters = activeTypeFilters) => typeFilters.size === 0
-                        || typeFilters.has(resolveCalendarItemType(item));
+                    const setFeedback = (message = '') => {
+                        if (!feedback) {
+                            return;
+                        }
+
+                        feedback.hidden = message === '';
+                        feedback.textContent = message;
+                    };
+
+                    const setLoadingState = (busy) => {
+                        isLoading = busy;
+                        calendarCard.classList.toggle('is-loading', busy);
+                        calendarCard.setAttribute('aria-busy', busy ? 'true' : 'false');
+
+                        if (loading) {
+                            loading.hidden = !busy;
+                        }
+
+                        [prevNav, nextNav].forEach((link) => {
+                            link.classList.toggle('is-disabled', busy);
+                            link.setAttribute('aria-disabled', busy ? 'true' : 'false');
+                        });
+
+                        [monthSelect, yearSelect].forEach((select) => {
+                            select.disabled = busy;
+                        });
+                    };
+
+                    const matchesTypeFilter = (item, typeFilter = activeTypeFilter) => typeFilter === 'all'
+                        || resolveCalendarItemType(item) === typeFilter;
 
                     const matchesStatusFilter = (item, statusFilter = activeStatusFilter) => statusFilter === 'all'
                         || resolveCalendarItemStatus(item) === statusFilter;
 
-                    const matchesActiveFilters = (item) => matchesTypeFilters(item) && matchesStatusFilter(item);
+                    const matchesActiveFilters = (item) => matchesTypeFilter(item) && matchesStatusFilter(item);
 
-                    const filteredCalendarItems = () => calendarItems.filter((item) => matchesActiveFilters(item));
+                    const buildFilteredDayLookup = (items) => {
+                        const groupedItems = Object.keys(baseDayLookup).reduce((lookup, date) => {
+                            lookup[date] = createEmptyDayEntry(date);
 
-                    const filteredItemsForDate = (date) => (dayLookup[date]?.items || []).filter((item) => matchesActiveFilters(item));
+                            return lookup;
+                        }, {});
+
+                        items.forEach((item) => {
+                            const startDate = item.start_date;
+                            const endDate = item.end_date || item.start_date;
+
+                            if (!startDate || !endDate || startDate > endDate) {
+                                return;
+                            }
+
+                            let cursor = startDate;
+
+                            while (cursor && cursor <= endDate) {
+                                groupedItems[cursor] ||= createEmptyDayEntry(cursor);
+                                groupedItems[cursor].items.push(item);
+                                groupedItems[cursor].item_count = groupedItems[cursor].items.length;
+
+                                const nextCursor = addDaysToIsoDate(cursor, 1);
+
+                                if (!nextCursor || nextCursor <= cursor) {
+                                    break;
+                                }
+
+                                cursor = nextCursor;
+                            }
+                        });
+
+                        return groupedItems;
+                    };
+
+                    const syncInteractiveRefs = () => {
+                        dayButtons = Array.from(module.querySelectorAll('[data-calendar-day]'));
+                        spanLanes = Array.from(module.querySelectorAll('[data-calendar-lane]'));
+                    };
+
+                    const renderCalendarFrame = () => {
+                        const weekdayCells = (Array.isArray(eventCalendar?.day_labels) ? eventCalendar.day_labels : []).map((label) => {
+                            const cell = document.createElement('div');
+                            cell.className = 'event-calendar-compact__weekday';
+                            cell.textContent = label;
+
+                            return cell;
+                        });
+
+                        weekdaysContainer.replaceChildren(...weekdayCells);
+
+                        const weekSections = (Array.isArray(eventCalendar?.weeks) ? eventCalendar.weeks : []).map((week) => {
+                            return createWeekSection(week, module);
+                        });
+
+                        weeksContainer.replaceChildren(...weekSections);
+                        syncInteractiveRefs();
+                    };
+
+                    const refreshFilteredState = () => {
+                        filteredItems = calendarItems.filter((item) => matchesActiveFilters(item));
+                        filteredDayLookup = buildFilteredDayLookup(filteredItems);
+                        filteredItemIdSet = new Set(
+                            filteredItems
+                                .map((item) => resolveCalendarItemId(item))
+                                .filter(Boolean)
+                        );
+                    };
+
+                    const filteredItemsForDate = (date) => {
+                        if (!date) {
+                            return [];
+                        }
+
+                        const itemsForDate = filteredDayLookup[date]?.items;
+
+                        return Array.isArray(itemsForDate) ? itemsForDate : [];
+                    };
 
                     const countItems = (predicate) => calendarItems.filter((item) => predicate(item)).length;
 
@@ -647,7 +1083,7 @@
                     });
 
                     const countForStatusFilter = (statusValue) => countItems((item) => {
-                        if (!matchesTypeFilters(item)) {
+                        if (!matchesTypeFilter(item)) {
                             return false;
                         }
 
@@ -659,7 +1095,7 @@
                     const syncFilterButtons = () => {
                         typeFilterButtons.forEach((button) => {
                             const value = button.dataset.calendarFilterValue || button.dataset.calendarFilter || '';
-                            const isActive = activeTypeFilters.has(value);
+                            const isActive = activeTypeFilter === value;
                             const count = button.querySelector('[data-calendar-filter-count]');
 
                             button.classList.toggle('is-active', isActive);
@@ -685,17 +1121,16 @@
                     };
 
                     const syncSummary = () => {
-                        const items = filteredCalendarItems();
                         const summaryCounts = {
-                            events: items.filter((item) => resolveCalendarItemType(item) === 'event').length,
-                            ongoing: items.filter((item) => resolveCalendarItemStatus(item) === 'ongoing').length,
-                            planned: items.filter((item) => resolveCalendarItemStatus(item) === 'planned').length,
-                            visits: items.filter((item) => resolveCalendarItemType(item) === 'visit').length,
-                            birthdays: items.filter((item) => resolveCalendarItemType(item) === 'birthday').length,
+                            events: filteredItems.filter((item) => resolveCalendarItemType(item) === 'event').length,
+                            ongoing: filteredItems.filter((item) => resolveCalendarItemStatus(item) === 'ongoing').length,
+                            planned: filteredItems.filter((item) => resolveCalendarItemStatus(item) === 'planned').length,
+                            visits: filteredItems.filter((item) => resolveCalendarItemType(item) === 'visit').length,
+                            birthdays: filteredItems.filter((item) => resolveCalendarItemType(item) === 'birthday').length,
                         };
 
                         if (totalCountBadge) {
-                            totalCountBadge.textContent = replaceCount(module.dataset.countTemplate, items.length);
+                            totalCountBadge.textContent = replaceCount(module.dataset.countTemplate, filteredItems.length);
                         }
 
                         summaryCards.forEach((card) => {
@@ -706,6 +1141,125 @@
                                 count.textContent = String(summaryCounts[key]);
                             }
                         });
+                    };
+
+                    const syncPeriodControls = () => {
+                        const monthKey = parseMonthKey(eventCalendar?.month_key || hiddenInput.value || '');
+                        const normalizedMonthOptions = normalizeMonthOptions(monthOptions);
+                        const normalizedYearOptions = normalizeYearOptions(
+                            yearOptions,
+                            Array.from(yearSelect.options).map((option) => option.value)
+                        );
+
+                        hiddenInput.value = eventCalendar?.month_key || hiddenInput.value;
+                        form.setAttribute('aria-label', eventCalendar?.month_label || form.getAttribute('aria-label') || '');
+
+                        monthSelect.replaceChildren(...normalizedMonthOptions.map((option) => {
+                            const element = document.createElement('option');
+                            element.value = option.value;
+                            element.textContent = option.label;
+
+                            return element;
+                        }));
+
+                        yearSelect.replaceChildren(...normalizedYearOptions.map((year) => {
+                            const element = document.createElement('option');
+                            element.value = year;
+                            element.textContent = year;
+
+                            return element;
+                        }));
+
+                        if (monthKey) {
+                            monthSelect.value = monthKey.month;
+                            yearSelect.value = monthKey.year;
+                        }
+
+                        prevNav.href = eventCalendar?.prev_url || prevNav.href;
+                        nextNav.href = eventCalendar?.next_url || nextNav.href;
+
+                        if (listingLink) {
+                            if (eventCalendar?.listing_url) {
+                                listingLink.hidden = false;
+                                listingLink.href = eventCalendar.listing_url;
+                            } else {
+                                listingLink.hidden = true;
+                            }
+                        }
+
+                        if (listingLabel && eventCalendar?.listing_label) {
+                            listingLabel.textContent = eventCalendar.listing_label;
+                        }
+                    };
+
+                    const updateBrowserMonth = (monthKey) => {
+                        if (typeof window === 'undefined' || monthKey === '') {
+                            return;
+                        }
+
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('month', monthKey);
+                        window.history.replaceState({calendarMonth: monthKey}, '', url);
+                    };
+
+                    const resolvePreservedSelectedDate = () => {
+                        if (selectedDate && baseDayLookup[selectedDate]) {
+                            return selectedDate;
+                        }
+
+                        if (selectedDate) {
+                            const monthKey = parseMonthKey(eventCalendar?.month_key || '');
+                            const daySegment = selectedDate.slice(8, 10);
+
+                            if (monthKey && daySegment !== '') {
+                                const candidate = `${monthKey.year}-${monthKey.month}-${daySegment}`;
+
+                                if (baseDayLookup[candidate]) {
+                                    return candidate;
+                                }
+                            }
+                        }
+
+                        return eventCalendar?.selected_date || Object.keys(baseDayLookup)[0] || '';
+                    };
+
+                    const applyCalendarPayload = (payload, {updateHistory = false} = {}) => {
+                        eventCalendar = payload?.eventCalendar && typeof payload.eventCalendar === 'object'
+                            ? payload.eventCalendar
+                            : {};
+                        monthOptions = payload?.calendarMonthOptions ?? payload?.monthOptions ?? monthOptions;
+                        yearOptions = Array.isArray(payload?.calendarYearOptions ?? payload?.yearOptions)
+                            ? (payload.calendarYearOptions ?? payload.yearOptions)
+                            : yearOptions;
+                        calendarItems = Array.isArray(eventCalendar?.items) ? eventCalendar.items : [];
+                        baseDayLookup = buildBaseDayLookup(eventCalendar, eventCalendar?.month_label || module.dataset.monthLabel || '');
+
+                        module.dataset.countTemplate = eventCalendar?.texts?.item_count || module.dataset.countTemplate || '';
+                        module.dataset.emptyCountLabel = eventCalendar?.texts?.empty_count || module.dataset.emptyCountLabel || '';
+                        module.dataset.moreTemplate = eventCalendar?.texts?.more_items || module.dataset.moreTemplate || '';
+                        module.dataset.detailEmpty = eventCalendar?.texts?.detail_empty || module.dataset.detailEmpty || '';
+                        module.dataset.detailFilterEmpty = eventCalendar?.texts?.empty_filtered || module.dataset.detailFilterEmpty || '';
+                        module.dataset.monthLabel = eventCalendar?.month_label || module.dataset.monthLabel || '';
+
+                        renderCalendarFrame();
+                        selectedDate = resolvePreservedSelectedDate();
+                        refreshFilteredState();
+                        syncPeriodControls();
+                        syncFilterButtons();
+                        syncSummary();
+                        renderDayPreviews();
+                        renderSpanBars();
+                        renderDetail();
+
+                        payloadScript.textContent = JSON.stringify(eventCalendar);
+                        periodOptionsScript.textContent = JSON.stringify({
+                            months: monthOptions,
+                            years: yearOptions,
+                        });
+
+                        if (updateHistory) {
+                            updateBrowserMonth(eventCalendar?.month_key || '');
+                        }
                     };
 
                     const resolveSelectedDate = () => {
@@ -725,18 +1279,23 @@
                             return anyBusyDay.dataset.date;
                         }
 
-                        return selectedDate || dayButtons[0]?.dataset.date || '';
+                        return selectedDate || eventCalendar?.selected_date || dayButtons[0]?.dataset.date || '';
                     };
 
                     const renderDayPreviews = () => {
                         dayButtons.forEach((button) => {
                             const date = button.dataset.date;
-                            const items = filteredItemsForDate(date);
+                            const dayEntry = filteredDayLookup[date] ?? createEmptyDayEntry(date);
+                            const items = Array.isArray(dayEntry.items) ? dayEntry.items : [];
                             const previewableItems = items.filter((item) => !item.is_multi_day);
                             const preview = button.querySelector('[data-day-preview]');
                             const more = button.querySelector('[data-day-more]');
                             const count = button.querySelector('[data-day-count]');
-                            const label = dayLookup[date]?.label || date;
+                            const label = dayEntry.label || date;
+
+                            if (!preview || !more || !count) {
+                                return;
+                            }
 
                             preview.replaceChildren();
                             previewableItems.slice(0, 2).forEach((item) => preview.append(createPreviewItem(item)));
@@ -771,10 +1330,14 @@
                             let hasVisibleItems = false;
 
                             lane.querySelectorAll('[data-calendar-span]').forEach((span) => {
-                                const isVisible = matchesActiveFilters({
-                                    type: span.dataset.type,
-                                    status: span.dataset.status,
-                                });
+                                const itemId = span.dataset.itemId || '';
+                                const fallbackSpanItem = {
+                                    type: span.dataset.type || 'unknown',
+                                    status: span.dataset.status || null,
+                                };
+                                const isVisible = itemId !== ''
+                                    ? filteredItemIdSet.has(itemId)
+                                    : matchesActiveFilters(fallbackSpanItem);
 
                                 span.hidden = !isVisible;
                                 hasVisibleItems ||= isVisible;
@@ -786,6 +1349,7 @@
 
                     const renderDetail = () => {
                         selectedDate = resolveSelectedDate();
+                        module.dataset.selectedDate = selectedDate;
 
                         dayButtons.forEach((button) => {
                             const isSelected = button.dataset.date === selectedDate;
@@ -793,10 +1357,12 @@
                             button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
                         });
 
-                        const selectedDay = dayLookup[selectedDate] || {label: selectedDate, items: []};
+                        const selectedDay = selectedDate && (filteredDayLookup[selectedDate] || baseDayLookup[selectedDate])
+                            ? (filteredDayLookup[selectedDate] || baseDayLookup[selectedDate])
+                            : createEmptyDayEntry(selectedDate || dayButtons[0]?.dataset.date || '');
                         const items = filteredItemsForDate(selectedDate);
 
-                        detailDate.textContent = selectedDay.label || selectedDate;
+                        detailDate.textContent = selectedDay.label || selectedDate || module.dataset.monthLabel || '';
                         detailCount.textContent = items.length > 0
                             ? replaceCount(module.dataset.countTemplate, items.length)
                             : module.dataset.emptyCountLabel;
@@ -815,24 +1381,74 @@
                         items.forEach((item) => detailBody.append(createDetailItem(item)));
                     };
 
-                    filterButtons.forEach((button) => {
+                    const requestCalendar = async (monthKey) => {
+                        if (monthKey === '' || monthKey === (eventCalendar?.month_key || '') || isLoading) {
+                            return;
+                        }
+
+                        requestVersion += 1;
+                        const currentRequest = requestVersion;
+
+                        if (pendingRequest) {
+                            pendingRequest.abort();
+                        }
+
+                        pendingRequest = new AbortController();
+                        setFeedback('');
+                        setLoadingState(true);
+
+                        try {
+                            const url = new URL(endpoint, window.location.origin);
+                            url.searchParams.set('month', monthKey);
+
+                            const response = await fetch(url.toString(), {
+                                headers: {
+                                    Accept: 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                },
+                                credentials: 'same-origin',
+                                signal: pendingRequest.signal,
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`Calendar request failed with status ${response.status}`);
+                            }
+
+                            const payload = await response.json();
+
+                            if (currentRequest !== requestVersion) {
+                                return;
+                            }
+
+                            applyCalendarPayload(payload, {updateHistory: true});
+                        } catch (error) {
+                            if (error?.name === 'AbortError') {
+                                return;
+                            }
+
+                            console.error('Calendar async update failed.', error);
+                            setFeedback("Kalendar ma'lumotlarini yangilab bo'lmadi. Qayta urinib ko'ring.");
+                        } finally {
+                            if (currentRequest === requestVersion) {
+                                setLoadingState(false);
+                            }
+                        }
+                    };
+
+                    [...typeFilterButtons, ...statusFilterButtons].forEach((button) => {
                         button.addEventListener('click', () => {
                             const group = button.dataset.calendarFilterGroup || 'all';
                             const value = button.dataset.calendarFilterValue || button.dataset.calendarFilter || 'all';
 
                             if (group === 'type') {
-                                if (activeTypeFilters.has(value) && activeTypeFilters.size === 1) {
-                                    activeTypeFilters.clear();
-                                } else {
-                                    activeTypeFilters.clear();
-                                    activeTypeFilters.add(value);
-                                }
+                                activeTypeFilter = activeTypeFilter === value ? 'all' : value;
                             }
 
                             if (group === 'status') {
                                 activeStatusFilter = value;
                             }
 
+                            refreshFilteredState();
                             syncFilterButtons();
                             syncSummary();
                             renderDayPreviews();
@@ -841,18 +1457,48 @@
                         });
                     });
 
-                    dayButtons.forEach((button) => {
-                        button.addEventListener('click', () => {
-                            selectedDate = button.dataset.date || selectedDate;
-                            renderDetail();
+                    weeksContainer.addEventListener('click', (event) => {
+                        const button = event.target.closest('[data-calendar-day]');
+
+                        if (!button || !weeksContainer.contains(button)) {
+                            return;
+                        }
+
+                        selectedDate = button.dataset.date || selectedDate;
+                        renderDetail();
+                    });
+
+                    form.addEventListener('submit', (event) => {
+                        event.preventDefault();
+                        requestCalendar(buildMonthKey(yearSelect.value, monthSelect.value));
+                    });
+
+                    monthSelect.addEventListener('change', () => {
+                        requestCalendar(buildMonthKey(yearSelect.value, monthSelect.value));
+                    });
+
+                    yearSelect.addEventListener('change', () => {
+                        requestCalendar(buildMonthKey(yearSelect.value, monthSelect.value));
+                    });
+
+                    [prevNav, nextNav].forEach((link) => {
+                        link.addEventListener('click', (event) => {
+                            event.preventDefault();
+
+                            if (isLoading) {
+                                return;
+                            }
+
+                            const targetUrl = new URL(link.href, window.location.origin);
+                            requestCalendar(targetUrl.searchParams.get('month') || '');
                         });
                     });
 
-                    syncFilterButtons();
-                    syncSummary();
-                    renderDayPreviews();
-                    renderSpanBars();
-                    renderDetail();
+                    applyCalendarPayload({
+                        eventCalendar,
+                        calendarMonthOptions: monthOptions,
+                        calendarYearOptions: yearOptions,
+                    });
                 });
             });
         </script>

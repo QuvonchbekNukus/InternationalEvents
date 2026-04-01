@@ -13,7 +13,7 @@
 
             @can('create departments')
                 <a class="btn btn--primary" href="{{ route('departments.create') }}">
-                    <i class="material-icons" aria-hidden="true">add_business</i>
+                    <i class="material-icons" aria-hidden="true">business_center</i>
                     <span>Yangi bo'lim</span>
                 </a>
             @endcan
@@ -32,7 +32,7 @@
 
             @if ($search !== '')
                 <a class="btn btn--ghost" href="{{ route('departments.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>Tozalash</span>
                 </a>
             @endif

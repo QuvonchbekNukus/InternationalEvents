@@ -152,6 +152,61 @@ class EventAttachmentTest extends TestCase
         Storage::disk('documents')->assertExists($newDocument->file_path);
     }
 
+    public function test_event_edit_can_delete_existing_attachment_and_storage_file(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view events',
+            'edit events',
+        ]);
+
+        [$country, $partnerOrganization, $agreement] = $this->createCountryOrganizationAndAgreement($user, 'C');
+
+        $event = Event::query()->create([
+            'title_ru' => 'Delete Event RU',
+            'title_uz' => 'Delete Event UZ',
+            'title_cryl' => 'Delete Event CY',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'agreement_id' => $agreement->id,
+            'start_datetime' => '2026-05-12 10:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        Storage::disk('documents')->put('2026/04/event-delete.pdf', 'delete-me');
+
+        $document = Document::query()->create([
+            'title_ru' => null,
+            'title_uz' => null,
+            'title_cryl' => null,
+            'document_number' => null,
+            'document_type_id' => null,
+            'file_name' => 'event-delete.pdf',
+            'file_path' => '2026/04/event-delete.pdf',
+            'file_ext' => 'pdf',
+            'file_size' => 9,
+            'mime_type' => 'application/pdf',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'agreement_id' => $agreement->id,
+            'event_id' => $event->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('events.attachments.destroy', [$event, $document]))
+            ->assertRedirect(route('events.edit', $event));
+
+        $this->assertDatabaseMissing('documents', ['id' => $document->id]);
+        Storage::disk('documents')->assertMissing('2026/04/event-delete.pdf');
+    }
+
     /**
      * @param  list<string>  $permissions
      */

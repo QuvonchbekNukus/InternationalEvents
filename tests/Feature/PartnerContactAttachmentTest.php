@@ -176,6 +176,76 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{4}\/\d{2}\/.+$/', $cvDocument->file_path);
     }
 
+    public function test_partner_contact_edit_can_delete_selected_attachment_and_storage_file(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view partner contacts',
+            'edit partner contacts',
+        ]);
+
+        $partnerOrganization = $this->createPartnerOrganization();
+
+        Storage::disk('documents')->put('2026/04/contact-photo-delete.jpg', 'delete-photo');
+        Storage::disk('documents')->put('2026/04/contact-cv-keep.pdf', 'keep-cv');
+
+        $photoDocument = Document::query()->create([
+            'title_uz' => 'Delete foto',
+            'title_ru' => 'Delete photo',
+            'title_cryl' => 'Delete foto',
+            'file_name' => 'contact-photo-delete.jpg',
+            'file_path' => '2026/04/contact-photo-delete.jpg',
+            'file_ext' => 'jpg',
+            'file_size' => 5,
+            'mime_type' => 'image/jpeg',
+            'country_id' => $partnerOrganization->country_id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $cvDocument = Document::query()->create([
+            'title_uz' => 'Keep CV',
+            'title_ru' => 'Keep CV',
+            'title_cryl' => 'Keep CV',
+            'file_name' => 'contact-cv-keep.pdf',
+            'file_path' => '2026/04/contact-cv-keep.pdf',
+            'file_ext' => 'pdf',
+            'file_size' => 7,
+            'mime_type' => 'application/pdf',
+            'country_id' => $partnerOrganization->country_id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $partnerContact = PartnerContact::query()->create([
+            'partner_organization_id' => $partnerOrganization->id,
+            'full_name_ru' => 'Delete Contact RU',
+            'full_name_uz' => 'Delete Contact',
+            'full_name_cryl' => 'Delete Contact CY',
+            'photo' => $photoDocument->id,
+            'cv' => $cvDocument->id,
+            'is_primary' => false,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('partner-contacts.attachments.destroy', ['partnerContact' => $partnerContact, 'type' => 'photo']))
+            ->assertRedirect(route('partner-contacts.edit', $partnerContact));
+
+        $partnerContact->refresh();
+
+        $this->assertNull($partnerContact->photo);
+        $this->assertSame($cvDocument->id, $partnerContact->cv);
+        $this->assertDatabaseMissing('documents', ['id' => $photoDocument->id]);
+        $this->assertDatabaseHas('documents', ['id' => $cvDocument->id]);
+        Storage::disk('documents')->assertMissing('2026/04/contact-photo-delete.jpg');
+        Storage::disk('documents')->assertExists('2026/04/contact-cv-keep.pdf');
+    }
+
     /**
      * @param  list<string>  $permissions
      */

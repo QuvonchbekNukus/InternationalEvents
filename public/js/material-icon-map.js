@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createMaterialIcon = (name) => {
         const icon = document.createElement('i');
-        icon.className = 'material-icons';
+        icon.className = 'material-icons app-icon app-icon--md';
         icon.setAttribute('aria-hidden', 'true');
         icon.textContent = name;
         return icon;

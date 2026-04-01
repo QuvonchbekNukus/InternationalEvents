@@ -173,7 +173,7 @@
                                         <span>Ochish</span>
                                     </a>
                                     <a class="action-pill" href="{{ $partnerContact->photoDocument->file_url }}" download="{{ $partnerContact->photoDocument->file_name }}">
-                                        <i class="material-icons" aria-hidden="true">download</i>
+                                        <i class="material-icons" aria-hidden="true">file_download</i>
                                         <span>Faylni olish</span>
                                     </a>
                                 @endif
@@ -203,7 +203,7 @@
                                         <span>Ochish</span>
                                     </a>
                                     <a class="action-pill" href="{{ $partnerContact->cvDocument->file_url }}" download="{{ $partnerContact->cvDocument->file_name }}">
-                                        <i class="material-icons" aria-hidden="true">download</i>
+                                        <i class="material-icons" aria-hidden="true">file_download</i>
                                         <span>Faylni olish</span>
                                     </a>
                                 @endif

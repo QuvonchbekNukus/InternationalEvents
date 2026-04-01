@@ -138,6 +138,27 @@
             <span class="field-help">{{ $document->exists ? "Bo'sh qoldirilsa mavjud fayl saqlanadi." : "Fayl majburiy. Maksimal hajm 50 MB." }}</span>
             @if ($document->exists)
                 <span class="field-help">Joriy fayl: <a href="{{ route('documents.download', $document) }}">{{ $document->file_name }}</a>{{ $document->file_size_human ? ' / '.$document->file_size_human : '' }}</span>
+                <div class="detail-actions-inline">
+                    @if ($document->file_url)
+                        <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                            <i class="material-icons" aria-hidden="true">open_in_new</i>
+                            <span>Ochish</span>
+                        </a>
+                    @endif
+                    <a class="action-pill" href="{{ route('documents.download', $document) }}">
+                        <i class="material-icons" aria-hidden="true">file_download</i>
+                        <span>Faylni olish</span>
+                    </a>
+                    <button
+                        class="action-pill action-pill--danger"
+                        type="submit"
+                        form="document-file-delete-{{ $document->id }}"
+                        onclick="return confirm('Ushbu hujjat faylini o\\'chirishni tasdiqlaysizmi? Hujjat yozuvi ham o\\'chiriladi.')"
+                    >
+                        <i class="material-icons" aria-hidden="true">delete</i>
+                        <span>Faylni o'chirish</span>
+                    </button>
+                </div>
             @endif
             @error('file')
                 <span class="field-error">{{ $message }}</span>
@@ -167,3 +188,15 @@
         </button>
     </div>
 </form>
+
+@if ($document->exists)
+    <form
+        id="document-file-delete-{{ $document->id }}"
+        method="POST"
+        action="{{ route('documents.file.destroy', $document) }}"
+        hidden
+    >
+        @csrf
+        @method('DELETE')
+    </form>
+@endif

@@ -49,7 +49,7 @@
 
             @if (collect($filters)->filter(fn ($value) => $value !== '' && $value !== null)->isNotEmpty())
                 <a class="btn btn--ghost" href="{{ route('activity-logs.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>Tozalash</span>
                 </a>
             @endif

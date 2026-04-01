@@ -128,7 +128,7 @@
                                     <span>Ochish</span>
                                 </a>
                                 <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
-                                    <i class="material-icons" aria-hidden="true">download</i>
+                                    <i class="material-icons" aria-hidden="true">file_download</i>
                                     <span>Faylni olish</span>
                                 </a>
                             </div>
@@ -410,7 +410,7 @@
                                 </span>
                                 <div class="detail-actions-inline">
                                     <a class="action-pill" href="{{ route('documents.download', $document) }}">
-                                        <i class="material-icons" aria-hidden="true">download</i>
+                                        <i class="material-icons" aria-hidden="true">file_download</i>
                                         <span>Faylni olish</span>
                                     </a>
                                 </div>

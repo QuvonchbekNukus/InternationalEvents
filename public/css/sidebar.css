@@ -20,7 +20,7 @@
     width: var(--sidebar-width);
     max-width: 100%;
     padding: 10px 0 10px 10px;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: var(--app-font-sans);
     transition: width 0.42s cubic-bezier(0.22, 1, 0.36, 1);
     z-index: 20;
 }

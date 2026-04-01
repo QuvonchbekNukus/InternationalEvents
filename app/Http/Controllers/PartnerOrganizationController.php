@@ -28,7 +28,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:view partner organizations', only: ['index', 'show']),
             new Middleware('permission:create partner organizations', only: ['create', 'store']),
-            new Middleware('permission:edit partner organizations', only: ['edit', 'update']),
+            new Middleware('permission:edit partner organizations', only: ['edit', 'update', 'destroyOrganizationInfoDocument']),
             new Middleware('permission:delete partner organizations', only: ['destroy']),
         ];
     }
@@ -178,6 +178,27 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         return redirect()
             ->route('partner-organizations.index')
             ->with('status', "Hamkor tashkilot {$partnerOrganization->display_name} yangilandi.");
+    }
+
+    public function destroyOrganizationInfoDocument(PartnerOrganization $partnerOrganization): RedirectResponse
+    {
+        $document = $partnerOrganization->organizationInfoDocument;
+
+        abort_unless($document, 404);
+
+        $fileName = $document->file_name;
+
+        DB::transaction(function () use ($partnerOrganization, $document): void {
+            $partnerOrganization->forceFill([
+                'organization_info_document_id' => null,
+            ])->save();
+
+            $document->delete();
+        });
+
+        return redirect()
+            ->route('partner-organizations.edit', $partnerOrganization)
+            ->with('status', "Tashkilot info fayli {$fileName} o'chirildi.");
     }
 
     public function destroy(PartnerOrganization $partnerOrganization): RedirectResponse

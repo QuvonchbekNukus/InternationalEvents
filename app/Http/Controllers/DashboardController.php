@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\PartnerContact;
 use App\Models\Visit;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -65,9 +66,24 @@ class DashboardController extends Controller
 
     public function __invoke(Request $request): View
     {
-        return view('dashboard', [
-            'eventCalendar' => $this->buildEventCalendar($request),
-        ]);
+        return view('dashboard', $this->buildDashboardCalendarViewData($request));
+    }
+
+    public function calendar(Request $request): JsonResponse
+    {
+        return response()->json($this->buildDashboardCalendarViewData($request));
+    }
+
+    private function buildDashboardCalendarViewData(Request $request): array
+    {
+        $eventCalendar = $this->buildEventCalendar($request);
+
+        return [
+            'eventCalendar' => $eventCalendar,
+            'calendarMonthOptions' => $this->resolveCalendarMonthOptions(),
+            'calendarYearOptions' => $this->resolveCalendarYearOptions($eventCalendar['month_key'] ?? null),
+            'calendarDataUrl' => route('dashboard.calendar'),
+        ];
     }
 
     private function buildEventCalendar(Request $request): array
@@ -215,12 +231,36 @@ class DashboardController extends Controller
 
     private function formatMonthLabel(CarbonImmutable $month): string
     {
-        $translatedMonths = trans('ui.dashboard.calendar.months');
-        $monthLabel = is_array($translatedMonths)
-            ? ($translatedMonths[$month->month] ?? null)
-            : null;
+        $monthLabel = $this->resolveCalendarMonthOptions()[$month->month] ?? null;
 
         return sprintf('%s %s', $monthLabel ?? self::DEFAULT_MONTH_LABELS[$month->month], $month->year);
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function resolveCalendarMonthOptions(): array
+    {
+        $translatedMonths = trans('ui.dashboard.calendar.months');
+
+        if (is_array($translatedMonths) && count($translatedMonths) === 12) {
+            return array_combine(range(1, 12), array_values($translatedMonths)) ?: self::DEFAULT_MONTH_LABELS;
+        }
+
+        return self::DEFAULT_MONTH_LABELS;
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function resolveCalendarYearOptions(?string $monthKey): array
+    {
+        $month = is_string($monthKey) && $monthKey !== ''
+            ? CarbonImmutable::createFromFormat('!Y-m', $monthKey) ?: null
+            : null;
+        $year = $month?->year ?? CarbonImmutable::now()->year;
+
+        return range($year - 5, $year + 5);
     }
 
     /**
@@ -832,7 +872,7 @@ class DashboardController extends Controller
                     'value' => 'all',
                     'label' => $texts['filter_all'],
                     'count' => $items->count(),
-                    'icon' => 'grid_view',
+                    'icon' => 'dashboard',
                 ],
                 [
                     'key' => 'planned',
@@ -856,7 +896,7 @@ class DashboardController extends Controller
                     'value' => self::CALENDAR_STATUS_COMPLETED,
                     'label' => $texts['filter_completed'],
                     'count' => $items->where('status', self::CALENDAR_STATUS_COMPLETED)->count(),
-                    'icon' => 'task_alt',
+                    'icon' => 'check_circle',
                 ],
             ],
         ];

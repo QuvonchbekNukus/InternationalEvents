@@ -25,7 +25,7 @@ class PartnerContactController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:view partner contacts', only: ['index', 'show', 'previewAttachment', 'downloadAttachment']),
             new Middleware('permission:create partner contacts', only: ['create', 'store']),
-            new Middleware('permission:edit partner contacts', only: ['edit', 'update']),
+            new Middleware('permission:edit partner contacts', only: ['edit', 'update', 'destroyAttachment']),
             new Middleware('permission:delete partner contacts', only: ['destroy']),
         ];
     }
@@ -130,6 +130,11 @@ class PartnerContactController extends Controller implements HasMiddleware
 
     public function edit(PartnerContact $partnerContact): View
     {
+        $partnerContact->load([
+            'photoDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type',
+            'cvDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type',
+        ]);
+
         return view('partner-contacts.edit', [
             'partnerContact' => $partnerContact,
             ...$this->formOptions(),
@@ -178,6 +183,26 @@ class PartnerContactController extends Controller implements HasMiddleware
         $document = $this->resolvedAttachmentDocument($partnerContact, $type);
 
         return Storage::disk(self::STORAGE_DISK)->download($document->file_path, $document->file_name);
+    }
+
+    public function destroyAttachment(PartnerContact $partnerContact, string $type): RedirectResponse
+    {
+        abort_unless(in_array($type, ['photo', 'cv'], true), 404);
+
+        $document = $this->attachmentDocument($partnerContact, $type);
+
+        abort_unless($document, 404);
+
+        $fileName = $document->file_name;
+
+        DB::transaction(function () use ($partnerContact, $type, $document): void {
+            $partnerContact->forceFill([$type => null])->save();
+            $document->delete();
+        });
+
+        return redirect()
+            ->route('partner-contacts.edit', $partnerContact)
+            ->with('status', "Biriktirilgan fayl {$fileName} o'chirildi.");
     }
 
     /**

@@ -31,7 +31,7 @@ class EventController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:view events|view own events', only: ['index', 'show']),
             new Middleware('permission:create events', only: ['create', 'store']),
-            new Middleware('permission:edit events|edit own events', only: ['edit', 'update']),
+            new Middleware('permission:edit events|edit own events', only: ['edit', 'update', 'destroyAttachment']),
             new Middleware('permission:delete events', only: ['destroy']),
         ];
     }
@@ -259,6 +259,26 @@ class EventController extends Controller implements HasMiddleware
             ->with('status', "Tadbir {$event->display_title} yangilandi.");
     }
 
+    public function destroyAttachment(Request $request, Event $event, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnedRecord(
+            $request,
+            $event,
+            'edit events',
+            'edit own events',
+            fn (Event $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $document = $this->resolveEventDocument($event, $document);
+        $fileName = $document->file_name;
+        $document->delete();
+
+        return redirect()
+            ->route('events.edit', $event)
+            ->with('status', "Biriktirilgan fayl {$fileName} o'chirildi.");
+    }
+
     public function destroy(Event $event): RedirectResponse
     {
         $eventTitle = $event->display_title;
@@ -388,6 +408,13 @@ class EventController extends Controller implements HasMiddleware
             'partner_organization_id' => $event->partner_organization_id,
             'agreement_id' => $event->agreement_id,
         ]);
+    }
+
+    private function resolveEventDocument(Event $event, Document $document): Document
+    {
+        abort_unless($event->documents()->whereKey($document->id)->exists(), 404);
+
+        return $document;
     }
 
     /**

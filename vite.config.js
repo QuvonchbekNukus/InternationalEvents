@@ -7,6 +7,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/leaflet-map.js',
                 'resources/css/auth/login.css',
                 'resources/js/auth/login.js',
             ],

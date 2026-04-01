@@ -2,9 +2,11 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @php
+        $typographyCssVersion = filemtime(public_path('css/typography.css'));
         $navbarCssVersion = filemtime(public_path('css/navbar.css'));
         $sidebarCssVersion = filemtime(public_path('css/sidebar.css'));
         $dashboardCssVersion = filemtime(public_path('css/dashboard-admin.css'));
+        $themeCssVersion = filemtime(public_path('css/theme.css'));
         $sidebarJsVersion = filemtime(public_path('js/sidebar.js'));
         $materialIconMapJsVersion = filemtime(public_path('js/material-icon-map.js'));
         $statusMessage = match (session('status')) {
@@ -17,9 +19,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', __('ui.layout.default_title'))</title>
     <link rel="stylesheet" href="{{ asset('css/material-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/typography.css').'?v='.$typographyCssVersion }}">
     <link rel="stylesheet" href="{{ asset('css/navbar.css').'?v='.$navbarCssVersion }}">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css').'?v='.$sidebarCssVersion }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard-admin.css').'?v='.$dashboardCssVersion }}">
+    @stack('head')
+    <link rel="stylesheet" href="{{ asset('css/theme.css').'?v='.$themeCssVersion }}">
 </head>
 <body class="mg-admin-body">
     <div class="dashboard-layout">

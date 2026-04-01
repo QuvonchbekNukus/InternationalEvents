@@ -47,7 +47,7 @@
 
             @if (collect($filters)->filter()->isNotEmpty())
                 <a class="btn btn--ghost" href="{{ route('partner-contacts.index') }}">
-                    <i class="material-icons" aria-hidden="true">restart_alt</i>
+                    <i class="material-icons" aria-hidden="true">refresh</i>
                     <span>Tozalash</span>
                 </a>
             @endif

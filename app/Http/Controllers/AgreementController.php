@@ -31,7 +31,7 @@ class AgreementController extends Controller implements HasMiddleware
         return [
             new Middleware('permission:view agreements|view own agreements', only: ['index', 'show']),
             new Middleware('permission:create agreements', only: ['create', 'store']),
-            new Middleware('permission:edit agreements|edit own agreements', only: ['edit', 'update']),
+            new Middleware('permission:edit agreements|edit own agreements', only: ['edit', 'update', 'destroyAttachment']),
             new Middleware('permission:delete agreements', only: ['destroy']),
         ];
     }
@@ -270,6 +270,26 @@ class AgreementController extends Controller implements HasMiddleware
             ->with('status', "Kelishuv {$agreement->display_title} yangilandi.");
     }
 
+    public function destroyAttachment(Request $request, Agreement $agreement, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnedRecord(
+            $request,
+            $agreement,
+            'edit agreements',
+            'edit own agreements',
+            fn (Agreement $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $document = $this->resolveAgreementDocument($agreement, $document);
+        $fileName = $document->file_name;
+        $document->delete();
+
+        return redirect()
+            ->route('agreements.edit', $agreement)
+            ->with('status', "Biriktirilgan fayl {$fileName} o'chirildi.");
+    }
+
     public function destroy(Agreement $agreement): RedirectResponse
     {
         $agreementTitle = $agreement->display_title;
@@ -386,6 +406,16 @@ class AgreementController extends Controller implements HasMiddleware
             'country_id' => $agreement->country_id,
             'partner_organization_id' => $agreement->partner_organization_id,
         ]);
+    }
+
+    private function resolveAgreementDocument(Agreement $agreement, Document $document): Document
+    {
+        abort_unless(
+            $this->agreementDocumentsQuery($agreement)->whereKey($document->id)->exists(),
+            404
+        );
+
+        return $document;
     }
 
     private function agreementDocumentsQuery(Agreement $agreement)

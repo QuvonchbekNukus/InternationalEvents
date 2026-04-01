@@ -154,7 +154,7 @@
 
             <div class="form-actions">
                 <button class="btn btn--primary" type="submit">
-                    <i class="material-icons" aria-hidden="true">lock_reset</i>
+                    <i class="material-icons" aria-hidden="true">vpn_key</i>
                     <span>Parolni yangilash</span>
                 </button>
             </div>

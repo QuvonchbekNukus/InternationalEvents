@@ -104,7 +104,7 @@
                 <div class="form-actions">
                     <a class="btn btn--ghost" href="{{ route('role-permissions.index') }}">Yopish</a>
                     <button class="btn btn--primary" type="submit">
-                        <i class="material-icons" aria-hidden="true">task_alt</i>
+                        <i class="material-icons" aria-hidden="true">check_circle</i>
                         <span>Yangilash</span>
                     </button>
                 </div>

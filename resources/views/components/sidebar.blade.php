@@ -23,27 +23,27 @@
         'partner-contacts' => 'perm_contact_calendar',
         'organization-types' => 'domain',
         'agreements' => 'description',
-        'agreement-types' => 'category',
-        'agreement-directions' => 'explore',
+        'agreement-types' => 'toc',
+        'agreement-directions' => 'timeline',
         'events-index' => 'event_note',
-        'event-types' => 'category',
+        'event-types' => 'label',
         'visits-index' => 'flight',
-        'visit-types' => 'category',
-        'document-types' => 'category',
+        'visit-types' => 'label',
+        'document-types' => 'toc',
         'users' => 'group',
-        'departments' => 'apartment',
-        'ranks' => 'military_tech',
+        'departments' => 'business_center',
+        'ranks' => 'stars',
         'activity-logs' => 'history',
         'role-permissions' => 'security',
     ];
-    $renderSidebarIcon = function (string $icon, string $wrapperClass = 'ie-sidebar__item-icon') {
+    $renderSidebarIcon = function (string $icon, string $wrapperClass = 'ie-sidebar__item-icon', string $size = 'md') {
         return new \Illuminate\Support\HtmlString(
-            '<span class="'.e($wrapperClass).'" aria-hidden="true"><i class="material-icons">'.e($icon).'</i></span>'
+            '<span class="'.e($wrapperClass).' app-icon-box app-icon-box--'.e($size).'" aria-hidden="true"><i class="material-icons app-icon app-icon--'.e($size).'">'.e($icon).'</i></span>'
         );
     };
     $renderSubmenuContent = function (string $icon, string $label) {
         return new \Illuminate\Support\HtmlString(
-            '<span class="ie-sidebar__submenu-icon" aria-hidden="true"><i class="material-icons">'.e($icon).'</i></span>'
+            '<span class="ie-sidebar__submenu-icon app-icon-box app-icon-box--xs" aria-hidden="true"><i class="material-icons app-icon app-icon--xs">'.e($icon).'</i></span>'
             .'<span class="ie-sidebar__submenu-label">'.e($label).'</span>'
         );
     };
@@ -57,7 +57,7 @@
         aria-label="{{ __('ui.sidebar.open') }}"
         aria-expanded="false"
     >
-        <i class="material-icons" aria-hidden="true">{{ $sidebarIcons['mobile_toggle'] }}</i>
+        <i class="material-icons app-icon app-icon--md" aria-hidden="true">{{ $sidebarIcons['mobile_toggle'] }}</i>
     </button>
 
     <button class="ie-sidebar-backdrop" type="button" data-sidebar-backdrop aria-label="{{ __('ui.sidebar.close') }}"></button>
@@ -88,7 +88,7 @@
                     aria-label="{{ __('ui.sidebar.collapse') }}"
                     aria-expanded="true"
                 >
-                    <i class="material-icons" aria-hidden="true">{{ $sidebarIcons['collapse_toggle'] }}</i>
+                    <i class="material-icons app-icon app-icon--md" aria-hidden="true">{{ $sidebarIcons['collapse_toggle'] }}</i>
                 </button>
             </header>
 
@@ -118,7 +118,7 @@
                                 <span class="ie-sidebar__item-copy">
                                     <span class="ie-sidebar__item-title">{{ __('ui.sidebar.cooperation') }}</span>
                                 </span>
-                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron') !!}
+                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron', 'xs') !!}
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $cooperationOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-cooperation" data-inline-submenu="cooperation">
@@ -164,7 +164,7 @@
                                 <span class="ie-sidebar__item-copy">
                                     <span class="ie-sidebar__item-title">{{ __('ui.sidebar.agreements') }}</span>
                                 </span>
-                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron') !!}
+                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron', 'xs') !!}
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $agreementsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-agreements" data-inline-submenu="agreements">
@@ -204,7 +204,7 @@
                                 <span class="ie-sidebar__item-copy">
                                     <span class="ie-sidebar__item-title">{{ __('ui.sidebar.events') }}</span>
                                 </span>
-                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron') !!}
+                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron', 'xs') !!}
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $eventsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-events" data-inline-submenu="events">
@@ -238,7 +238,7 @@
                                 <span class="ie-sidebar__item-copy">
                                     <span class="ie-sidebar__item-title">{{ __('ui.sidebar.visits') }}</span>
                                 </span>
-                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron') !!}
+                                {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron', 'xs') !!}
                             </button>
 
                             <div class="ie-sidebar__submenu {{ $visitsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-visits" data-inline-submenu="visits">
@@ -271,7 +271,7 @@
                             <span class="ie-sidebar__item-copy">
                                 <span class="ie-sidebar__item-title">{{ __('ui.sidebar.settings') }}</span>
                             </span>
-                            {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron') !!}
+                            {!! $renderSidebarIcon($sidebarIcons['submenu_chevron'], 'ie-sidebar__item-chevron', 'xs') !!}
                         </button>
 
                         <div class="ie-sidebar__submenu {{ $settingsOpen ? 'is-open' : '' }}" id="ie-sidebar-inline-submenu-settings" data-inline-submenu="settings">
