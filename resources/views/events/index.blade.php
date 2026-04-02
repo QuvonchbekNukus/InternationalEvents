@@ -121,9 +121,6 @@
                                     <span class="status-pill {{ $statusClass }}">
                                         {{ $statuses[$event->status] ?? $event->status }}
                                     </span>
-                                    @if ($event->control_due_date)
-                                        <span class="row-subtitle">{{ __('ui.pages.events.index.values.control') }}: {{ $event->control_due_date->format('d.m.Y') }}</span>
-                                    @endif
                                     @if ($event->description)
                                         <span class="row-subtitle">{{ \Illuminate\Support\Str::limit($event->description, 90) }}</span>
                                     @endif

@@ -137,25 +137,6 @@
             </div>
         </div>
 
-        <div class="stats-grid">
-            @foreach ($resourceCards as $card)
-                @if (auth()->user()?->can($card['permission']))
-                    <article class="stat-card">
-                        <div class="stat-card__head">
-                            <span class="stat-icon app-icon-box app-icon-box--lg">
-                                <i class="material-icons app-icon app-icon--lg" aria-hidden="true">{{ $card['icon'] }}</i>
-                            </span>
-                            <a class="text-link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
-                        </div>
-
-                        <strong class="stat-value">{{ $card['count'] }}</strong>
-                        <h2 class="stat-title">{{ $card['title'] }}</h2>
-                        <p class="stat-description">{{ $card['description'] }}</p>
-                    </article>
-                @endif
-            @endforeach
-        </div>
-
         <x-leaflet-map
             :eyebrow="$dashboardMap['eyebrow']"
             :title="$dashboardMap['title']"
@@ -486,6 +467,25 @@
                 </div>
             </section>
         @endif
+
+        <div class="stats-grid">
+            @foreach ($resourceCards as $card)
+                @if (auth()->user()?->can($card['permission']))
+                    <article class="stat-card">
+                        <div class="stat-card__head">
+                            <span class="stat-icon app-icon-box app-icon-box--lg">
+                                <i class="material-icons app-icon app-icon--lg" aria-hidden="true">{{ $card['icon'] }}</i>
+                            </span>
+                            <a class="text-link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
+                        </div>
+
+                        <strong class="stat-value">{{ $card['count'] }}</strong>
+                        <h2 class="stat-title">{{ $card['title'] }}</h2>
+                        <p class="stat-description">{{ $card['description'] }}</p>
+                    </article>
+                @endif
+            @endforeach
+        </div>
 
     </div>
 @endsection

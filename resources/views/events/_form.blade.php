@@ -135,14 +135,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Nazorat muddati</span>
-            <input type="date" name="control_due_date" value="{{ old('control_due_date', $event->control_due_date?->format('Y-m-d')) }}">
-            @error('control_due_date')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Javobgar foydalanuvchi</span>
             <select name="responsible_user_id">
                 <option value="">Biriktirilmagan</option>

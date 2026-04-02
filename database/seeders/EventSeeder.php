@@ -47,7 +47,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-04-20',
             ],
             [
                 'country_iso3' => 'TUR',
@@ -70,7 +69,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => 'Подписан протокол о расширении обменных программ.',
                 'result_summary_uz' => "Almashinuv dasturlarini kengaytirish bo`yicha protokol imzolandi.",
                 'result_summary_cryl' => 'Алмашинув дастурларини кенгайтириш бўйича протокол имзоланди.',
-                'control_due_date' => '2026-03-01',
             ],
             [
                 'country_iso3' => 'KGZ',
@@ -93,7 +91,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-03-10',
             ],
             [
                 'country_iso3' => 'CHN',
@@ -116,7 +113,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-05-25',
             ],
             [
                 'country_iso3' => 'RUS',
@@ -139,7 +135,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => 'Согласован перечень приоритетных задач на следующий квартал.',
                 'result_summary_uz' => "Keyingi chorak uchun ustuvor vazifalar ro`yxati kelishildi.",
                 'result_summary_cryl' => 'Кейинги чорак учун устувор вазифалар рўйхати келишилди.',
-                'control_due_date' => '2026-02-05',
             ],
             [
                 'country_iso3' => 'KAZ',
@@ -162,7 +157,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-06-10',
             ],
             [
                 'country_iso3' => 'KGZ',
@@ -185,7 +179,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => 'Мероприятие перенесено на более позднюю дату.',
                 'result_summary_uz' => "Tadbir keyingi muddatga ko`chirildi.",
                 'result_summary_cryl' => 'Тадбир кейинги муддатга кўчирилди.',
-                'control_due_date' => null,
             ],
             [
                 'country_iso3' => 'CHN',
@@ -208,7 +201,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-07-15',
             ],
             [
                 'country_iso3' => 'TUR',
@@ -231,7 +223,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => 'Подготовлены предложения по цифровизации архивного фонда.',
                 'result_summary_uz' => "Arxiv fondini raqamlashtirish bo`yicha takliflar tayyorlandi.",
                 'result_summary_cryl' => 'Архив фондини рақамлаштириш бўйича таклифлар тайёрланди.',
-                'control_due_date' => '2026-03-05',
             ],
             [
                 'country_iso3' => 'RUS',
@@ -254,7 +245,6 @@ class EventSeeder extends Seeder
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
                 'result_summary_cryl' => null,
-                'control_due_date' => '2026-03-25',
             ],
         ];
 
@@ -293,7 +283,6 @@ class EventSeeder extends Seeder
                     'result_summary_ru' => $eventData['result_summary_ru'],
                     'result_summary_uz' => $eventData['result_summary_uz'],
                     'result_summary_cryl' => $eventData['result_summary_cryl'],
-                    'control_due_date' => $eventData['control_due_date'],
                     'created_by' => $responsibleUserId,
                     'updated_by' => $responsibleUserId,
                 ]

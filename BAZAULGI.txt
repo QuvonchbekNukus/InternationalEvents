@@ -215,7 +215,6 @@ events
 - result_summary_ru TEXT NULL (tashrifdan olingan natija)
 - result_summary_uz TEXT NULL (tashrifdan olingan natija)
 - result_summary_cryl TEXT NULL (tashrifdan olingan natija)
-- control_due_date NULL
 - created_by NULL
 - updated_by NULL
 - created_at

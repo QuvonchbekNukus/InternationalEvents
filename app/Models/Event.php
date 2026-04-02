@@ -68,7 +68,6 @@ class Event extends Model
         'result_summary_ru',
         'result_summary_uz',
         'result_summary_cryl',
-        'control_due_date',
         'created_by',
         'updated_by',
     ];
@@ -85,7 +84,6 @@ class Event extends Model
             'longitude' => 'float',
             'start_datetime' => 'datetime',
             'end_datetime' => 'datetime',
-            'control_due_date' => 'date',
         ];
     }
 

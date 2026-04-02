@@ -63,11 +63,6 @@
                         <span class="detail-list__label">{{ __('ui.details.events.fields.status') }}</span>
                         <span class="status-pill {{ $statusClass }}">{{ $statuses[$event->status] ?? $event->status }}</span>
                     </article>
-
-                    <article class="detail-list__item">
-                        <span class="detail-list__label">{{ __('ui.details.events.fields.control_due_date') }}</span>
-                        <strong>{{ $event->control_due_date?->format('d.m.Y') ?: __('ui.common.values.not_entered') }}</strong>
-                    </article>
                 </div>
             </section>
 

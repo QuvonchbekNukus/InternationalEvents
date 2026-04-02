@@ -316,7 +316,6 @@ class EventController extends Controller implements HasMiddleware
             'result_summary_ru' => ['nullable', 'string'],
             'result_summary_uz' => ['nullable', 'string'],
             'result_summary_cryl' => ['nullable', 'string'],
-            'control_due_date' => ['nullable', 'date'],
             'event_files' => ['nullable', 'array'],
             'event_files.*' => ['file', 'max:51200'],
         ]);

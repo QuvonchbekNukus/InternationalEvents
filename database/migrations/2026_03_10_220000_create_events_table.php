@@ -34,7 +34,6 @@ return new class extends Migration
             $table->text('result_summary_ru')->nullable();
             $table->text('result_summary_uz')->nullable();
             $table->text('result_summary_cryl')->nullable();
-            $table->date('control_due_date')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
