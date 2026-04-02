@@ -56,8 +56,6 @@ class Event extends Model
         'agreement_id',
         'city',
         'address',
-        'latitude',
-        'longitude',
         'start_datetime',
         'end_datetime',
         'format',
@@ -80,8 +78,6 @@ class Event extends Model
     protected function casts(): array
     {
         return [
-            'latitude' => 'float',
-            'longitude' => 'float',
             'start_datetime' => 'datetime',
             'end_datetime' => 'datetime',
         ];

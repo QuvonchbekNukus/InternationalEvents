@@ -68,6 +68,7 @@ partner_organizations
 - website NULL
 - status ENUM('faol','rejada','tugallangan') DEFAULT 'faol'
 - description TEXT NULL
+- partnership_history TEXT NULL
 - created_at
 - updated_at
 
@@ -203,8 +204,6 @@ events
 - agreement_id NULL
 - city NULL
 - address NULL
-- latitude NULL
-- longitude NULL
 - start_datetime
 - end_datetime NULL
 - format ENUM('offline','online','gibrid') DEFAULT 'offline'

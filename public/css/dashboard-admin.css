@@ -537,6 +537,23 @@ a {
     color: #ffc3bf;
 }
 
+.partnership-history-field .tox-tinymce {
+    border: 1px solid var(--admin-border);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.partnership-history-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.partnership-history-status.is-error {
+    color: #ffc3bf;
+}
+
 .checkbox-field {
     display: flex;
     align-items: center;
@@ -1722,6 +1739,10 @@ select.toolbar-select {
     line-height: 1.7;
 }
 
+.detail-note--preserve-lines {
+    white-space: pre-line;
+}
+
 .detail-empty {
     margin: 0;
     color: var(--admin-muted);
@@ -1754,12 +1775,18 @@ select.toolbar-select {
 
 .document-gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 280px));
+    justify-content: start;
     gap: 16px;
+}
+
+.document-gallery--single {
+    grid-template-columns: minmax(220px, 320px);
 }
 
 .document-card {
     overflow: hidden;
+    width: 100%;
     border-radius: 20px;
     border: 1px solid rgba(173, 197, 232, 0.14);
     background: rgba(255, 255, 255, 0.04);
@@ -1769,7 +1796,8 @@ select.toolbar-select {
 .document-card__media {
     position: relative;
     display: block;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 5 / 4;
+    max-height: 220px;
     overflow: hidden;
     background:
         linear-gradient(180deg, rgba(9, 18, 34, 0.18), rgba(9, 18, 34, 0.44)),
@@ -1806,6 +1834,17 @@ select.toolbar-select {
 .document-card__meta span {
     color: var(--admin-muted);
     line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+    .document-gallery,
+    .document-gallery--single {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .document-card__media {
+        max-height: 200px;
+    }
 }
 
 .detail-media {

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>partnership_history TinyMCE + Word Export Demo</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-top: #020617;
+            --bg-bottom: #0f172a;
+            --panel: rgba(15, 23, 42, 0.9);
+            --panel-border: rgba(148, 163, 184, 0.22);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #fca5a5;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            font-family: Arial, sans-serif;
+            background:
+                radial-gradient(circle at top, rgba(37, 99, 235, 0.18), transparent 28%),
+                linear-gradient(180deg, var(--bg-top), var(--bg-bottom) 48%, #111827 100%);
+            color: var(--text);
+        }
+
+        .demo-shell {
+            width: min(100%, 960px);
+            padding: 28px;
+            border: 1px solid var(--panel-border);
+            border-radius: 22px;
+            background: var(--panel);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        .demo-header {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .demo-title {
+            margin: 0;
+            font-size: clamp(26px, 4vw, 32px);
+            line-height: 1.2;
+        }
+
+        .demo-subtitle,
+        .demo-help,
+        .demo-status {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .demo-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .demo-button {
+            border: 0;
+            border-radius: 12px;
+            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .demo-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .demo-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .demo-status.is-error {
+            color: var(--danger);
+        }
+
+        .demo-meta {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(148, 163, 184, 0.08);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        code {
+            color: #bfdbfe;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            .demo-shell {
+                padding: 20px;
+            }
+
+            .demo-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="demo-shell">
+        <header class="demo-header">
+            <h1 class="demo-title">TinyMCE + Word Export for <code>partnership_history</code></h1>
+            <p class="demo-subtitle">
+                This browser-only example uses TinyMCE for rich text editing and the free <code>docx</code> library to export the
+                editor content as a <code>.docx</code> file.
+            </p>
+            <p class="demo-help">
+                The editor is intentionally mapped to a field named <code>partnership_history</code>, which matches a typical database
+                column name used in forms or APIs.
+            </p>
+        </header>
+
+        <!--
+            IMPORTANT:
+            - The textarea name below is "partnership_history".
+            - If you later connect this page to a backend form submit, the field name already matches the database column.
+            - To reuse this example for another database column, change:
+              1. FIELD_NAME in the script
+              2. the textarea id
+              3. the textarea name
+        -->
+        <form id="partnership-history-form" novalidate>
+            <textarea
+                id="partnership_history"
+                name="partnership_history"
+            >2019: Initial coordination meetings started.
+
+2021: Joint workshops were launched with partner representatives.
+
+2024: Cooperation framework was expanded with new training initiatives.</textarea>
+
+            <div class="demo-toolbar">
+                <button class="demo-button" id="download-word" type="button" disabled>
+                    Download as Word
+                </button>
+                <p class="demo-status" id="status" aria-live="polite">Editor is loading...</p>
+            </div>
+
+            <div class="demo-meta">
+                Export behavior:
+                The generated Word file contains the plain text version of <code>partnership_history</code>.
+                Formatting inside TinyMCE is allowed for editing convenience, but export intentionally writes normalized plain text.
+            </div>
+        </form>
+    </main>
+
+    <!-- TinyMCE CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@8.3.2/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <!-- docx UMD build for browser usage -->
+    <script src="https://unpkg.com/docx@9.6.1/dist/index.umd.cjs"></script>
+
+    <script>
+        (() => {
+            'use strict';
+
+            /*
+             * To map this example to another database field later, only update:
+             * - FIELD_NAME
+             * - the textarea id in HTML
+             * - the textarea name in HTML
+             */
+            const FIELD_NAME = 'partnership_history';
+
+            const state = {
+                editor: null,
+                isBusy: false,
+            };
+
+            const elements = {
+                form: document.getElementById('partnership-history-form'),
+                textarea: document.getElementById(FIELD_NAME),
+                downloadButton: document.getElementById('download-word'),
+                status: document.getElementById('status'),
+            };
+
+            const setStatus = (message, isError = false) => {
+                elements.status.textContent = message;
+                elements.status.classList.toggle('is-error', isError);
+            };
+
+            const setBusy = (isBusy) => {
+                state.isBusy = isBusy;
+                elements.downloadButton.disabled = isBusy || !state.editor;
+            };
+
+            const normalizePlainText = (value) => value
+                .replace(/\u00a0/g, ' ')
+                .replace(/\r\n/g, '\n')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+
+            const getEditorPlainText = () => {
+                const rawText = state.editor
+                    ? state.editor.getContent({ format: 'text' })
+                    : elements.textarea.value;
+
+                return normalizePlainText(rawText);
+            };
+
+            const slugify = (value) => value
+                .toString()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-zA-Z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '')
+                .toLowerCase();
+
+            const buildWordDocument = async (plainText) => {
+                const { Document, Packer, Paragraph, TextRun } = window.docx;
+                const paragraphs = plainText
+                    .split('\n')
+                    .map((line) => new Paragraph({
+                        children: [new TextRun(line)],
+                    }));
+
+                const documentFile = new Document({
+                    sections: [
+                        {
+                            children: paragraphs.length ? paragraphs : [new Paragraph('')],
+                        },
+                    ],
+                });
+
+                return Packer.toBlob(documentFile);
+            };
+
+            const downloadBlob = (blob, fileName) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+
+                link.href = url;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                /*
+                 * setTimeout gives the browser enough time to start the download
+                 * before the object URL is revoked.
+                 */
+                window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+            };
+
+            const handleDownload = async () => {
+                if (state.isBusy) {
+                    return;
+                }
+
+                const plainText = getEditorPlainText();
+
+                if (!plainText) {
+                    setStatus(`Please enter ${FIELD_NAME} content before exporting.`, true);
+                    return;
+                }
+
+                try {
+                    setBusy(true);
+                    setStatus(`Generating Word document from ${FIELD_NAME}...`);
+
+                    const blob = await buildWordDocument(plainText);
+                    const fileName = `${slugify(FIELD_NAME) || 'document'}.docx`;
+
+                    downloadBlob(blob, fileName);
+                    setStatus(`Word document downloaded successfully from ${FIELD_NAME}.`);
+                } catch (error) {
+                    console.error(error);
+                    setStatus('Failed to generate the Word document.', true);
+                } finally {
+                    setBusy(false);
+                }
+            };
+
+            const initEditor = async () => {
+                if (!elements.textarea || !elements.downloadButton || !elements.status) {
+                    return;
+                }
+
+                if (!window.tinymce || !window.docx) {
+                    setStatus('TinyMCE or docx failed to load.', true);
+                    return;
+                }
+
+                try {
+                    const [editor] = await window.tinymce.init({
+                        target: elements.textarea,
+                        license_key: 'gpl',
+                        promotion: false,
+                        branding: false,
+                        menubar: false,
+                        height: 380,
+                        skin: 'oxide-dark',
+                        content_css: 'dark',
+                        plugins: 'lists link table autolink wordcount',
+                        toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | alignleft aligncenter alignright | link table | removeformat',
+                        content_style: 'body { font-family: Georgia, serif; font-size: 14px; line-height: 1.7; }',
+                        setup(instance) {
+                            instance.on('init', () => {
+                                state.editor = instance;
+                                setBusy(false);
+                                setStatus(`Editor is ready. ${FIELD_NAME} is mapped and export will use plain text.`);
+                            });
+                        },
+                    });
+
+                    state.editor = editor;
+                    elements.downloadButton.addEventListener('click', handleDownload, { passive: true });
+
+                    /*
+                     * If this page is later connected to a real backend form submit,
+                     * keep the textarea value synchronized with the plain text version.
+                     */
+                    elements.form.addEventListener('submit', () => {
+                        elements.textarea.value = getEditorPlainText();
+                    });
+                } catch (error) {
+                    console.error(error);
+                    setStatus('TinyMCE failed to initialize.', true);
+                }
+            };
+
+            setBusy(true);
+            initEditor();
+        })();
+    </script>
+</body>
+</html>

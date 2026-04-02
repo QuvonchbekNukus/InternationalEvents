@@ -304,8 +304,6 @@ class EventController extends Controller implements HasMiddleware
             'agreement_id' => ['nullable', 'integer', 'exists:agreements,id'],
             'city' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'start_datetime' => ['required', 'date'],
             'end_datetime' => ['nullable', 'date', 'after_or_equal:start_datetime'],
             'format' => ['required', 'string', Rule::in(Event::FORMATS)],

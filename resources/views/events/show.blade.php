@@ -187,7 +187,7 @@
                         <div class="attachment-section">
                             <p class="attachment-section__label">Rasm previewlari</p>
 
-                            <div class="document-gallery">
+                            <div class="document-gallery {{ $imageDocuments->count() === 1 ? 'document-gallery--single' : '' }}">
                                 @foreach ($imageDocuments as $document)
                                     <article class="document-card">
                                         <a class="document-card__media" href="{{ $document->file_url }}" target="_blank" rel="noopener">

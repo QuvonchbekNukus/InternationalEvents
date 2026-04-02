@@ -57,6 +57,7 @@ class ResourceDetailPagesTest extends TestCase
             'city' => 'Tashkent',
             'website' => 'example.test',
             'status' => 'faol',
+            'partnership_history' => "Hamkorlik 2022-yildan boshlangan.\nQo'shma forumlar muntazam o'tkaziladi.",
         ]);
 
         $organizationInfoDocument = Document::query()->create([
@@ -230,6 +231,7 @@ class ResourceDetailPagesTest extends TestCase
             ->assertSee('Annual Forum')
             ->assertSee('Delegation Visit')
             ->assertSee('organization-info.pdf')
+            ->assertSee('Hamkorlik 2022-yildan boshlangan.')
             ->assertSee('Foto')
             ->assertSee('CV');
 

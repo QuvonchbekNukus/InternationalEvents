@@ -192,8 +192,14 @@
 
         <label class="field field--span-2">
             <span class="field-label">Biriktiriladigan fayllar</span>
-            <input type="file" name="agreement_files[]" multiple>
-            <span class="field-help">Kelishuvga oid bir yoki bir nechta fayl tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
+            <input
+                type="file"
+                name="agreement_files[]"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                multiple
+                data-agreement-file-input
+            >
+            <span class="field-help" data-agreement-file-help>Faqat PDF yoki Word hujjatlari yuklanadi. Rasm fayllar qabul qilinmaydi. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
             @error('agreement_files')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -271,6 +277,8 @@
                 document.querySelectorAll('[data-agreement-form]').forEach((form) => {
                     const countrySelect = form.querySelector('[data-agreement-country-select]');
                     const organizationSelect = form.querySelector('[data-agreement-organization-select]');
+                    const fileInput = form.querySelector('[data-agreement-file-input]');
+                    const fileHelp = form.querySelector('[data-agreement-file-help]');
 
                     if (!countrySelect || !organizationSelect) {
                         return;
@@ -311,6 +319,32 @@
 
                     syncOrganizations(true);
                     countrySelect.addEventListener('change', () => syncOrganizations(false));
+
+                    if (fileInput && fileHelp) {
+                        const defaultHelpText = fileHelp.textContent;
+                        const allowedExtensions = new Set(['pdf', 'doc', 'docx']);
+
+                        fileInput.addEventListener('change', () => {
+                            const selectedFiles = Array.from(fileInput.files || []);
+                            const hasInvalidFile = selectedFiles.some((file) => {
+                                const extension = file.name.includes('.')
+                                    ? file.name.split('.').pop().toLowerCase()
+                                    : '';
+
+                                return !allowedExtensions.has(extension);
+                            });
+
+                            if (!hasInvalidFile) {
+                                fileHelp.textContent = defaultHelpText;
+                                fileHelp.classList.remove('field-error');
+                                return;
+                            }
+
+                            fileInput.value = '';
+                            fileHelp.textContent = "Faqat PDF yoki Word (.pdf, .doc, .docx) fayllarini tanlang. Rasm yuklash mumkin emas.";
+                            fileHelp.classList.add('field-error');
+                        });
+                    }
                 });
             });
         </script>

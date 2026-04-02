@@ -330,7 +330,7 @@ class AgreementController extends Controller implements HasMiddleware
             'responsible_department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'description' => ['nullable', 'string'],
             'agreement_files' => ['nullable', 'array'],
-            'agreement_files.*' => ['file', 'max:51200'],
+            'agreement_files.*' => ['file', 'mimes:pdf,doc,docx', 'max:51200'],
         ]);
 
         unset($validated['agreement_files']);

@@ -51,6 +51,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                         ->orWhere('short_name', 'like', "%{$search}%")
                         ->orWhere('city', 'like', "%{$search}%")
                         ->orWhere('website', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%")
+                        ->orWhere('partnership_history', 'like', "%{$search}%")
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
@@ -232,6 +234,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'website' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'string', Rule::in(PartnerOrganization::STATUSES)],
             'notes' => ['nullable', 'string'],
+            'partnership_history' => ['nullable', 'string'],
             'organization_info_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:51200'],
         ]);
 

@@ -59,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('documents/{document}/file', [DocumentController::class, 'destroyFile'])->name('documents.file.destroy');
     Route::delete('agreements/{agreement}/attachments/{document}', [AgreementController::class, 'destroyAttachment'])->name('agreements.attachments.destroy');
     Route::delete('events/{event}/attachments/{document}', [EventController::class, 'destroyAttachment'])->name('events.attachments.destroy');
+    Route::delete('visits/{visit}/attachments/{document}', [VisitController::class, 'destroyAttachment'])->name('visits.attachments.destroy');
     Route::delete('partner-organizations/{partnerOrganization}/organization-info-file', [PartnerOrganizationController::class, 'destroyOrganizationInfoDocument'])
         ->name('partner-organizations.organization-info.destroy');
     Route::get('partner-contacts/{partnerContact}/{type}/preview', [PartnerContactController::class, 'previewAttachment'])

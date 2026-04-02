@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Country;
 use App\Models\Department;
+use App\Models\Document;
 use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Models\Visit;
@@ -11,20 +12,25 @@ use App\Models\VisitType;
 use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class VisitController extends Controller implements HasMiddleware
 {
+    private const STORAGE_DISK = 'documents';
+
     public static function middleware(): array
     {
         return [
             new Middleware('permission:view visits|view own visits', only: ['index', 'show']),
             new Middleware('permission:create visits', only: ['create', 'store']),
-            new Middleware('permission:edit visits|edit own visits', only: ['edit', 'update']),
+            new Middleware('permission:edit visits|edit own visits', only: ['edit', 'update', 'destroyAttachment']),
             new Middleware('permission:delete visits', only: ['destroy']),
         ];
     }
@@ -137,7 +143,13 @@ class VisitController extends Controller implements HasMiddleware
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
 
-        $visit = Visit::create($validated);
+        $visit = DB::transaction(function () use ($request, $validated) {
+            $visit = Visit::query()->create($validated);
+            $this->syncVisitDocuments($request, $visit->refresh(), (int) $request->user()->id);
+
+            return $visit->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
             $visit,
             null,
@@ -171,6 +183,8 @@ class VisitController extends Controller implements HasMiddleware
             'responsibleDepartment:id,name_uz,name_ru,name_cryl',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
+            'documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,visit_id,uploaded_by,created_at',
+            'documents.uploader:id,first_name,middle_name,last_name',
         ]);
 
         return view('visits.show', [
@@ -190,6 +204,8 @@ class VisitController extends Controller implements HasMiddleware
             fn (Visit $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
                 || (int) $record->created_by === (int) $user->id
         );
+
+        $visit->load('documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,visit_id,uploaded_by,created_at');
 
         return view('visits.edit', [
             'visit' => $visit,
@@ -212,9 +228,15 @@ class VisitController extends Controller implements HasMiddleware
         $validated = $this->validatedData($request);
         $validated['updated_by'] = $request->user()?->id;
 
-        $visit->update($validated);
+        $visit = DB::transaction(function () use ($request, $visit, $validated) {
+            $visit->update($validated);
+            $this->syncVisitDocuments($request, $visit->refresh(), (int) $request->user()->id);
+
+            return $visit->refresh();
+        });
+
         $notificationService->notifyResponsibleUser(
-            $visit->fresh(),
+            $visit,
             $previousResponsibleUserId,
             $visit->responsible_user_id,
             $request->user(),
@@ -224,6 +246,26 @@ class VisitController extends Controller implements HasMiddleware
         return redirect()
             ->route('visits.index')
             ->with('status', "Tashrif {$visit->display_title} yangilandi.");
+    }
+
+    public function destroyAttachment(Request $request, Visit $visit, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnedRecord(
+            $request,
+            $visit,
+            'edit visits',
+            'edit own visits',
+            fn (Visit $record, $user): bool => (int) $record->responsible_user_id === (int) $user->id
+                || (int) $record->created_by === (int) $user->id
+        );
+
+        $document = $this->resolveVisitDocument($visit, $document);
+        $fileName = $document->file_name;
+        $document->delete();
+
+        return redirect()
+            ->route('visits.edit', $visit)
+            ->with('status', "Biriktirilgan fayl {$fileName} o'chirildi.");
     }
 
     public function destroy(Visit $visit): RedirectResponse
@@ -265,7 +307,11 @@ class VisitController extends Controller implements HasMiddleware
             'result_summary_uz' => ['nullable', 'string'],
             'result_summary_cryl' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
+            'visit_files' => ['nullable', 'array'],
+            'visit_files.*' => ['file', 'mimes:jpg,jpeg,png,gif,webp,bmp,svg,pdf,doc,docx', 'max:51200'],
         ]);
+
+        unset($validated['visit_files']);
 
         if (($validated['partner_organization_id'] ?? null) !== null) {
             $organizationCountryId = PartnerOrganization::query()
@@ -301,6 +347,85 @@ class VisitController extends Controller implements HasMiddleware
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
             'directions' => Visit::DIRECTION_LABELS,
             'statuses' => Visit::STATUS_LABELS,
+        ];
+    }
+
+    private function syncVisitDocuments(Request $request, Visit $visit, int $uploadedBy): void
+    {
+        if (! $request->hasFile('visit_files')) {
+            $this->syncVisitDocumentMetadata($visit);
+            return;
+        }
+
+        $visit->documents()
+            ->get()
+            ->each(fn (Document $document) => $document->delete());
+
+        foreach ($request->file('visit_files', []) as $file) {
+            if (! $file instanceof UploadedFile) {
+                continue;
+            }
+
+            Document::query()->create(array_merge(
+                $this->visitDocumentMetadata($visit),
+                $this->uploadedFilePayload($file),
+                [
+                    'uploaded_by' => $uploadedBy,
+                    'status' => 'faol',
+                    'is_confidential' => false,
+                ],
+            ));
+        }
+    }
+
+    private function syncVisitDocumentMetadata(Visit $visit): void
+    {
+        $visit->documents()->update([
+            'country_id' => $visit->country_id,
+            'partner_organization_id' => $visit->partner_organization_id,
+        ]);
+    }
+
+    private function resolveVisitDocument(Visit $visit, Document $document): Document
+    {
+        abort_unless($visit->documents()->whereKey($document->id)->exists(), 404);
+
+        return $document;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function visitDocumentMetadata(Visit $visit): array
+    {
+        return [
+            'title_ru' => null,
+            'title_uz' => null,
+            'title_cryl' => null,
+            'document_number' => null,
+            'document_type_id' => null,
+            'country_id' => $visit->country_id,
+            'partner_organization_id' => $visit->partner_organization_id,
+            'agreement_id' => null,
+            'visit_id' => $visit->id,
+            'event_id' => null,
+            'description' => 'Tashrif uchun biriktirilgan fayl',
+        ];
+    }
+
+    /**
+     * @return array{file_name: string, file_path: string, file_ext: ?string, file_size: int, mime_type: ?string}
+     */
+    private function uploadedFilePayload(UploadedFile $file): array
+    {
+        $filePath = $file->store(now()->format('Y/m'), self::STORAGE_DISK);
+
+        return [
+            'file_name' => $file->getClientOriginalName(),
+            'file_path' => $filePath,
+            'file_ext' => $file->getClientOriginalExtension() ?: null,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getClientMimeType(),
         ];
     }
 }

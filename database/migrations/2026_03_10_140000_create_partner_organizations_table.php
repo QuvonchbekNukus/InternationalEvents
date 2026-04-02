@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('website')->nullable();
             $table->enum('status', ['faol', 'rejada', 'tugallangan'])->default('faol');
             $table->text('notes')->nullable();
+            $table->text('partnership_history')->nullable();
             $table->timestamps();
 
             $table->index('status');

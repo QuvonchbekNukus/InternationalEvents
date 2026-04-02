@@ -176,22 +176,6 @@
             @enderror
         </label>
 
-        <label class="field">
-            <span class="field-label">Latitude</span>
-            <input type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $event->latitude) }}" placeholder="41.3110810">
-            @error('latitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
-            <span class="field-label">Longitude</span>
-            <input type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $event->longitude) }}" placeholder="69.2405620">
-            @error('longitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field field--span-2">
             <span class="field-label">Natija (UZ)</span>
             <textarea name="result_summary_uz" placeholder="Tadbir natijalari">{{ old('result_summary_uz', $event->result_summary_uz) }}</textarea>

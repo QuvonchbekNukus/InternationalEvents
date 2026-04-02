@@ -46,6 +46,7 @@ class PartnerOrganization extends Model
         'website',
         'status',
         'notes',
+        'partnership_history',
     ];
 
     public function country(): BelongsTo

@@ -194,6 +194,85 @@ class AgreementAttachmentTest extends TestCase
         Storage::disk('documents')->assertMissing('2026/04/agreement-delete.pdf');
     }
 
+    public function test_agreement_store_rejects_image_attachments(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view agreements',
+            'create agreements',
+        ]);
+
+        [$country, $partnerOrganization] = $this->createCountryAndOrganization('D');
+
+        $response = $this->actingAs($user)->from(route('agreements.create'))->post(route('agreements.store'), [
+            'agreement_number' => 'AG-004',
+            'title_ru' => 'Agreement Image RU',
+            'title_uz' => 'Agreement Image UZ',
+            'title_cryl' => 'Agreement Image CY',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'status' => 'draft',
+            'agreement_files' => [
+                UploadedFile::fake()->create('agreement-image.png', 120, 'image/png'),
+            ],
+        ]);
+
+        $response
+            ->assertRedirect(route('agreements.create'))
+            ->assertSessionHasErrors('agreement_files.0');
+
+        $this->assertDatabaseCount('agreements', 0);
+        $this->assertDatabaseCount('documents', 0);
+    }
+
+    public function test_agreement_update_rejects_image_attachments(): void
+    {
+        Storage::fake('documents');
+
+        $user = $this->authorizedUser([
+            'view agreements',
+            'edit agreements',
+        ]);
+
+        [$country, $partnerOrganization] = $this->createCountryAndOrganization('E');
+
+        $agreement = Agreement::query()->create([
+            'agreement_number' => 'AG-005',
+            'title_ru' => 'Agreement Keep RU',
+            'title_uz' => 'Agreement Keep UZ',
+            'title_cryl' => 'Agreement Keep CY',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'status' => 'draft',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this->actingAs($user)->from(route('agreements.edit', $agreement))->put(route('agreements.update', $agreement), [
+            'agreement_number' => 'AG-005',
+            'title_ru' => 'Agreement Keep RU',
+            'title_uz' => 'Agreement Keep UZ',
+            'title_cryl' => 'Agreement Keep CY',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'status' => 'draft',
+            'agreement_files' => [
+                UploadedFile::fake()->create('updated-image.jpg', 120, 'image/jpeg'),
+            ],
+        ]);
+
+        $response
+            ->assertRedirect(route('agreements.edit', $agreement))
+            ->assertSessionHasErrors('agreement_files.0');
+
+        $this->assertDatabaseHas('agreements', [
+            'id' => $agreement->id,
+            'title_uz' => 'Agreement Keep UZ',
+        ]);
+        $this->assertDatabaseCount('documents', 0);
+    }
+
     /**
      * @param  list<string>  $permissions
      */

@@ -45,6 +45,7 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'website' => 'example.test',
             'status' => 'faol',
             'notes' => 'Test notes',
+            'partnership_history' => "Hamkorlik 2024-yilda boshlangan.\nQo'shma uchrashuv o'tkazilgan.",
             'organization_info_file' => UploadedFile::fake()->create('org-info.pdf', 140, 'application/pdf'),
         ]);
 
@@ -59,6 +60,7 @@ class PartnerOrganizationAttachmentTest extends TestCase
         $this->assertSame($country->id, $partnerOrganization->organizationInfoDocument?->country_id);
         $this->assertSame($partnerOrganization->id, $partnerOrganization->organizationInfoDocument?->partner_organization_id);
         $this->assertSame('org-info.pdf', $partnerOrganization->organizationInfoDocument?->file_name);
+        $this->assertSame("Hamkorlik 2024-yilda boshlangan.\nQo'shma uchrashuv o'tkazilgan.", $partnerOrganization->partnership_history);
         Storage::disk('documents')->assertExists($partnerOrganization->organizationInfoDocument->file_path);
     }
 
@@ -114,6 +116,7 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'website' => 'updated.example.test',
             'status' => 'faol',
             'notes' => 'Updated notes',
+            'partnership_history' => "Hamkorlik tarixi yangilandi.\nYangi memorandum loyihasi tayyorlandi.",
             'organization_info_file' => UploadedFile::fake()->create('org-info-new.docx', 220, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
         ]);
 
@@ -125,6 +128,7 @@ class PartnerOrganizationAttachmentTest extends TestCase
         $this->assertSame($document->id, $partnerOrganization->organization_info_document_id);
         $this->assertSame('org-info-new.docx', $document->file_name);
         $this->assertSame('Updated Organization info fayli', $document->title_uz);
+        $this->assertSame("Hamkorlik tarixi yangilandi.\nYangi memorandum loyihasi tayyorlandi.", $partnerOrganization->partnership_history);
         Storage::disk('documents')->assertMissing('2026/03/org-info-old.pdf');
         Storage::disk('documents')->assertExists($document->file_path);
         $this->assertMatchesRegularExpression('/^\d{4}\/\d{2}\/.+$/', $document->file_path);

@@ -1,4 +1,4 @@
-<form class="resource-form" method="POST" action="{{ $action }}">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
     @csrf
 
     @if ($method !== 'POST')
@@ -223,6 +223,128 @@
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
+
+        <label class="field field--span-2">
+            <span class="field-label">Biriktiriladigan fayllar</span>
+            <input
+                type="file"
+                name="visit_files[]"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.pdf,.doc,.docx,image/jpeg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                multiple
+            >
+            <span class="field-help">Tashrifga oid rasm, PDF yoki Word fayllarini bir nechta tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
+            @error('visit_files')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            @error('visit_files.*')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            @if ($visit->exists && $visit->documents->isNotEmpty())
+                @php
+                    $documents = $visit->documents->sortByDesc('created_at');
+                    $imageDocuments = $documents->filter(fn ($document) => $document->is_image && $document->file_url);
+                    $otherDocuments = $documents->reject(fn ($document) => $document->is_image && $document->file_url);
+                @endphp
+
+                <span class="field-help">Mavjud biriktirmalar:</span>
+
+                @if ($imageDocuments->isNotEmpty())
+                    <div class="attachment-section">
+                        <p class="attachment-section__label">Rasmlar</p>
+
+                        <div class="stack-list">
+                            @foreach ($imageDocuments as $document)
+                                <article class="stack-list__item">
+                                    @php($deleteFormId = "visit-attachment-delete-{$visit->id}-{$document->id}")
+                                    <div class="detail-media detail-media--compact">
+                                        <a href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                            <img
+                                                class="detail-media__thumb"
+                                                src="{{ $document->file_url }}"
+                                                alt="{{ $document->file_name }}"
+                                                loading="lazy"
+                                            >
+                                        </a>
+
+                                        <div class="detail-media__body">
+                                            <strong>{{ $document->file_name }}</strong>
+                                            <span>
+                                                {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                                @if ($document->file_size_human)
+                                                    {{ ' | '.$document->file_size_human }}
+                                                @endif
+                                            </span>
+
+                                            <div class="detail-actions-inline">
+                                                <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                                    <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                                    <span>Ochish</span>
+                                                </a>
+                                                <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                                    <i class="material-icons" aria-hidden="true">file_download</i>
+                                                    <span>Faylni olish</span>
+                                                </a>
+                                                <button
+                                                    class="action-pill action-pill--danger"
+                                                    type="submit"
+                                                    form="{{ $deleteFormId }}"
+                                                    onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                                >
+                                                    <i class="material-icons" aria-hidden="true">delete</i>
+                                                    <span>Faylni o'chirish</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                @if ($otherDocuments->isNotEmpty())
+                    <div class="attachment-section">
+                        <p class="attachment-section__label">Fayllar</p>
+
+                        <div class="stack-list">
+                            @foreach ($otherDocuments as $document)
+                                <article class="stack-list__item">
+                                    @php($deleteFormId = "visit-attachment-delete-{$visit->id}-{$document->id}")
+                                    <strong>{{ $document->file_name }}</strong>
+                                    <span>
+                                        {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                        @if ($document->file_size_human)
+                                            {{ ' | '.$document->file_size_human }}
+                                        @endif
+                                    </span>
+                                    @if ($document->file_url)
+                                        <div class="detail-actions-inline">
+                                            <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
+                                                <i class="material-icons" aria-hidden="true">open_in_new</i>
+                                                <span>Ochish</span>
+                                            </a>
+                                            <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
+                                                <i class="material-icons" aria-hidden="true">file_download</i>
+                                                <span>Faylni olish</span>
+                                            </a>
+                                            <button
+                                                class="action-pill action-pill--danger"
+                                                type="submit"
+                                                form="{{ $deleteFormId }}"
+                                                onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                            >
+                                                <i class="material-icons" aria-hidden="true">delete</i>
+                                                <span>Faylni o'chirish</span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endif
+        </label>
     </div>
 
     <div class="form-actions">
@@ -233,3 +355,17 @@
         </button>
     </div>
 </form>
+
+@if ($visit->exists && $visit->documents->isNotEmpty())
+    @foreach ($visit->documents as $document)
+        <form
+            id="visit-attachment-delete-{{ $visit->id }}-{{ $document->id }}"
+            method="POST"
+            action="{{ route('visits.attachments.destroy', [$visit, $document]) }}"
+            hidden
+        >
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
+@endif

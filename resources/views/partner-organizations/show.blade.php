@@ -138,6 +138,21 @@
                     </article>
                 </div>
             </section>
+
+            <section class="content-card detail-card detail-card--full">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Hamkorlik</p>
+                        <h2 class="section-title">Hamkorlik tarixi</h2>
+                    </div>
+                </div>
+
+                @if ($partnerOrganization->partnership_history)
+                    <div class="detail-note detail-note--preserve-lines">{{ $partnerOrganization->partnership_history }}</div>
+                @else
+                    <p class="detail-empty">Hamkorlik tarixi hali kiritilmagan.</p>
+                @endif
+            </section>
         </div>
 
         <div class="stats-grid">

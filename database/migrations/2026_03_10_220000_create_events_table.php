@@ -22,8 +22,6 @@ return new class extends Migration
             $table->foreignId('agreement_id')->nullable()->constrained()->nullOnDelete();
             $table->string('city')->nullable();
             $table->string('address')->nullable();
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
             $table->dateTime('start_datetime');
             $table->dateTime('end_datetime')->nullable();
             $table->enum('format', ['offline', 'online', 'gibrid'])->default('offline');
