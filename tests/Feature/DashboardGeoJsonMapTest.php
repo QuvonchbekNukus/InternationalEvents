@@ -73,7 +73,6 @@ class DashboardGeoJsonMapTest extends TestCase
             ->get(route('dashboard'));
 
         $response->assertOk()
-            ->assertSee('GeoJSON asosidagi global davlatlar xaritasi')
             ->assertSee('data-dashboard-geojson-map', false)
             ->assertSee(route('dashboard.map.countries.index'), false)
             ->assertSee('Test modal oynasi');

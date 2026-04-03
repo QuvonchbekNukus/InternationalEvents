@@ -4,6 +4,7 @@ import '../css/leaflet-map.css';
 import '../css/dashboard-geojson-map.css';
 
 const initializedBlocks = new WeakMap();
+const lastCountrySummaryByCode = new Map();
 
 const COUNTRY_PALETTE = [
     {fill: '#93c5fd', stroke: '#3b82f6'},
@@ -105,12 +106,92 @@ function bindModal(block) {
     const title = block.querySelector('[data-dashboard-geojson-modal-title]');
     const code = block.querySelector('[data-dashboard-geojson-modal-code]');
     const link = block.querySelector('[data-dashboard-geojson-modal-link]');
+    const eventsLink = block.querySelector('[data-dashboard-geojson-events-link]');
+    const visitsLink = block.querySelector('[data-dashboard-geojson-visits-link]');
+    const eventEmpty = block.querySelector('[data-dashboard-geojson-event-empty]');
+    const eventLink = block.querySelector('[data-dashboard-geojson-event-link]');
+    const eventTitle = block.querySelector('[data-dashboard-geojson-event-title]');
+    const eventDate = block.querySelector('[data-dashboard-geojson-event-date]');
+    const visitEmpty = block.querySelector('[data-dashboard-geojson-visit-empty]');
+    const visitLink = block.querySelector('[data-dashboard-geojson-visit-link]');
+    const visitTitle = block.querySelector('[data-dashboard-geojson-visit-title]');
+    const visitDate = block.querySelector('[data-dashboard-geojson-visit-date]');
     const closeButtons = Array.from(block.querySelectorAll('[data-dashboard-geojson-modal-close]'));
     let previousActiveElement = null;
+    let pendingSummary = null;
+
+    const applySummaryToUi = (payload) => {
+        const eventPayload = payload?.event ?? null;
+        const visitPayload = payload?.visit ?? null;
+
+        if (eventPayload && eventLink instanceof HTMLAnchorElement && eventTitle && eventDate) {
+            eventTitle.textContent = eventPayload.title || 'Tadbir';
+            eventDate.textContent = eventPayload.date || '';
+            eventLink.href = eventPayload.url || '#';
+            eventLink.hidden = false;
+            if (eventEmpty) {
+                eventEmpty.hidden = true;
+            }
+
+            const imageUrl = eventPayload.image_url || null;
+            const img = block.querySelector('[data-dashboard-geojson-event-image]');
+            if (img instanceof HTMLImageElement) {
+                if (imageUrl) {
+                    img.hidden = false;
+                    img.src = String(imageUrl);
+                } else {
+                    img.hidden = true;
+                    img.removeAttribute('src');
+                }
+            }
+        } else if (eventEmpty) {
+            eventEmpty.textContent = "Tadbir topilmadi.";
+            eventEmpty.hidden = false;
+        }
+
+        if (visitPayload && visitLink instanceof HTMLAnchorElement && visitTitle && visitDate) {
+            visitTitle.textContent = visitPayload.title || 'Tashrif';
+            visitDate.textContent = visitPayload.date || '';
+            visitLink.href = visitPayload.url || '#';
+            visitLink.hidden = false;
+            if (visitEmpty) {
+                visitEmpty.hidden = true;
+            }
+
+            const imageUrl = visitPayload.image_url || null;
+            const img = block.querySelector('[data-dashboard-geojson-visit-image]');
+            if (img instanceof HTMLImageElement) {
+                if (imageUrl) {
+                    img.hidden = false;
+                    img.src = String(imageUrl);
+                } else {
+                    img.hidden = true;
+                    img.removeAttribute('src');
+                }
+            }
+        } else if (visitEmpty) {
+            visitEmpty.textContent = "Tashrif topilmadi.";
+            visitEmpty.hidden = false;
+        }
+
+        if (payload?.country) {
+            if (eventsLink instanceof HTMLAnchorElement && payload.country.events_url) {
+                eventsLink.href = payload.country.events_url;
+            }
+            if (visitsLink instanceof HTMLAnchorElement && payload.country.visits_url) {
+                visitsLink.href = payload.country.visits_url;
+            }
+        }
+    };
 
     const closeModal = () => {
         if (!modal) {
             return;
+        }
+
+        if (pendingSummary) {
+            pendingSummary.abort();
+            pendingSummary = null;
         }
 
         modal.hidden = true;
@@ -150,6 +231,36 @@ function bindModal(block) {
                 link.removeAttribute('href');
             }
 
+            if (eventsLink instanceof HTMLAnchorElement) {
+                eventsLink.href = country.eventsUrl || eventsLink.href;
+            }
+
+            if (visitsLink instanceof HTMLAnchorElement) {
+                visitsLink.href = country.visitsUrl || visitsLink.href;
+            }
+
+            if (eventEmpty) {
+                eventEmpty.textContent = "Ma'lumot yuklanmoqda...";
+                eventEmpty.hidden = false;
+            }
+            if (eventLink instanceof HTMLAnchorElement) {
+                eventLink.hidden = true;
+                eventLink.removeAttribute('href');
+            }
+            if (visitEmpty) {
+                visitEmpty.textContent = "Ma'lumot yuklanmoqda...";
+                visitEmpty.hidden = false;
+            }
+            if (visitLink instanceof HTMLAnchorElement) {
+                visitLink.hidden = true;
+                visitLink.removeAttribute('href');
+            }
+
+            const cacheKey = country.code || country.name || '';
+            if (cacheKey && lastCountrySummaryByCode.has(cacheKey)) {
+                applySummaryToUi(lastCountrySummaryByCode.get(cacheKey));
+            }
+
             modal.hidden = false;
             document.body.classList.add('dashboard-geojson-map-modal-open');
             requestAnimationFrame(() => {
@@ -159,6 +270,63 @@ function bindModal(block) {
                     closeButton.focus();
                 }
             });
+
+            if (!country.summaryUrl) {
+                if (eventEmpty) {
+                    eventEmpty.textContent = "Tadbir topilmadi.";
+                }
+                if (visitEmpty) {
+                    visitEmpty.textContent = "Tashrif topilmadi.";
+                }
+                return;
+            }
+
+            if (pendingSummary) {
+                pendingSummary.abort();
+            }
+
+            pendingSummary = new AbortController();
+
+            fetch(country.summaryUrl, {
+                headers: {
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                signal: pendingSummary.signal,
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error(`Request failed with status ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((payload) => {
+                    if (cacheKey) {
+                        lastCountrySummaryByCode.set(cacheKey, payload);
+                    }
+                    applySummaryToUi(payload);
+                })
+                .catch((error) => {
+                    if (error?.name === 'AbortError') {
+                        return;
+                    }
+
+                    console.error('Country summary could not be loaded.', error);
+                    if (!(cacheKey && lastCountrySummaryByCode.has(cacheKey))) {
+                        if (eventEmpty) {
+                            eventEmpty.textContent = "Tadbir ma'lumotini yuklab bo'lmadi.";
+                            eventEmpty.hidden = false;
+                        }
+                        if (visitEmpty) {
+                            visitEmpty.textContent = "Tashrif ma'lumotini yuklab bo'lmadi.";
+                            visitEmpty.hidden = false;
+                        }
+                    }
+                })
+                .finally(() => {
+                    pendingSummary = null;
+                });
         },
         close: closeModal,
     };
@@ -264,6 +432,9 @@ function decorateCountryLayer(layer, country, map, modalController) {
                     name: country.name,
                     code: country.code,
                     countryUrl: country.country_url || null,
+                    summaryUrl: country.summary_url || null,
+                    eventsUrl: country.events_url || null,
+                    visitsUrl: country.visits_url || null,
                 });
             },
         });
@@ -276,6 +447,69 @@ function renderCountryLayer(map, modalController, country, geoJson) {
     }).addTo(map);
 
     decorateCountryLayer(layer, country, map, modalController);
+}
+
+function renderCountryCollectionLayer(map, modalController, geoJsonCollection) {
+    const safeCollection = geoJsonCollection && typeof geoJsonCollection === 'object'
+        ? geoJsonCollection
+        : {type: 'FeatureCollection', features: []};
+
+    const layer = L.geoJSON(safeCollection, {
+        style: (feature) => baseStyleForCountry(feature?.properties?.code || feature?.properties?.name || ''),
+        onEachFeature: (feature, featureLayer) => {
+            const name = feature?.properties?.name || feature?.properties?.NAME || feature?.properties?.name_en || 'Davlat';
+            const code = feature?.properties?.code || null;
+            const countryUrl = feature?.properties?.country_url || null;
+            const summaryUrl = feature?.properties?.summary_url || null;
+            const eventsUrl = feature?.properties?.events_url || null;
+            const visitsUrl = feature?.properties?.visits_url || null;
+
+            featureLayer.bindTooltip(String(name), {
+                sticky: true,
+                direction: 'top',
+                className: 'dashboard-geojson-map__tooltip',
+            });
+
+            const initialStyle = baseStyleForCountry(code || name || '');
+
+            featureLayer.on({
+                mouseover(event) {
+                    event.target.setStyle({
+                        ...initialStyle,
+                        ...ACTIVE_STYLE,
+                    });
+
+                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                        event.target.bringToFront();
+                    }
+                },
+                mouseout(event) {
+                    layer.resetStyle(event.target);
+                },
+                click(event) {
+                    const bounds = event.target.getBounds?.();
+
+                    if (bounds?.isValid?.()) {
+                        map.fitBounds(bounds, {
+                            padding: [28, 28],
+                            maxZoom: 5,
+                        });
+                    }
+
+                    modalController.open({
+                        name: String(name),
+                        code: code ? String(code) : '',
+                        countryUrl: countryUrl ? String(countryUrl) : null,
+                        summaryUrl: summaryUrl ? String(summaryUrl) : null,
+                        eventsUrl: eventsUrl ? String(eventsUrl) : null,
+                        visitsUrl: visitsUrl ? String(visitsUrl) : null,
+                    });
+                },
+            });
+        },
+    }).addTo(map);
+
+    return layer;
 }
 
 async function loadCountriesProgressively(block, map, modalController, countries) {
@@ -362,6 +596,37 @@ async function buildGeoJsonMap(block) {
     const modalController = bindModal(block);
 
     try {
+        if (config.collectionUrl) {
+            setStatus(
+                block,
+                'loading',
+                'GeoJSON kolleksiyasi yuklanmoqda',
+                'Davlatlar bittalab emas, bitta fayl orqali yuklanmoqda...',
+            );
+
+            const geoJsonCollection = await fetchJson(config.collectionUrl);
+            const featureCount = Array.isArray(geoJsonCollection?.features) ? geoJsonCollection.features.length : 0;
+
+            if (featureCount === 0) {
+                setStatus(
+                    block,
+                    'empty',
+                    'GeoJSON fayllari topilmadi',
+                    "storage/geojson/countries papkasiga davlat fayllarini joylang.",
+                );
+
+                return null;
+            }
+
+            renderCountryCollectionLayer(map, modalController, geoJsonCollection);
+
+            setStatus(
+                block,
+                'ready',
+                'Xarita tayyor',
+                `${featureCount} ta GeoJSON feature muvaffaqiyatli joylandi.`,
+            );
+        } else {
         const payload = await fetchJson(config.listUrl);
         const countries = Array.isArray(payload?.data) ? payload.data : [];
 
@@ -377,6 +642,7 @@ async function buildGeoJsonMap(block) {
         }
 
         await loadCountriesProgressively(block, map, modalController, countries);
+        }
     } catch (error) {
         console.error('Dashboard GeoJSON map failed to initialize.', error);
         setStatus(

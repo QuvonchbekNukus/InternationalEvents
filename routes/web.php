@@ -45,6 +45,10 @@ Route::post('/locale', function (Request $request) {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/calendar', [DashboardController::class, 'calendar'])->name('dashboard.calendar');
     Route::get('/dashboard/map/countries', [DashboardGeoJsonController::class, 'index'])->name('dashboard.map.countries.index');
+    Route::get('/dashboard/map/countries-collection', [DashboardGeoJsonController::class, 'collection'])->name('dashboard.map.countries.collection');
+    Route::get('/dashboard/map/countries/{country}/summary', [DashboardGeoJsonController::class, 'summary'])
+        ->where('country', '[A-Za-z0-9\-_]+')
+        ->name('dashboard.map.countries.summary');
     Route::get('/dashboard/map/countries/{country}', [DashboardGeoJsonController::class, 'show'])
         ->where('country', '[A-Za-z0-9\-_]+')
         ->name('dashboard.map.countries.show');

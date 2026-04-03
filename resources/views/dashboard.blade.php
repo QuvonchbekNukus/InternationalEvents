@@ -10,13 +10,13 @@
             ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole))
             : $translatedRole;
         $dashboardGeoJsonMap = [
-            'eyebrow' => 'Hamkorlik xaritasi',
-            'title' => 'GeoJSON asosidagi global davlatlar xaritasi',
-            'subtitle' => "storage/geojson/countries ichidagi barcha davlat fayllari alohida qatlam sifatida yuklanadi. Davlat ustiga bosilganda test modal oynasida nomi ko'rsatiladi.",
+            'eyebrow' => '',
+            'title' => '',
+            'subtitle' => '',
             'height' => 460,
             'center' => [20, 0],
             'zoom' => 2,
-            'chips' => ['Leaflet', 'GeoJSON', 'Interactive modal'],
+            'chips' => [],
         ];
         $resourceCards = [
             [
@@ -127,9 +127,6 @@
             <div>
                 <p class="eyebrow">{{ __('ui.dashboard.eyebrow') }}</p>
                 <h1 class="page-title">{{ __('ui.dashboard.title') }}</h1>
-                <p class="page-subtitle">
-                    {{ __('ui.dashboard.subtitle') }}
-                </p>
             </div>
 
             <div class="context-chip">
@@ -152,9 +149,6 @@
                             <h2 class="section-title">{{ __('ui.dashboard.calendar.title') }}</h2>
                             <span class="badge" data-calendar-total-count>{{ $eventCalendar['count_label'] }}</span>
                         </div>
-                        <p class="dashboard-calendar-card__subtitle">
-                            {{ $eventCalendar['subtitle'] }}
-                        </p>
                     </div>
 
                     <div class="dashboard-calendar-card__controls">
@@ -229,7 +223,6 @@
                             <div class="dashboard-calendar-card__filter-head">
                                 <div>
                                     <p class="dashboard-calendar-card__filter-label">Turlar</p>
-                                    <p class="dashboard-calendar-card__filter-hint">Tanlanmasa barcha turlar, tanlansa faqat o'sha tur ko'rsatiladi</p>
                                 </div>
                             </div>
                             <div class="dashboard-calendar-card__filters dashboard-calendar-card__filters--type" role="group" aria-label="Turlar bo'yicha filterlar">
@@ -256,7 +249,6 @@
                             <div class="dashboard-calendar-card__filter-head">
                                 <div>
                                     <p class="dashboard-calendar-card__filter-label">Status</p>
-                                    <p class="dashboard-calendar-card__filter-hint">Bir vaqtning o'zida faqat bitta holat tanlanadi</p>
                                 </div>
                             </div>
                             <div class="dashboard-calendar-card__filters dashboard-calendar-card__filters--status" role="radiogroup" aria-label="Status bo'yicha filterlar">

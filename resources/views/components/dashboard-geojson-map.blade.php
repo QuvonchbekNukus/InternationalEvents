@@ -22,6 +22,7 @@
         'minZoom' => $minZoom,
         'maxZoom' => $maxZoom,
         'listUrl' => $listUrl,
+        'collectionUrl' => $listUrl ? route('dashboard.map.countries.collection') : null,
         'tileUrl' => $tileUrl,
         'tileAttribution' => $tileAttribution,
     ];
@@ -34,34 +35,38 @@
 @endonce
 
 <section {{ $attributes->class(['leaflet-map-card', 'dashboard-geojson-map']) }} data-dashboard-geojson-map>
-    <div class="leaflet-map-card__head">
-        <div class="leaflet-map-card__copy">
-            @if ($eyebrow)
-                <p class="leaflet-map-card__eyebrow">{{ $eyebrow }}</p>
-            @endif
+    @if ($eyebrow || $title || $subtitle || !empty($chips))
+        <div class="leaflet-map-card__head">
+            <div class="leaflet-map-card__copy">
+                @if ($eyebrow)
+                    <p class="leaflet-map-card__eyebrow">{{ $eyebrow }}</p>
+                @endif
 
-            <h2 class="leaflet-map-card__title">{{ $title }}</h2>
+                @if ($title)
+                    <h2 class="leaflet-map-card__title">{{ $title }}</h2>
+                @endif
 
-            @if ($subtitle)
-                <p class="leaflet-map-card__subtitle">{{ $subtitle }}</p>
+                @if ($subtitle)
+                    <p class="leaflet-map-card__subtitle">{{ $subtitle }}</p>
+                @endif
+            </div>
+
+            @if (!empty($chips))
+                <div class="leaflet-map-card__chips" aria-label="Xarita meta ma'lumotlari">
+                    @foreach ($chips as $chip)
+                        <span class="leaflet-map-card__chip">{{ $chip }}</span>
+                    @endforeach
+                </div>
             @endif
         </div>
-
-        @if (!empty($chips))
-            <div class="leaflet-map-card__chips" aria-label="Xarita meta ma'lumotlari">
-                @foreach ($chips as $chip)
-                    <span class="leaflet-map-card__chip">{{ $chip }}</span>
-                @endforeach
-            </div>
-        @endif
-    </div>
+    @endif
 
     <div class="leaflet-map-card__viewport" style="--leaflet-map-height: {{ (int) $height }}px;">
         <div
             id="{{ $mapId }}"
             class="leaflet-map-card__canvas dashboard-geojson-map__canvas"
             data-dashboard-geojson-map-canvas
-            aria-label="{{ $title }}"
+            aria-label="{{ $title ?: 'Davlatlar xaritasi' }}"
         ></div>
 
         <div class="dashboard-geojson-map__status" data-dashboard-geojson-status role="status" aria-live="polite">
@@ -107,6 +112,40 @@
                 <a class="dashboard-geojson-map__modal-link" href="#" data-dashboard-geojson-modal-link hidden>
                     Davlat sahifasini ochish
                 </a>
+            </div>
+
+            <div class="dashboard-geojson-map__modal-body" data-dashboard-geojson-modal-body>
+                <div class="dashboard-geojson-map__modal-grid" role="group" aria-label="Davlat bo'yicha yaqin tadbirlar va tashriflar">
+                    <section class="dashboard-geojson-map__modal-panel" aria-label="Yaqin tadbir">
+                        <p class="dashboard-geojson-map__modal-panel-title">Yaqin tadbir</p>
+                        <div class="dashboard-geojson-map__modal-panel-content" data-dashboard-geojson-event>
+                            <p class="dashboard-geojson-map__modal-muted" data-dashboard-geojson-event-empty>Ma'lumot yuklanmoqda...</p>
+                            <a class="dashboard-geojson-map__modal-item" href="#" data-dashboard-geojson-event-link hidden>
+                                <img class="dashboard-geojson-map__modal-item-image" alt="" loading="lazy" data-dashboard-geojson-event-image hidden>
+                                <strong data-dashboard-geojson-event-title></strong>
+                                <span data-dashboard-geojson-event-date></span>
+                            </a>
+                        </div>
+                        <a class="btn btn--ghost dashboard-geojson-map__modal-action" href="{{ route('events.index') }}" data-dashboard-geojson-events-link>
+                            Barcha tadbirlar
+                        </a>
+                    </section>
+
+                    <section class="dashboard-geojson-map__modal-panel" aria-label="Yaqin tashrif">
+                        <p class="dashboard-geojson-map__modal-panel-title">Yaqin tashrif</p>
+                        <div class="dashboard-geojson-map__modal-panel-content" data-dashboard-geojson-visit>
+                            <p class="dashboard-geojson-map__modal-muted" data-dashboard-geojson-visit-empty>Ma'lumot yuklanmoqda...</p>
+                            <a class="dashboard-geojson-map__modal-item" href="#" data-dashboard-geojson-visit-link hidden>
+                                <img class="dashboard-geojson-map__modal-item-image" alt="" loading="lazy" data-dashboard-geojson-visit-image hidden>
+                                <strong data-dashboard-geojson-visit-title></strong>
+                                <span data-dashboard-geojson-visit-date></span>
+                            </a>
+                        </div>
+                        <a class="btn btn--ghost dashboard-geojson-map__modal-action" href="{{ route('visits.index') }}" data-dashboard-geojson-visits-link>
+                            Barcha tashriflar
+                        </a>
+                    </section>
+                </div>
             </div>
         </div>
     </div>
