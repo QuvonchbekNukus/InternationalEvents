@@ -9,23 +9,14 @@
         $roleLabel = $currentRole && $translatedRole === "ui.roles.$currentRole"
             ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole))
             : $translatedRole;
-        $dashboardMap = [
+        $dashboardGeoJsonMap = [
             'eyebrow' => 'Hamkorlik xaritasi',
-            'title' => 'Leaflet bilan interaktiv xarita',
-            'subtitle' => "Xaritaga marker, popup va keyingi bosqichda real lokatsiyalarni ulash uchun reusable blok tayyorlandi.",
-            'height' => 360,
-            'center' => [41.3111, 69.2797],
-            'zoom' => 5,
-            'markers' => [
-                [
-                    'lat' => 41.3111,
-                    'lng' => 69.2797,
-                    'title' => "Toshkent",
-                    'description' => "Leaflet integratsiyasi uchun boshlang'ich nuqta.",
-                    'openPopup' => true,
-                ],
-            ],
-            'chips' => ['Leaflet', 'OpenStreetMap', 'Reusable component'],
+            'title' => 'GeoJSON asosidagi global davlatlar xaritasi',
+            'subtitle' => "storage/geojson/countries ichidagi barcha davlat fayllari alohida qatlam sifatida yuklanadi. Davlat ustiga bosilganda test modal oynasida nomi ko'rsatiladi.",
+            'height' => 460,
+            'center' => [20, 0],
+            'zoom' => 2,
+            'chips' => ['Leaflet', 'GeoJSON', 'Interactive modal'],
         ];
         $resourceCards = [
             [
@@ -467,15 +458,15 @@
             </section>
         @endif
 
-        <x-leaflet-map
-            :eyebrow="$dashboardMap['eyebrow']"
-            :title="$dashboardMap['title']"
-            :subtitle="$dashboardMap['subtitle']"
-            :height="$dashboardMap['height']"
-            :center="$dashboardMap['center']"
-            :zoom="$dashboardMap['zoom']"
-            :markers="$dashboardMap['markers']"
-            :chips="$dashboardMap['chips']"
+        <x-dashboard-geojson-map
+            :eyebrow="$dashboardGeoJsonMap['eyebrow']"
+            :title="$dashboardGeoJsonMap['title']"
+            :subtitle="$dashboardGeoJsonMap['subtitle']"
+            :height="$dashboardGeoJsonMap['height']"
+            :center="$dashboardGeoJsonMap['center']"
+            :zoom="$dashboardGeoJsonMap['zoom']"
+            :chips="$dashboardGeoJsonMap['chips']"
+            :list-url="route('dashboard.map.countries.index')"
         />
 
         <div class="stats-grid dashboard-stats-grid">

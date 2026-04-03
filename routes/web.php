@@ -6,6 +6,7 @@ use App\Http\Controllers\AgreementTypeController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardGeoJsonController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
@@ -43,6 +44,10 @@ Route::post('/locale', function (Request $request) {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard/calendar', [DashboardController::class, 'calendar'])->name('dashboard.calendar');
+    Route::get('/dashboard/map/countries', [DashboardGeoJsonController::class, 'index'])->name('dashboard.map.countries.index');
+    Route::get('/dashboard/map/countries/{country}', [DashboardGeoJsonController::class, 'show'])
+        ->where('country', '[A-Za-z0-9\-_]+')
+        ->name('dashboard.map.countries.show');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 });
 
