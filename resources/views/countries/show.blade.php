@@ -9,6 +9,15 @@
             'tugatilgan' => 'is-completed',
             default => 'is-active',
         };
+        $countryHasCoordinates = $country->latitude !== null && $country->longitude !== null;
+        $countryMapZoom = $country->default_zoom !== null ? (float) $country->default_zoom : 5;
+        $countryMapDescription = implode(' | ', array_filter([
+            $country->display_region,
+            $statuses[$country->cooperation_status] ?? $country->cooperation_status,
+            $countryHasCoordinates
+                ? number_format($country->latitude, 4).', '.number_format($country->longitude, 4)
+                : null,
+        ]));
     @endphp
 
     <div class="page-section">
@@ -379,6 +388,40 @@
                 @else
                     <p class="detail-empty">Bu davlat bo'yicha ko'rinadigan hujjat topilmadi.</p>
                 @endif
+            </section>
+        @endif
+
+        @if ($countryHasCoordinates)
+            <x-leaflet-map
+                eyebrow="Geolokatsiya"
+                title="{{ $country->display_name }} xaritada"
+                subtitle="Davlat uchun kiritilgan koordinatalar xaritada marker bilan ko'rsatildi."
+                :height="400"
+                :center="[$country->latitude, $country->longitude]"
+                :zoom="$countryMapZoom"
+                :markers="[[
+                    'lat' => $country->latitude,
+                    'lng' => $country->longitude,
+                    'title' => $country->display_name,
+                    'description' => $countryMapDescription,
+                    'openPopup' => true,
+                ]]"
+                :chips="array_values(array_filter([
+                    $country->iso2 ? 'ISO2: '.$country->iso2 : null,
+                    $country->iso3 ? 'ISO3: '.$country->iso3 : null,
+                    $country->display_region,
+                ]))"
+            />
+        @else
+            <section class="content-card">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Geolokatsiya</p>
+                        <h2 class="section-title">Davlat xaritada</h2>
+                    </div>
+                </div>
+
+                <p class="detail-empty">Davlat uchun latitude va longitude kiritilmagani sababli xarita ko'rsatilmadi.</p>
             </section>
         @endif
     </div>

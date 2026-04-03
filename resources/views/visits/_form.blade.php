@@ -1,4 +1,4 @@
-<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data">
+<form class="resource-form" method="POST" action="{{ $action }}" enctype="multipart/form-data" data-visit-form>
     @csrf
 
     @if ($method !== 'POST')
@@ -45,7 +45,7 @@
 
         <label class="field">
             <span class="field-label">Davlat</span>
-            <select name="country_id" required>
+            <select name="country_id" required data-visit-country-select>
                 <option value="">Davlatni tanlang</option>
                 @foreach ($countries as $country)
                     <option value="{{ $country->id }}" @selected((string) old('country_id', $visit->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
@@ -58,10 +58,16 @@
 
         <label class="field">
             <span class="field-label">Hamkor tashkilot</span>
-            <select name="partner_organization_id">
+            <select name="partner_organization_id" data-visit-organization-select>
                 <option value="">Biriktirilmagan</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
-                    <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $visit->partner_organization_id) === (string) $partnerOrganization->id)>{{ $partnerOrganization->display_name }}</option>
+                    <option
+                        value="{{ $partnerOrganization->id }}"
+                        data-country-id="{{ $partnerOrganization->country_id }}"
+                        @selected((string) old('partner_organization_id', $visit->partner_organization_id) === (string) $partnerOrganization->id)
+                    >
+                        {{ $partnerOrganization->display_name }}
+                    </option>
                 @endforeach
             </select>
             @error('partner_organization_id')
@@ -369,3 +375,56 @@
         </form>
     @endforeach
 @endif
+
+@once
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('[data-visit-form]').forEach((form) => {
+                    const countrySelect = form.querySelector('[data-visit-country-select]');
+                    const organizationSelect = form.querySelector('[data-visit-organization-select]');
+
+                    if (!countrySelect || !organizationSelect) {
+                        return;
+                    }
+
+                    const syncOrganizations = (preserveSelectedMismatch = false) => {
+                        const selectedCountryId = countrySelect.value;
+                        const currentValue = organizationSelect.value;
+
+                        Array.from(organizationSelect.options).forEach((option) => {
+                            if (!option.value) {
+                                option.hidden = false;
+                                option.disabled = false;
+                                return;
+                            }
+
+                            const matchesCountry = selectedCountryId === '' || option.dataset.countryId === selectedCountryId;
+                            const keepSelectedMismatch = preserveSelectedMismatch && option.value === currentValue;
+                            const shouldShow = matchesCountry || keepSelectedMismatch;
+
+                            option.hidden = !shouldShow;
+                            option.disabled = !shouldShow;
+                        });
+
+                        if (!preserveSelectedMismatch && currentValue !== '') {
+                            const selectedOption = organizationSelect.options[organizationSelect.selectedIndex];
+
+                            if (
+                                selectedOption &&
+                                selectedOption.value !== '' &&
+                                selectedCountryId !== '' &&
+                                selectedOption.dataset.countryId !== selectedCountryId
+                            ) {
+                                organizationSelect.value = '';
+                            }
+                        }
+                    };
+
+                    syncOrganizations(true);
+                    countrySelect.addEventListener('change', () => syncOrganizations(false));
+                });
+            });
+        </script>
+    @endpush
+@endonce

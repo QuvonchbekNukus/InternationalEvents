@@ -45,6 +45,9 @@ class ResourceDetailPagesTest extends TestCase
             'iso2' => 'TC',
             'iso3' => 'TCT',
             'region_uz' => 'Central Asia',
+            'latitude' => 41.3111,
+            'longitude' => 69.2797,
+            'default_zoom' => 5,
             'cooperation_status' => 'faol',
         ]);
 
@@ -209,7 +212,11 @@ class ResourceDetailPagesTest extends TestCase
             ->assertSee('Framework Agreement')
             ->assertSee('Annual Forum')
             ->assertSee('Delegation Visit')
-            ->assertSee('Overview File');
+            ->assertSee('Overview File')
+            ->assertSee('Test Country xaritada')
+            ->assertSee('data-leaflet-map', false)
+            ->assertSee('"lat":41.3111', false)
+            ->assertSee('"lng":69.2797', false);
 
         $this->actingAs($user)
             ->get(route('agreements.show', $agreement))

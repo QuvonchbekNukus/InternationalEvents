@@ -34,6 +34,7 @@
                 'count' => \App\Models\User::count(),
                 'description' => __('ui.dashboard.cards.users.description'),
                 'icon' => 'group',
+                'tone' => 'azure',
                 'route' => route('users.index'),
                 'action' => __('ui.dashboard.cards.users.action'),
             ],
@@ -43,6 +44,7 @@
                 'count' => \App\Models\Department::count(),
                 'description' => __('ui.dashboard.cards.departments.description'),
                 'icon' => 'business_center',
+                'tone' => 'emerald',
                 'route' => route('departments.index'),
                 'action' => __('ui.dashboard.cards.departments.action'),
             ],
@@ -52,6 +54,7 @@
                 'count' => \App\Models\Rank::count(),
                 'description' => __('ui.dashboard.cards.ranks.description'),
                 'icon' => 'stars',
+                'tone' => 'amber',
                 'route' => route('ranks.index'),
                 'action' => __('ui.dashboard.cards.ranks.action'),
             ],
@@ -61,6 +64,7 @@
                 'count' => \App\Models\Country::count(),
                 'description' => __('ui.dashboard.cards.countries.description'),
                 'icon' => 'public',
+                'tone' => 'cyan',
                 'route' => route('countries.index'),
                 'action' => __('ui.dashboard.cards.countries.action'),
             ],
@@ -70,6 +74,7 @@
                 'count' => \App\Models\Agreement::count(),
                 'description' => __('ui.dashboard.cards.agreements.description'),
                 'icon' => 'description',
+                'tone' => 'indigo',
                 'route' => route('agreements.index'),
                 'action' => __('ui.dashboard.cards.agreements.action'),
             ],
@@ -79,6 +84,7 @@
                 'count' => \App\Models\AgreementType::count(),
                 'description' => __('ui.dashboard.cards.agreement_types.description'),
                 'icon' => 'toc',
+                'tone' => 'violet',
                 'route' => route('agreement-types.index'),
                 'action' => __('ui.dashboard.cards.agreement_types.action'),
             ],
@@ -88,6 +94,7 @@
                 'count' => \App\Models\AgreementDirection::count(),
                 'description' => __('ui.dashboard.cards.agreement_directions.description'),
                 'icon' => 'timeline',
+                'tone' => 'rose',
                 'route' => route('agreement-directions.index'),
                 'action' => __('ui.dashboard.cards.agreement_directions.action'),
             ],
@@ -97,6 +104,7 @@
                 'count' => \App\Models\OrganizationType::count(),
                 'description' => __('ui.dashboard.cards.organization_types.description'),
                 'icon' => 'domain',
+                'tone' => 'teal',
                 'route' => route('organization-types.index'),
                 'action' => __('ui.dashboard.cards.organization_types.action'),
             ],
@@ -106,6 +114,7 @@
                 'count' => \App\Models\PartnerOrganization::count(),
                 'description' => __('ui.dashboard.cards.partner_organizations.description'),
                 'icon' => 'business',
+                'tone' => 'sky',
                 'route' => route('partner-organizations.index'),
                 'action' => __('ui.dashboard.cards.partner_organizations.action'),
             ],
@@ -115,6 +124,7 @@
                 'count' => \App\Models\PartnerContact::count(),
                 'description' => __('ui.dashboard.cards.partner_contacts.description'),
                 'icon' => 'contacts',
+                'tone' => 'orange',
                 'route' => route('partner-contacts.index'),
                 'action' => __('ui.dashboard.cards.partner_contacts.action'),
             ],
@@ -136,17 +146,6 @@
                 <span>{{ $roleLabel }}</span>
             </div>
         </div>
-
-        <x-leaflet-map
-            :eyebrow="$dashboardMap['eyebrow']"
-            :title="$dashboardMap['title']"
-            :subtitle="$dashboardMap['subtitle']"
-            :height="$dashboardMap['height']"
-            :center="$dashboardMap['center']"
-            :zoom="$dashboardMap['zoom']"
-            :markers="$dashboardMap['markers']"
-            :chips="$dashboardMap['chips']"
-        />
 
         @if (($eventCalendar['has_access'] ?? false) === true)
             @php
@@ -317,7 +316,7 @@
                                 @foreach ($eventCalendar['weeks'] as $week)
                                     @php
                                         $weekLaneCount = count($week['span_lanes'] ?? []);
-                                        $weekLaneHeight = $weekLaneCount > 0 ? ($weekLaneCount * 30) + (($weekLaneCount - 1) * 6) : 0;
+                                        $weekLaneHeight = $weekLaneCount > 0 ? ($weekLaneCount * 32) + (($weekLaneCount - 1) * 6) : 0;
                                     @endphp
                                     <section class="event-calendar-compact__week" style="--week-lane-height: {{ $weekLaneHeight }}px;">
                                         <div class="event-calendar-compact__days">
@@ -468,15 +467,26 @@
             </section>
         @endif
 
-        <div class="stats-grid">
+        <x-leaflet-map
+            :eyebrow="$dashboardMap['eyebrow']"
+            :title="$dashboardMap['title']"
+            :subtitle="$dashboardMap['subtitle']"
+            :height="$dashboardMap['height']"
+            :center="$dashboardMap['center']"
+            :zoom="$dashboardMap['zoom']"
+            :markers="$dashboardMap['markers']"
+            :chips="$dashboardMap['chips']"
+        />
+
+        <div class="stats-grid dashboard-stats-grid">
             @foreach ($resourceCards as $card)
                 @if (auth()->user()?->can($card['permission']))
-                    <article class="stat-card">
+                    <article class="stat-card dashboard-stat-card dashboard-stat-card--{{ $card['tone'] ?? 'azure' }}">
                         <div class="stat-card__head">
                             <span class="stat-icon app-icon-box app-icon-box--lg">
                                 <i class="material-icons app-icon app-icon--lg" aria-hidden="true">{{ $card['icon'] }}</i>
                             </span>
-                            <a class="text-link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
+                            <a class="text-link dashboard-stat-card__link" href="{{ $card['route'] }}">{{ $card['action'] }}</a>
                         </div>
 
                         <strong class="stat-value">{{ $card['count'] }}</strong>
@@ -505,6 +515,7 @@
                 const resolveCalendarItemType = (item) => item?.type ?? 'unknown';
                 const resolveCalendarItemStatus = (item) => item?.status ?? null;
                 const resolveCalendarItemId = (item) => String(item?.id ?? '');
+                const rendersAsWeekSpan = (item) => Boolean(item?.is_multi_day) || resolveCalendarItemType(item) === 'birthday';
 
                 const parseJsonScript = (scriptElement, fallback) => {
                     if (!scriptElement) {
@@ -770,7 +781,7 @@
                     const section = document.createElement('section');
                     const lanes = Array.isArray(week?.span_lanes) ? week.span_lanes : [];
                     const laneCount = lanes.length;
-                    const laneHeight = laneCount > 0 ? (laneCount * 30) + ((laneCount - 1) * 6) : 0;
+                    const laneHeight = laneCount > 0 ? (laneCount * 32) + ((laneCount - 1) * 6) : 0;
 
                     section.className = 'event-calendar-compact__week';
                     section.style.setProperty('--week-lane-height', `${laneHeight}px`);
@@ -1287,7 +1298,7 @@
                             const date = button.dataset.date;
                             const dayEntry = filteredDayLookup[date] ?? createEmptyDayEntry(date);
                             const items = Array.isArray(dayEntry.items) ? dayEntry.items : [];
-                            const previewableItems = items.filter((item) => !item.is_multi_day);
+                            const previewableItems = items.filter((item) => !rendersAsWeekSpan(item));
                             const preview = button.querySelector('[data-day-preview]');
                             const more = button.querySelector('[data-day-more]');
                             const count = button.querySelector('[data-day-count]');

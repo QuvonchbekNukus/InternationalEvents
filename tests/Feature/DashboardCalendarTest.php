@@ -354,6 +354,83 @@ class DashboardCalendarTest extends TestCase
         $response->assertSee('grid-column: 1 / span 4');
     }
 
+    public function test_dashboard_keeps_multi_week_event_visible_in_each_week_of_the_same_month(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+
+        $country = $this->createCountry('IT', 'ITA');
+
+        Event::create([
+            'title_ru' => 'Nedelnaya sessiya',
+            'title_uz' => 'Haftalik sessiya',
+            'title_cryl' => 'Haftalik sessiya',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-04-01 09:00:00',
+            'end_datetime' => '2026-04-08 18:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->getJson(route('dashboard.calendar', ['month' => '2026-04']));
+
+        $response->assertOk();
+
+        $segments = $this->extractSpanPlacementsForTitle(
+            $response->json('eventCalendar.weeks') ?? [],
+            'Haftalik sessiya'
+        );
+
+        $this->assertSame([
+            ['start_column' => 3, 'span' => 5],
+            ['start_column' => 1, 'span' => 3],
+        ], $segments);
+    }
+
+    public function test_dashboard_keeps_multi_week_visit_visible_in_each_week_of_the_same_month(): void
+    {
+        $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewVisitsPermission);
+
+        $country = $this->createCountry('ES', 'ESP');
+
+        Visit::create([
+            'title_ru' => 'Nedelniy vizit',
+            'title_uz' => 'Haftalik tashrif',
+            'title_cryl' => 'Haftalik tashrif',
+            'country_id' => $country->id,
+            'start_date' => '2026-04-01',
+            'end_date' => '2026-04-07',
+            'status' => 'ongoing',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->getJson(route('dashboard.calendar', ['month' => '2026-04']));
+
+        $response->assertOk();
+
+        $segments = $this->extractSpanPlacementsForTitle(
+            $response->json('eventCalendar.weeks') ?? [],
+            'Haftalik tashrif'
+        );
+
+        $this->assertSame([
+            ['start_column' => 3, 'span' => 5],
+            ['start_column' => 1, 'span' => 2],
+        ], $segments);
+    }
+
     public function test_dashboard_displays_completed_events_and_visits_with_completed_filter(): void
     {
         $viewEventsPermission = Permission::findOrCreate('view events', 'web');
@@ -436,6 +513,78 @@ class DashboardCalendarTest extends TestCase
         $response->assertSee('Hamkor tashkilot');
     }
 
+    public function test_dashboard_renders_birthdays_as_separate_week_spans_even_when_day_is_busy(): void
+    {
+        $viewEventsPermission = Permission::findOrCreate('view events', 'web');
+        $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
+        $viewPartnerContactsPermission = Permission::findOrCreate('view partner contacts', 'web');
+
+        $user = User::factory()->create();
+        $user->givePermissionTo($viewEventsPermission);
+        $user->givePermissionTo($viewVisitsPermission);
+        $user->givePermissionTo($viewPartnerContactsPermission);
+
+        $country = $this->createCountry('CN', 'CHN');
+        $organization = PartnerOrganization::create([
+            'country_id' => $country->id,
+            'name_ru' => 'Busy organization',
+            'name_uz' => 'Band tashkilot',
+            'name_cryl' => 'Band tashkilot',
+            'short_name' => 'BT',
+            'status' => 'faol',
+        ]);
+
+        Event::create([
+            'title_ru' => 'Busy event RU',
+            'title_uz' => 'Band tadbir',
+            'title_cryl' => 'Band tadbir',
+            'country_id' => $country->id,
+            'start_datetime' => '2026-03-05 09:00:00',
+            'end_datetime' => '2026-03-07 18:00:00',
+            'format' => 'offline',
+            'status' => 'rejada',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        Visit::create([
+            'title_ru' => 'Busy visit RU',
+            'title_uz' => 'Band tashrif',
+            'title_cryl' => 'Band tashrif',
+            'country_id' => $country->id,
+            'start_date' => '2026-03-05',
+            'end_date' => '2026-03-06',
+            'status' => 'ongoing',
+            'created_by' => $user->id,
+            'updated_by' => $user->id,
+        ]);
+
+        PartnerContact::create([
+            'partner_organization_id' => $organization->id,
+            'full_name_ru' => 'Li Vey',
+            'full_name_uz' => 'Li Vey',
+            'full_name_cryl' => 'Li Vey',
+            'birthday' => '1990-03-05',
+            'position_uz' => 'Maslahatchi',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->getJson(route('dashboard.calendar', ['month' => '2026-03']));
+
+        $response->assertOk();
+
+        $birthdaySegments = $this->extractSegmentsForTitle(
+            $response->json('eventCalendar.weeks') ?? [],
+            'Li Vey'
+        );
+
+        $this->assertCount(1, $birthdaySegments);
+        $this->assertSame('birthday', $birthdaySegments[0]['type']);
+        $this->assertSame(4, $birthdaySegments[0]['start_column']);
+        $this->assertSame(1, $birthdaySegments[0]['span']);
+    }
+
     private function createCountry(string $iso2, string $iso3): Country
     {
         return Country::create([
@@ -446,5 +595,58 @@ class DashboardCalendarTest extends TestCase
             'iso3' => $iso3,
             'cooperation_status' => 'faol',
         ]);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $weeks
+     * @return list<array{start_column: int, span: int}>
+     */
+    private function extractSpanPlacementsForTitle(array $weeks, string $title): array
+    {
+        $placements = [];
+
+        foreach ($weeks as $week) {
+            foreach (($week['span_lanes'] ?? []) as $lane) {
+                foreach ($lane as $segment) {
+                    if (($segment['title'] ?? null) !== $title) {
+                        continue;
+                    }
+
+                    $placements[] = [
+                        'start_column' => $segment['start_column'] ?? 0,
+                        'span' => $segment['span'] ?? 0,
+                    ];
+                }
+            }
+        }
+
+        return $placements;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $weeks
+     * @return list<array{type: mixed, start_column: mixed, span: mixed}>
+     */
+    private function extractSegmentsForTitle(array $weeks, string $title): array
+    {
+        $segments = [];
+
+        foreach ($weeks as $week) {
+            foreach (($week['span_lanes'] ?? []) as $lane) {
+                foreach ($lane as $segment) {
+                    if (($segment['title'] ?? null) !== $title) {
+                        continue;
+                    }
+
+                    $segments[] = [
+                        'type' => $segment['type'] ?? null,
+                        'start_column' => $segment['start_column'] ?? null,
+                        'span' => $segment['span'] ?? null,
+                    ];
+                }
+            }
+        }
+
+        return $segments;
     }
 }

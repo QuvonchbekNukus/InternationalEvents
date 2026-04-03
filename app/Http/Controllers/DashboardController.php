@@ -137,11 +137,11 @@ class DashboardController extends Controller
         $items = collect();
 
         if ($canViewEvents) {
-            $items = $items->concat($this->fetchEventCalendarItems($request, $monthStart, $monthEnd, $texts));
+            $items = $items->concat($this->fetchEventCalendarItems($request, $calendarStart, $calendarEnd, $texts));
         }
 
         if ($canViewVisits) {
-            $items = $items->concat($this->fetchVisitCalendarItems($request, $monthStart, $monthEnd, $texts));
+            $items = $items->concat($this->fetchVisitCalendarItems($request, $calendarStart, $calendarEnd, $texts));
         }
 
         if ($canViewPartnerContacts) {
@@ -165,7 +165,7 @@ class DashboardController extends Controller
         $selectedDate = $this->resolveSelectedCalendarDate($dayLookup, $monthStart, $monthEnd);
 
         for ($weekStart = $calendarStart; $weekStart->lte($calendarEnd); $weekStart = $weekStart->addWeek()) {
-            $weekEnd = $weekStart->endOfWeek(CarbonImmutable::SUNDAY);
+            $weekEnd = $weekStart->addDays(6)->startOfDay();
             $days = [];
 
             for ($dayOffset = 0; $dayOffset < 7; $dayOffset++) {
@@ -282,8 +282,8 @@ class DashboardController extends Controller
      */
     private function fetchEventCalendarItems(
         Request $request,
-        CarbonImmutable $monthStart,
-        CarbonImmutable $monthEnd,
+        CarbonImmutable $visibleStart,
+        CarbonImmutable $visibleEnd,
         array $texts
     ): Collection {
         $eventsQuery = Event::query()
@@ -292,14 +292,14 @@ class DashboardController extends Controller
                 'eventType:id,name_uz,name_ru,name_cryl',
             ])
             ->whereIn('status', self::DISPLAY_EVENT_STATUSES)
-            ->where(function ($query) use ($monthStart, $monthEnd): void {
+            ->where(function ($query) use ($visibleStart, $visibleEnd): void {
                 $query
-                    ->whereBetween('start_datetime', [$monthStart->startOfDay(), $monthEnd->endOfDay()])
-                    ->orWhere(function ($rangeQuery) use ($monthStart, $monthEnd): void {
+                    ->whereBetween('start_datetime', [$visibleStart->startOfDay(), $visibleEnd->endOfDay()])
+                    ->orWhere(function ($rangeQuery) use ($visibleStart, $visibleEnd): void {
                         $rangeQuery
                             ->whereNotNull('end_datetime')
-                            ->where('start_datetime', '<=', $monthEnd->endOfDay())
-                            ->where('end_datetime', '>=', $monthStart->startOfDay());
+                            ->where('start_datetime', '<=', $visibleEnd->endOfDay())
+                            ->where('end_datetime', '>=', $visibleStart->startOfDay());
                     });
             });
 
@@ -329,8 +329,8 @@ class DashboardController extends Controller
      */
     private function fetchVisitCalendarItems(
         Request $request,
-        CarbonImmutable $monthStart,
-        CarbonImmutable $monthEnd,
+        CarbonImmutable $visibleStart,
+        CarbonImmutable $visibleEnd,
         array $texts
     ): Collection {
         $visitsQuery = Visit::query()
@@ -339,14 +339,14 @@ class DashboardController extends Controller
                 'visitType:id,name_uz,name_ru,name_cryl',
             ])
             ->whereIn('status', self::DISPLAY_VISIT_STATUSES)
-            ->where(function ($query) use ($monthStart, $monthEnd): void {
+            ->where(function ($query) use ($visibleStart, $visibleEnd): void {
                 $query
-                    ->whereBetween('start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                    ->orWhere(function ($rangeQuery) use ($monthStart, $monthEnd): void {
+                    ->whereBetween('start_date', [$visibleStart->toDateString(), $visibleEnd->toDateString()])
+                    ->orWhere(function ($rangeQuery) use ($visibleStart, $visibleEnd): void {
                         $rangeQuery
                             ->whereNotNull('end_date')
-                            ->where('start_date', '<=', $monthEnd->toDateString())
-                            ->where('end_date', '>=', $monthStart->toDateString());
+                            ->where('start_date', '<=', $visibleEnd->toDateString())
+                            ->where('end_date', '>=', $visibleStart->toDateString());
                     });
             });
 
@@ -637,8 +637,12 @@ class DashboardController extends Controller
         $groupedItems = [];
 
         foreach ($items as $item) {
-            $cursor = $item['start_cursor']->max($calendarStart);
-            $endCursor = $item['end_cursor']->min($calendarEnd);
+            $cursor = $this->calendarDateCursor($item['start_date'] ?? null)?->max($calendarStart);
+            $endCursor = $this->calendarDateCursor($item['end_date'] ?? $item['start_date'] ?? null)?->min($calendarEnd);
+
+            if (! $cursor || ! $endCursor) {
+                continue;
+            }
 
             while ($cursor->lte($endCursor)) {
                 $groupedItems[$cursor->toDateString()][] = $this->exportCalendarItem($item);
@@ -654,7 +658,7 @@ class DashboardController extends Controller
             $dayItems = $groupedItems[$dateKey] ?? [];
             $previewableItems = array_values(array_filter(
                 $dayItems,
-                fn (array $item): bool => ($item['is_multi_day'] ?? false) === false
+                fn (array $item): bool => ! $this->rendersAsWeekSpan($item)
             ));
 
             $lookup[$dateKey] = [
@@ -697,12 +701,16 @@ class DashboardController extends Controller
         $lanes = [];
 
         foreach ($items as $item) {
-            if (! ($item['is_multi_day'] ?? false)) {
+            if (! $this->rendersAsWeekSpan($item)) {
                 continue;
             }
 
-            $itemStart = $item['start_cursor'];
-            $itemEnd = $item['end_cursor'];
+            $itemStart = $this->calendarDateCursor($item['start_date'] ?? null);
+            $itemEnd = $this->calendarDateCursor($item['end_date'] ?? $item['start_date'] ?? null);
+
+            if (! $itemStart || ! $itemEnd) {
+                continue;
+            }
 
             if ($itemEnd->lt($weekStart) || $itemStart->gt($weekEnd)) {
                 continue;
@@ -739,6 +747,28 @@ class DashboardController extends Controller
         ksort($lanes);
 
         return array_values($lanes);
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private function rendersAsWeekSpan(array $item): bool
+    {
+        return (bool) ($item['is_multi_day'] ?? false)
+            || ($item['type'] ?? null) === self::CALENDAR_ITEM_TYPE_BIRTHDAY;
+    }
+
+    private function calendarDateCursor(?string $date): ?CarbonImmutable
+    {
+        if (! is_string($date) || $date === '') {
+            return null;
+        }
+
+        try {
+            return CarbonImmutable::createFromFormat('!Y-m-d', $date, 'UTC')->startOfDay();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
