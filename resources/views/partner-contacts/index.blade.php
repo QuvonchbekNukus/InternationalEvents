@@ -74,7 +74,7 @@
                                     <span class="row-title">
                                         <a class="row-title-link" href="{{ route('partner-contacts.show', $partnerContact) }}">{{ $partnerContact->display_name }}</a>
                                     </span>
-                                    <span class="row-subtitle">{{ $partnerContact->full_name_ru }} / {{ $partnerContact->full_name_cryl }}</span>
+                                    <span class="row-subtitle">{{ $partnerContact->full_name_ru }}</span>
                                     @if ($partnerContact->photoDocument || $partnerContact->cvDocument)
                                         <span class="row-subtitle">
                                             @if ($partnerContact->photoDocument?->file_url)
@@ -103,8 +103,8 @@
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $partnerContact->display_position ?: "Lavozim kiritilmagan" }}</span>
-                                    @if ($partnerContact->position_ru || $partnerContact->position_cryl)
-                                        <span class="row-subtitle">{{ $partnerContact->position_ru ?: '-' }} / {{ $partnerContact->position_cryl ?: '-' }}</span>
+                                    @if ($partnerContact->position_ru)
+                                        <span class="row-subtitle">{{ $partnerContact->position_ru }}</span>
                                     @endif
                                 </td>
                                 <td>

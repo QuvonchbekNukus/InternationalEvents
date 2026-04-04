@@ -20,6 +20,7 @@ class ProfileController extends Controller
             'user' => $request->user(),
             'notifications' => $request->user()
                 ->notificationItems()
+                ->with('related')
                 ->orderBy('is_read')
                 ->orderByDesc('created_at')
                 ->paginate(10, ['*'], 'notifications_page')

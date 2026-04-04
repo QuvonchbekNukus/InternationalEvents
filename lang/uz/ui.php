@@ -12,13 +12,24 @@ return [
         'logout' => 'Chiqish',
         'language' => 'Til',
     ],
+    'notifications_dropdown' => [
+        'panel_title' => 'So\'nggi bildirishnomalar',
+        'panel_aria' => 'So\'nggi bildirishnomalar ro\'yxati',
+        'empty' => 'Hozircha bildirishnomalar yo\'q.',
+        'open_notifications' => 'Bildirishnomalarni ochish',
+        'kind_event' => 'Tadbir',
+        'kind_visit' => 'Tashrif',
+        'kind_agreement' => 'Kelishuv',
+        'kind_birthday' => 'Tug\'ilgan kun',
+        'kind_other' => 'Xabar',
+    ],
     'auth' => [
         'login' => [
             'page_title' => 'Tizimga kirish',
             'brand_alt' => 'Milliy Gvardiya logosi',
             'organization_country' => "O'ZBEKISTON RESPUBLIKASI",
             'organization_agency' => 'MILLIY GVARDIYASI',
-            'department' => 'Xalqaro aloqalar boshqarmasi',
+            'department' => 'Xalqaro Hamkorlik Boshqarmasi',
             'form_aria' => 'Kirish formasi',
             'heading' => 'Tizimga kirish',
             'phone' => 'Telefon raqami',
@@ -46,7 +57,7 @@ return [
         'admin' => 'Admin',
         'operator' => 'Operator',
         'user' => 'Foydalanuvchi',
-        'unassigned' => "Rol biriktirilmagan",
+        'unassigned' => 'Rol biriktirilmagan',
     ],
     'sidebar' => [
         'open' => 'Yon panelni ochish',
@@ -83,7 +94,7 @@ return [
         'departments' => "Bo'limlar",
         'ranks' => 'Unvonlar',
         'activity_logs' => 'Tizim loglari',
-        'role_permissions' => "Ruxsatlarni boshqarish",
+        'role_permissions' => 'Ruxsatlarni boshqarish',
     ],
     'dashboard' => [
         'page_title' => 'Boshqaruv paneli',

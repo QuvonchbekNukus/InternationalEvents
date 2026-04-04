@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('country_id')->constrained()->restrictOnDelete();
             $table->string('name_ru');
             $table->string('name_uz');
-            $table->string('name_cryl');
             $table->string('short_name', 100)->nullable();
             $table->foreignId('organization_type_id')->nullable()->constrained()->nullOnDelete();
             $table->string('address')->nullable();

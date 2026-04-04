@@ -39,7 +39,6 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Test Organization RU',
             'name_uz' => 'Test Organization',
-            'name_cryl' => 'Test Organization CY',
             'short_name' => 'TO',
             'city' => 'Tashkent',
             'website' => 'example.test',
@@ -81,14 +80,12 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Stored Organization RU',
             'name_uz' => 'Stored Organization',
-            'name_cryl' => 'Stored Organization CY',
             'status' => 'faol',
         ]);
 
         $document = Document::query()->create([
             'title_uz' => 'Stored Organization info fayli',
             'title_ru' => 'Stored Organization info file',
-            'title_cryl' => 'Stored Organization info fayli',
             'file_name' => 'org-info-old.pdf',
             'file_path' => '2026/03/org-info-old.pdf',
             'file_ext' => 'pdf',
@@ -110,7 +107,6 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Updated Organization RU',
             'name_uz' => 'Updated Organization',
-            'name_cryl' => 'Updated Organization CY',
             'short_name' => 'UO',
             'city' => 'Samarkand',
             'website' => 'updated.example.test',
@@ -149,7 +145,6 @@ class PartnerOrganizationAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Delete Organization RU',
             'name_uz' => 'Delete Organization',
-            'name_cryl' => 'Delete Organization CY',
             'status' => 'faol',
         ]);
 
@@ -158,7 +153,6 @@ class PartnerOrganizationAttachmentTest extends TestCase
         $document = Document::query()->create([
             'title_uz' => 'Delete Organization info fayli',
             'title_ru' => 'Delete Organization info file',
-            'title_cryl' => 'Delete Organization info fayli',
             'file_name' => 'organization-delete.pdf',
             'file_path' => '2026/04/organization-delete.pdf',
             'file_ext' => 'pdf',
@@ -206,7 +200,6 @@ class PartnerOrganizationAttachmentTest extends TestCase
         return Country::query()->create([
             'name_ru' => 'Test Country RU',
             'name_uz' => 'Test Country',
-            'name_cryl' => 'Test Country CY',
             'iso2' => 'TC',
             'iso3' => 'TCT',
             'cooperation_status' => 'faol',

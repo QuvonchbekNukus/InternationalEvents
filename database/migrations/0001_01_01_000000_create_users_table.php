@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('last_name');
             $table->string('phone')->unique();
             $table->string('password');
+            $table->rememberToken();
             $table->string('position_ru')->nullable();
             $table->string('position_uz')->nullable();
-            $table->string('position_cryl')->nullable();
             $table->unsignedBigInteger('department_id')->nullable();
             $table->unsignedBigInteger('rank_id');
             $table->string('avatar')->nullable();

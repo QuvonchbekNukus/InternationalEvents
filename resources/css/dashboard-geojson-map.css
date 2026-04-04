@@ -28,8 +28,11 @@
     border-color: rgba(248, 113, 113, 0.45);
 }
 
+/* Tayyor: +/– tugmalari yonidagi qora status-blok va matn ko‘rinmasin */
 .dashboard-geojson-map__status[data-variant='ready'] {
-    border-color: rgba(74, 222, 128, 0.35);
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
 }
 
 .dashboard-geojson-map__status-copy {
@@ -56,43 +59,6 @@
     border-top-color: #93c5fd;
     border-radius: 999px;
     animation: dashboard-geojson-map-spin 0.85s linear infinite;
-}
-
-.dashboard-geojson-map__legend {
-    position: absolute;
-    right: 18px;
-    bottom: 18px;
-    z-index: 550;
-    display: inline-flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(7, 12, 24, 0.72);
-    backdrop-filter: blur(12px);
-    color: #f8fbff;
-    font-size: 12px;
-}
-
-.dashboard-geojson-map__legend-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.dashboard-geojson-map__legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 999px;
-    border: 1px solid #3b82f6;
-    background: rgba(147, 197, 253, 0.72);
-}
-
-.dashboard-geojson-map__legend-swatch--active {
-    border-color: #f8fafc;
-    background: rgba(248, 250, 252, 0.82);
 }
 
 .leaflet-map-card .dashboard-geojson-map__tooltip {
@@ -226,17 +192,28 @@
     margin-bottom: 10px;
 }
 
+/* `hidden` must win over `.dashboard-geojson-map__modal-item { display: grid }` */
+.dashboard-geojson-map__modal-panel-content [hidden] {
+    display: none !important;
+}
+
 .dashboard-geojson-map__modal-item {
     display: grid;
-    grid-template-columns: 54px 1fr;
     gap: 12px;
-    align-items: center;
+    align-items: start;
     padding: 12px;
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0.06);
     color: #f8fbff;
     text-decoration: none;
+    /* Rasm yoki yo‘qligiga qarab: yashirin rasm bo‘lsa faqat bitta ustun (matn to‘liq kenglikda) */
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.dashboard-geojson-map__modal-item:has(> .dashboard-geojson-map__modal-item-image:not([hidden])) {
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
 }
 
 .dashboard-geojson-map__modal-item:hover,
@@ -254,14 +231,21 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
-.dashboard-geojson-map__modal-item strong {
-    display: block;
-    font-size: 13px;
-    line-height: 1.25;
-    margin-bottom: 4px;
+.dashboard-geojson-map__modal-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
 }
 
-.dashboard-geojson-map__modal-item span {
+.dashboard-geojson-map__modal-item-main strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.35;
+    font-weight: 700;
+}
+
+.dashboard-geojson-map__modal-item-main span {
     display: block;
     color: rgba(214, 223, 241, 0.82);
     font-size: 12px;
@@ -272,8 +256,7 @@
     width: fit-content;
 }
 
-.dashboard-geojson-map__modal-chip,
-.dashboard-geojson-map__modal-link {
+.dashboard-geojson-map__modal-chip {
     display: inline-flex;
     align-items: center;
     min-height: 38px;
@@ -284,13 +267,6 @@
     color: #f8fbff;
     font-size: 13px;
     font-weight: 700;
-    text-decoration: none;
-}
-
-.dashboard-geojson-map__modal-link:hover,
-.dashboard-geojson-map__modal-link:focus {
-    border-color: rgba(147, 197, 253, 0.4);
-    background: rgba(59, 130, 246, 0.18);
 }
 
 .dashboard-geojson-map-modal-open {
@@ -304,15 +280,10 @@
 }
 
 @media (max-width: 860px) {
-    .dashboard-geojson-map__status,
-    .dashboard-geojson-map__legend {
+    .dashboard-geojson-map__status {
         left: 14px;
         right: 14px;
         max-width: none;
-    }
-
-    .dashboard-geojson-map__legend {
-        justify-content: space-between;
     }
 
     .dashboard-geojson-map__modal-dialog {

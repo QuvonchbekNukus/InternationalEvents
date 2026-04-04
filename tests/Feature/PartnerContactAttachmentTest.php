@@ -40,11 +40,9 @@ class PartnerContactAttachmentTest extends TestCase
             'partner_organization_id' => $partnerOrganization->id,
             'full_name_ru' => 'Тестовый Контакт',
             'full_name_uz' => 'Test Kontakt',
-            'full_name_cryl' => 'Тест Контакт',
             'birthday' => '1990-01-15',
             'position_ru' => 'Советник',
             'position_uz' => 'Maslahatchi',
-            'position_cryl' => 'Маслаҳатчи',
             'email' => 'contact@example.test',
             'phone' => '+998901234567',
             'description' => 'Test izoh',
@@ -98,7 +96,6 @@ class PartnerContactAttachmentTest extends TestCase
         $photoDocument = Document::query()->create([
             'title_uz' => 'Eski foto',
             'title_ru' => 'Старое фото',
-            'title_cryl' => 'Эски фото',
             'file_name' => 'photo-old.jpg',
             'file_path' => '2026/03/photo-old.jpg',
             'file_ext' => 'jpg',
@@ -114,7 +111,6 @@ class PartnerContactAttachmentTest extends TestCase
         $cvDocument = Document::query()->create([
             'title_uz' => 'Eski CV',
             'title_ru' => 'Старое CV',
-            'title_cryl' => 'Эски CV',
             'file_name' => 'cv-old.pdf',
             'file_path' => '2026/03/cv-old.pdf',
             'file_ext' => 'pdf',
@@ -131,7 +127,6 @@ class PartnerContactAttachmentTest extends TestCase
             'partner_organization_id' => $partnerOrganization->id,
             'full_name_ru' => 'Старый Контакт',
             'full_name_uz' => 'Eski Kontakt',
-            'full_name_cryl' => 'Эски Контакт',
             'photo' => $photoDocument->id,
             'cv' => $cvDocument->id,
             'is_primary' => false,
@@ -142,11 +137,9 @@ class PartnerContactAttachmentTest extends TestCase
             'partner_organization_id' => $partnerOrganization->id,
             'full_name_ru' => 'Yangilangan Kontakt RU',
             'full_name_uz' => 'Yangilangan Kontakt',
-            'full_name_cryl' => 'Янгиланган Контакт',
             'birthday' => '1992-05-10',
             'position_ru' => 'Советник',
             'position_uz' => 'Maslahatchi',
-            'position_cryl' => 'Маслаҳатчи',
             'email' => 'updated@example.test',
             'phone' => '+998909999999',
             'description' => 'Yangilangan izoh',
@@ -193,7 +186,6 @@ class PartnerContactAttachmentTest extends TestCase
         $photoDocument = Document::query()->create([
             'title_uz' => 'Delete foto',
             'title_ru' => 'Delete photo',
-            'title_cryl' => 'Delete foto',
             'file_name' => 'contact-photo-delete.jpg',
             'file_path' => '2026/04/contact-photo-delete.jpg',
             'file_ext' => 'jpg',
@@ -209,7 +201,6 @@ class PartnerContactAttachmentTest extends TestCase
         $cvDocument = Document::query()->create([
             'title_uz' => 'Keep CV',
             'title_ru' => 'Keep CV',
-            'title_cryl' => 'Keep CV',
             'file_name' => 'contact-cv-keep.pdf',
             'file_path' => '2026/04/contact-cv-keep.pdf',
             'file_ext' => 'pdf',
@@ -226,7 +217,6 @@ class PartnerContactAttachmentTest extends TestCase
             'partner_organization_id' => $partnerOrganization->id,
             'full_name_ru' => 'Delete Contact RU',
             'full_name_uz' => 'Delete Contact',
-            'full_name_cryl' => 'Delete Contact CY',
             'photo' => $photoDocument->id,
             'cv' => $cvDocument->id,
             'is_primary' => false,
@@ -266,7 +256,6 @@ class PartnerContactAttachmentTest extends TestCase
         $country = Country::query()->create([
             'name_ru' => 'Тестовая страна',
             'name_uz' => 'Test davlat',
-            'name_cryl' => 'Тест давлат',
             'iso2' => 'TS',
             'iso3' => 'TST',
             'cooperation_status' => 'faol',
@@ -276,7 +265,6 @@ class PartnerContactAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Тестовая организация',
             'name_uz' => 'Test tashkilot',
-            'name_cryl' => 'Тест ташкилот',
             'status' => 'faol',
         ]);
     }

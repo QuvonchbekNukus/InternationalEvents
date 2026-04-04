@@ -37,7 +37,6 @@ class PartnerOrganization extends Model
         'country_id',
         'name_ru',
         'name_uz',
-        'name_cryl',
         'short_name',
         'organization_type_id',
         'organization_info_document_id',

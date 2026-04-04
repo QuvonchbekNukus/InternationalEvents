@@ -6,6 +6,7 @@
         ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $roleName))
         : $translatedRole;
     $unreadNotificationsCount = $navbarUnreadNotificationsCount ?? 0;
+    $navbarRecentNotifications = $navbarRecentNotifications ?? collect();
     $availableLocales = config('app.supported_locales', []);
     $currentLocale = app()->getLocale();
 
@@ -74,17 +75,77 @@
                 </div>
             </form>
 
-            <a
-                class="topbar-icon-button topbar-notification"
-                href="{{ route('profile.edit') }}#profile-notifications"
-                data-topbar-notification
-                aria-label="{{ __('ui.nav.notifications') }}"
-            >
-                <i class="material-icons app-icon app-icon--md topbar-icon" aria-hidden="true">notifications</i>
-                @if ($unreadNotificationsCount > 0)
-                    <span class="topbar-badge">{{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}</span>
-                @endif
-            </a>
+            <div class="topbar-notification-dropdown" data-notification-dropdown>
+                <button
+                    type="button"
+                    class="topbar-icon-button topbar-notification"
+                    data-notification-dropdown-trigger
+                    aria-label="{{ __('ui.notifications_dropdown.open_notifications') }}"
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-controls="topbar-notification-panel"
+                >
+                    <i class="material-icons app-icon app-icon--md topbar-icon" aria-hidden="true">notifications</i>
+                    @if ($unreadNotificationsCount > 0)
+                        <span class="topbar-badge">{{ $unreadNotificationsCount > 99 ? '99+' : $unreadNotificationsCount }}</span>
+                    @endif
+                </button>
+
+                <div
+                    id="topbar-notification-panel"
+                    class="topbar-notification-panel"
+                    data-notification-dropdown-panel
+                    role="dialog"
+                    aria-label="{{ __('ui.notifications_dropdown.panel_aria') }}"
+                    aria-modal="false"
+                    hidden
+                >
+                    <div class="topbar-notification-panel__head">
+                        <span class="topbar-notification-panel__title">{{ __('ui.notifications_dropdown.panel_title') }}</span>
+                    </div>
+
+                    <div class="topbar-notification-panel__body">
+                        @forelse ($navbarRecentNotifications as $notification)
+                            @php
+                                $targetUrl = $notification->resolveTargetUrl();
+                            @endphp
+                            @if ($targetUrl)
+                                <a
+                                    class="topbar-notification-item topbar-notification-item--{{ $notification->related_kind_slug }} {{ $notification->is_read ? '' : 'is-unread' }}"
+                                    href="{{ route('notifications.open', $notification) }}"
+                                >
+                                    <span class="topbar-notification-item__icon" aria-hidden="true">
+                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                    </span>
+                                    <span class="topbar-notification-item__text">
+                                        <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                        <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                        <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
+                                        <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                    </span>
+                                    @if (! $notification->is_read)
+                                        <span class="topbar-notification-item__dot" aria-hidden="true"></span>
+                                    @endif
+                                </a>
+                            @else
+                                <div class="topbar-notification-item topbar-notification-item--generic is-disabled">
+                                    <span class="topbar-notification-item__icon" aria-hidden="true">
+                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                    </span>
+                                    <span class="topbar-notification-item__text">
+                                        <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                        <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                        <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
+                                        <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                    </span>
+                                </div>
+                            @endif
+                        @empty
+                            <p class="topbar-notification-panel__empty">{{ __('ui.notifications_dropdown.empty') }}</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
             <a class="profile-chip" href="{{ route('profile.edit') }}" aria-label="{{ __('ui.nav.profile') }}">
                 <span class="profile-avatar" aria-hidden="true">

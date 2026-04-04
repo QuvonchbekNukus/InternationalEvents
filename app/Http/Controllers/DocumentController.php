@@ -42,12 +42,12 @@ class DocumentController extends Controller implements HasMiddleware
         $selectedConfidential = trim((string) $request->string('is_confidential'));
 
         $documentsQuery = Document::query()->with([
-            'documentType:id,name_uz,name_ru,name_cryl',
-            'country:id,name_uz,name_ru,name_cryl,iso2',
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
-            'visit:id,title_uz,title_ru,title_cryl',
-            'event:id,title_uz,title_ru,title_cryl',
+            'documentType:id,name_uz,name_ru',
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'visit:id,title_uz,title_ru',
+            'event:id,title_uz,title_ru',
             'uploader:id,first_name,middle_name,last_name',
         ]);
 
@@ -65,39 +65,31 @@ class DocumentController extends Controller implements HasMiddleware
                     $documentQuery
                         ->where('title_uz', 'like', "%{$search}%")
                         ->orWhere('title_ru', 'like', "%{$search}%")
-                        ->orWhere('title_cryl', 'like', "%{$search}%")
                         ->orWhere('document_number', 'like', "%{$search}%")
                         ->orWhere('file_name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
                         ->orWhereHas('documentType', fn ($documentTypeQuery) => $documentTypeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%"))
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"))
                         ->orWhereHas('agreement', fn ($agreementQuery) => $agreementQuery
                             ->where('title_uz', 'like', "%{$search}%")
                             ->orWhere('title_ru', 'like', "%{$search}%")
-                            ->orWhere('title_cryl', 'like', "%{$search}%")
                             ->orWhere('short_title_uz', 'like', "%{$search}%")
-                            ->orWhere('short_title_ru', 'like', "%{$search}%")
-                            ->orWhere('short_title_cryl', 'like', "%{$search}%"))
+                            ->orWhere('short_title_ru', 'like', "%{$search}%"))
                         ->orWhereHas('visit', fn ($visitQuery) => $visitQuery
                             ->where('title_uz', 'like', "%{$search}%")
-                            ->orWhere('title_ru', 'like', "%{$search}%")
-                            ->orWhere('title_cryl', 'like', "%{$search}%"))
+                            ->orWhere('title_ru', 'like', "%{$search}%"))
                         ->orWhereHas('event', fn ($eventQuery) => $eventQuery
                             ->where('title_uz', 'like', "%{$search}%")
-                            ->orWhere('title_ru', 'like', "%{$search}%")
-                            ->orWhere('title_cryl', 'like', "%{$search}%"))
+                            ->orWhere('title_ru', 'like', "%{$search}%"))
                         ->orWhereHas('uploader', fn ($uploaderQuery) => $uploaderQuery
                             ->where('first_name', 'like', "%{$search}%")
                             ->orWhere('middle_name', 'like', "%{$search}%")
@@ -114,7 +106,7 @@ class DocumentController extends Controller implements HasMiddleware
 
         return view('documents.index', [
             'documents' => $documents,
-            'documentTypes' => DocumentType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'documentTypes' => DocumentType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'statuses' => Document::STATUS_LABELS,
             'filters' => [
                 'search' => $search,
@@ -256,8 +248,7 @@ class DocumentController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title_ru' => ['nullable', 'string', 'max:255'],
             'title_uz' => ['nullable', 'string', 'max:255'],
-            'title_cryl' => ['nullable', 'string', 'max:255'],
-            'document_number' => ['nullable', 'string', 'max:255'],
+'document_number' => ['nullable', 'string', 'max:255'],
             'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
             'country_id' => ['nullable', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
@@ -303,12 +294,12 @@ class DocumentController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'documentTypes' => DocumentType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
-            'agreements' => Agreement::query()->orderByDesc('created_at')->get(['id', 'country_id', 'title_uz', 'title_ru', 'title_cryl', 'short_title_uz', 'short_title_ru', 'short_title_cryl']),
-            'visits' => Visit::query()->orderByDesc('start_date')->get(['id', 'country_id', 'title_uz', 'title_ru', 'title_cryl', 'start_date']),
-            'events' => Event::query()->orderByDesc('start_datetime')->get(['id', 'country_id', 'title_uz', 'title_ru', 'title_cryl', 'start_datetime']),
+            'documentTypes' => DocumentType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
+            'agreements' => Agreement::query()->orderByDesc('created_at')->get(['id', 'country_id', 'title_uz', 'title_ru', 'short_title_uz', 'short_title_ru']),
+            'visits' => Visit::query()->orderByDesc('start_date')->get(['id', 'country_id', 'title_uz', 'title_ru', 'start_date']),
+            'events' => Event::query()->orderByDesc('start_datetime')->get(['id', 'country_id', 'title_uz', 'title_ru', 'start_datetime']),
             'statuses' => Document::STATUS_LABELS,
         ];
     }

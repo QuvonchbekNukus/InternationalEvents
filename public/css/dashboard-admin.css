@@ -1952,6 +1952,53 @@ select.toolbar-select {
     background: rgba(23, 58, 116, 0.4);
 }
 
+.notification-item__icon--related {
+    border-color: rgba(173, 197, 232, 0.18);
+}
+
+.notification-item__icon--related-event {
+    color: #93c5fd;
+    background: rgba(59, 130, 246, 0.22);
+}
+
+.notification-item__icon--related-visit {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.2);
+}
+
+.notification-item__icon--related-agreement {
+    color: #d8b4fe;
+    background: rgba(168, 85, 247, 0.22);
+}
+
+.notification-item__icon--related-birthday {
+    color: #fdba74;
+    background: rgba(251, 146, 60, 0.22);
+}
+
+.notification-item__icon--related-generic {
+    color: #dbeafe;
+    background: rgba(23, 58, 116, 0.35);
+}
+
+.notification-item__kind {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--admin-muted);
+}
+
+.notification-item__preview {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--admin-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .notification-item__content {
     min-width: 0;
     display: grid;
@@ -2594,6 +2641,51 @@ select.toolbar-select {
     gap: 5px;
     align-content: start;
     min-height: 46px;
+}
+
+.event-calendar-compact__markers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 6px;
+    align-items: center;
+    align-content: flex-end;
+    justify-content: flex-start;
+    min-height: 46px;
+    padding: 0 2px 2px;
+}
+
+.event-calendar-compact__marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 2px;
+    border-radius: 999px;
+    line-height: 0;
+    cursor: pointer;
+}
+
+.event-calendar-compact__marker:focus-visible {
+    outline: 2px solid rgba(96, 165, 250, 0.95);
+    outline-offset: 2px;
+}
+
+.event-calendar-compact__marker-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #1e3a8a;
+    box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.35);
+}
+
+.event-calendar-compact__marker--visit .event-calendar-compact__marker-dot {
+    background: #1e3a8a;
+    box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.35);
+}
+
+.event-calendar-compact__marker--birthday .event-calendar-compact__marker-dot {
+    background: #be185d;
+    box-shadow: 0 0 0 1px rgba(190, 24, 93, 0.35);
 }
 
 .event-calendar-compact__item {

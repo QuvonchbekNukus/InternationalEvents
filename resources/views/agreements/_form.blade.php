@@ -151,14 +151,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Sarlavha (KRYL)</span>
-            <input type="text" name="title_cryl" value="{{ old('title_cryl', $agreement->title_cryl) }}" placeholder="Ҳамкорлик тўғрисидаги меморандум" required>
-            @error('title_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Qisqa sarlavha (UZ)</span>
             <input type="text" name="short_title_uz" value="{{ old('short_title_uz', $agreement->short_title_uz) }}" placeholder="Hamkorlik memorandumi">
             @error('short_title_uz')
@@ -170,14 +162,6 @@
             <span class="field-label">Qisqa sarlavha (RU)</span>
             <input type="text" name="short_title_ru" value="{{ old('short_title_ru', $agreement->short_title_ru) }}" placeholder="Меморандум">
             @error('short_title_ru')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field field--span-2">
-            <span class="field-label">Qisqa sarlavha (KRYL)</span>
-            <input type="text" name="short_title_cryl" value="{{ old('short_title_cryl', $agreement->short_title_cryl) }}" placeholder="Меморандум">
-            @error('short_title_cryl')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

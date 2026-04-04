@@ -12,9 +12,8 @@ trait ResolvesLocalizedAttributes
     protected function localizedAttributeCandidates(string $baseAttribute): array
     {
         $localePriority = match (App::currentLocale()) {
-            'ru' => ['ru', 'uz', 'cryl'],
-            'cryl' => ['cryl', 'uz', 'ru'],
-            default => ['uz', 'ru', 'cryl'],
+            'ru' => ['ru', 'uz'],
+            default => ['uz', 'ru'],
         };
 
         $candidates = [];

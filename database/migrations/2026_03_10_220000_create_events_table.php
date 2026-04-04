@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('title_ru');
             $table->string('title_uz');
-            $table->string('title_cryl');
             $table->foreignId('event_type_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('country_id')->constrained()->restrictOnDelete();
             $table->foreignId('partner_organization_id')->nullable()->constrained()->nullOnDelete();
@@ -31,7 +30,6 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->text('result_summary_ru')->nullable();
             $table->text('result_summary_uz')->nullable();
-            $table->text('result_summary_cryl')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();

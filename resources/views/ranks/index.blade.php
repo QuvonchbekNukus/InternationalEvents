@@ -54,7 +54,6 @@
                             <tr>
                                 <td>
                                     <span class="row-title">{{ $rank->display_name }}</span>
-                                    <span class="row-subtitle">{{ $rank->name_cryl }}</span>
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $rank->name_ru }}</span>

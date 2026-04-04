@@ -27,14 +27,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Sarlavha (KRYL)</span>
-            <input type="text" name="title_cryl" value="{{ old('title_cryl', $document->title_cryl) }}" placeholder="Kirilcha sarlavha">
-            @error('title_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Hujjat raqami</span>
             <input type="text" name="document_number" value="{{ old('document_number', $document->document_number) }}" placeholder="MG-2026/15">
             @error('document_number')

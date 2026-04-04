@@ -22,14 +22,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Nomi (KRYL)</span>
-            <input type="text" name="name_cryl" value="{{ old('name_cryl', $department->name_cryl) }}" placeholder="Халқаро алоқалар бошқармаси" required>
-            @error('name_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field">
             <span class="field-label">Kod</span>
             <input type="text" name="code" value="{{ old('code', $department->code) }}" placeholder="XAB">

@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agreement;
 use App\Models\Country;
-use App\Models\Document;
-use App\Models\Event;
-use App\Models\Visit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -37,12 +33,10 @@ class CountryController extends Controller implements HasMiddleware
                     $countryQuery
                         ->where('name_ru', 'like', "%{$search}%")
                         ->orWhere('name_uz', 'like', "%{$search}%")
-                        ->orWhere('name_cryl', 'like', "%{$search}%")
                         ->orWhere('iso2', 'like', "%{$search}%")
                         ->orWhere('iso3', 'like', "%{$search}%")
                         ->orWhere('region_ru', 'like', "%{$search}%")
-                        ->orWhere('region_uz', 'like', "%{$search}%")
-                        ->orWhere('region_cryl', 'like', "%{$search}%");
+                        ->orWhere('region_uz', 'like', "%{$search}%");
                 });
             })
             ->when($selectedStatus !== '', fn ($query) => $query->where('cooperation_status', $selectedStatus))
@@ -86,9 +80,9 @@ class CountryController extends Controller implements HasMiddleware
 
         $partnerOrganizations = $canViewPartnerOrganizations
             ? $country->partnerOrganizations()
-                ->with(['organizationType:id,name_uz,name_ru,name_cryl'])
+                ->with(['organizationType:id,name_uz,name_ru'])
                 ->withCount('partnerContacts')
-                ->orderByRaw('coalesce(name_uz, name_ru, name_cryl) asc')
+                ->orderByRaw('coalesce(name_uz, name_ru) asc')
                 ->get()
             : collect();
 
@@ -170,15 +164,12 @@ class CountryController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['nullable', 'string', 'max:255'],
-            'name_cryl' => ['nullable', 'string', 'max:255'],
-            'iso2' => ['nullable', 'string', 'size:2', Rule::unique('countries', 'iso2')->ignore($country?->id)],
+'iso2' => ['nullable', 'string', 'size:2', Rule::unique('countries', 'iso2')->ignore($country?->id)],
             'iso3' => ['nullable', 'string', 'size:3', Rule::unique('countries', 'iso3')->ignore($country?->id)],
             'region_ru' => ['nullable', 'string', 'max:255'],
             'region_uz' => ['nullable', 'string', 'max:255'],
-            'region_cryl' => ['nullable', 'string', 'max:255'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'default_zoom' => ['nullable', 'numeric', 'between:1,20'],
             'cooperation_status' => ['required', 'string', Rule::in(Country::STATUSES)],
             'boundary_geojson_path' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
@@ -187,6 +178,10 @@ class CountryController extends Controller implements HasMiddleware
         $validated['iso2'] = isset($validated['iso2']) ? strtoupper((string) $validated['iso2']) : null;
         $validated['iso3'] = isset($validated['iso3']) ? strtoupper((string) $validated['iso3']) : null;
         $validated['flag_path'] = null;
+
+        if ($country === null) {
+            $validated['default_zoom'] = Country::DEFAULT_MAP_ZOOM;
+        }
 
         return $validated;
     }
@@ -200,9 +195,9 @@ class CountryController extends Controller implements HasMiddleware
         }
 
         $query = $country->agreements()->with([
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'agreementType:id,name_uz,name_ru,name_cryl',
-            'agreementDirection:id,name_uz,name_ru,name_cryl',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreementType:id,name_uz,name_ru',
+            'agreementDirection:id,name_uz,name_ru',
         ]);
 
         if (! $user->can('view agreements') && $user->can('view own agreements')) {
@@ -215,7 +210,7 @@ class CountryController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('signed_date')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -228,8 +223,8 @@ class CountryController extends Controller implements HasMiddleware
         }
 
         $query = $country->visits()->with([
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'visitType:id,name_uz,name_ru,name_cryl',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'visitType:id,name_uz,name_ru',
         ]);
 
         if (! $user->can('view visits') && $user->can('view own visits')) {
@@ -242,7 +237,7 @@ class CountryController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('start_date')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -255,9 +250,9 @@ class CountryController extends Controller implements HasMiddleware
         }
 
         $query = $country->events()->with([
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'eventType:id,name_uz,name_ru,name_cryl',
-            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'eventType:id,name_uz,name_ru',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
         ]);
 
         if (! $user->can('view events') && $user->can('view own events')) {
@@ -270,7 +265,7 @@ class CountryController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('start_datetime')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -283,11 +278,11 @@ class CountryController extends Controller implements HasMiddleware
         }
 
         $query = $country->documents()->with([
-            'documentType:id,name_uz,name_ru,name_cryl',
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
-            'visit:id,title_uz,title_ru,title_cryl',
-            'event:id,title_uz,title_ru,title_cryl',
+            'documentType:id,name_uz,name_ru',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'visit:id,title_uz,title_ru',
+            'event:id,title_uz,title_ru',
             'uploader:id,first_name,middle_name,last_name',
         ]);
 
@@ -297,7 +292,7 @@ class CountryController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('created_at')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl, file_name) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru,  file_name) asc')
             ->get();
     }
 }

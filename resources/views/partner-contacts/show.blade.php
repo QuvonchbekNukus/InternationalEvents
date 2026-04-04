@@ -224,12 +224,12 @@
                 <div class="detail-list">
                     <article class="detail-list__item">
                         <span class="detail-list__label">F.I.Sh variantlari</span>
-                        <strong>{{ $partnerContact->full_name_ru ?: '-' }} / {{ $partnerContact->full_name_cryl ?: '-' }}</strong>
+                        <strong>{{ $partnerContact->full_name_ru ?: '-' }}</strong>
                     </article>
 
                     <article class="detail-list__item">
                         <span class="detail-list__label">Lavozim variantlari</span>
-                        <strong>{{ $partnerContact->position_ru ?: '-' }} / {{ $partnerContact->position_cryl ?: '-' }}</strong>
+                        <strong>{{ $partnerContact->position_ru ?: '-' }}</strong>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">

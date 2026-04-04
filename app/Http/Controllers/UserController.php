@@ -32,7 +32,7 @@ class UserController extends Controller implements HasMiddleware
         $selectedDepartment = trim((string) $request->string('department_id'));
         $selectedStatus = trim((string) $request->string('status'));
 
-        $usersQuery = User::query()->with(['department:id,name_uz,name_ru,name_cryl', 'rank:id,name_uz,name_ru,name_cryl', 'roles:id,name']);
+        $usersQuery = User::query()->with(['department:id,name_uz,name_ru', 'rank:id,name_uz,name_ru', 'roles:id,name']);
 
         $this->applyOwnScope(
             $request,
@@ -52,15 +52,12 @@ class UserController extends Controller implements HasMiddleware
                         ->orWhere('phone', 'like', "%{$search}%")
                         ->orWhere('position_uz', 'like', "%{$search}%")
                         ->orWhere('position_ru', 'like', "%{$search}%")
-                        ->orWhere('position_cryl', 'like', "%{$search}%")
                         ->orWhereHas('department', fn ($departmentQuery) => $departmentQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%"))
                         ->orWhereHas('rank', fn ($rankQuery) => $rankQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedRole !== '', fn ($query) => $query->whereHas('roles', fn ($roleQuery) => $roleQuery->where('name', $selectedRole)))
@@ -75,7 +72,7 @@ class UserController extends Controller implements HasMiddleware
         return view('users.index', [
             'users' => $users,
             'roles' => Role::query()->orderBy('name')->pluck('name'),
-            'departments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'departments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'filters' => [
                 'search' => $search,
                 'role' => $selectedRole,
@@ -191,8 +188,7 @@ class UserController extends Controller implements HasMiddleware
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:6', 'max:255'],
             'position_uz' => ['nullable', 'string', 'max:255'],
             'position_ru' => ['nullable', 'string', 'max:255'],
-            'position_cryl' => ['nullable', 'string', 'max:255'],
-            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
+'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'rank_id' => ['required', 'integer', 'exists:ranks,id'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')],
             'is_active' => ['sometimes', 'boolean'],
@@ -228,8 +224,7 @@ class UserController extends Controller implements HasMiddleware
             'password' => ['nullable', 'string', 'min:6', 'max:255'],
             'position_uz' => ['nullable', 'string', 'max:255'],
             'position_ru' => ['nullable', 'string', 'max:255'],
-            'position_cryl' => ['nullable', 'string', 'max:255'],
-        ]);
+]);
 
         if (($validated['password'] ?? '') === '') {
             unset($validated['password']);

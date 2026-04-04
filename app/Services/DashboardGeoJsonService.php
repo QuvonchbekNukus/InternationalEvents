@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Country;
 use App\Models\Document;
 use App\Models\Event;
+use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -133,13 +134,17 @@ class DashboardGeoJsonService
     }
 
     /**
+     * Event and visit are chosen per country by the latest active, non-confidential document upload
+     * on that record; if none exist, the row's created_at is used as a fallback.
+     * Ruxsatlar: `view events` / `view visits` — barcha yozuvlar; faqat `view own *` — o‘ziga tegishlilar.
+     *
      * @return array{
      *   country: array{code: string, id: int|null, name: string, country_url: string|null, events_url: string, visits_url: string},
-     *   event: array{id: int, title: string, date: string|null, url: string}|null,
-     *   visit: array{id: int, title: string, date: string|null, url: string}|null
+     *   event: array{id: int, title: string, date: string|null, url: string, image_url?: string|null}|null,
+     *   visit: array{id: int, title: string, date: string|null, url: string, image_url?: string|null}|null
      * }
      */
-    public function countryDashboardSummary(string $countryCode): array
+    public function countryDashboardSummary(string $countryCode, User $viewer): array
     {
         $normalized = mb_strtoupper(trim($countryCode));
         $country = $this->countryLookup()->get($normalized);
@@ -153,10 +158,7 @@ class DashboardGeoJsonService
         $visit = null;
 
         if ($countryId) {
-            $eventModel = Event::query()
-                ->where('country_id', $countryId)
-                ->orderByDesc('created_at')
-                ->first();
+            $eventModel = $this->latestEventForCountryByUpload($countryId, $viewer);
 
             if ($eventModel) {
                 $eventImageUrl = $this->latestImageForRelation(eventId: (int) $eventModel->id);
@@ -169,10 +171,7 @@ class DashboardGeoJsonService
                 ];
             }
 
-            $visitModel = Visit::query()
-                ->where('country_id', $countryId)
-                ->orderByDesc('created_at')
-                ->first();
+            $visitModel = $this->latestVisitForCountryByUpload($countryId, $viewer);
 
             if ($visitModel) {
                 $visitImageUrl = $this->latestImageForRelation(visitId: (int) $visitModel->id);
@@ -201,6 +200,70 @@ class DashboardGeoJsonService
             'event' => $event,
             'visit' => $visit,
         ];
+    }
+
+    private function latestEventForCountryByUpload(int $countryId, User $viewer): ?Event
+    {
+        $eventsQuery = Event::query()->where('country_id', $countryId);
+
+        if ($viewer->can('view events')) {
+            // barcha tadbirlar
+        } elseif ($viewer->can('view own events')) {
+            $eventsQuery->where(function ($eventQuery) use ($viewer): void {
+                $eventQuery
+                    ->where('responsible_user_id', $viewer->id)
+                    ->orWhere('created_by', $viewer->id);
+            });
+        } else {
+            return null;
+        }
+
+        $documentStats = Document::query()
+            ->selectRaw('event_id, MAX(created_at) as last_upload')
+            ->whereNotNull('event_id')
+            ->where('status', 'faol')
+            ->where('is_confidential', false)
+            ->groupBy('event_id');
+
+        return $eventsQuery
+            ->leftJoinSub($documentStats, 'doc_stats', function ($join): void {
+                $join->on('events.id', '=', 'doc_stats.event_id');
+            })
+            ->orderByRaw('COALESCE(doc_stats.last_upload, events.created_at) DESC')
+            ->select('events.*')
+            ->first();
+    }
+
+    private function latestVisitForCountryByUpload(int $countryId, User $viewer): ?Visit
+    {
+        $visitsQuery = Visit::query()->where('country_id', $countryId);
+
+        if ($viewer->can('view visits')) {
+            // barcha tashriflar
+        } elseif ($viewer->can('view own visits')) {
+            $visitsQuery->where(function ($visitQuery) use ($viewer): void {
+                $visitQuery
+                    ->where('responsible_user_id', $viewer->id)
+                    ->orWhere('created_by', $viewer->id);
+            });
+        } else {
+            return null;
+        }
+
+        $documentStats = Document::query()
+            ->selectRaw('visit_id, MAX(created_at) as last_upload')
+            ->whereNotNull('visit_id')
+            ->where('status', 'faol')
+            ->where('is_confidential', false)
+            ->groupBy('visit_id');
+
+        return $visitsQuery
+            ->leftJoinSub($documentStats, 'doc_stats', function ($join): void {
+                $join->on('visits.id', '=', 'doc_stats.visit_id');
+            })
+            ->orderByRaw('COALESCE(doc_stats.last_upload, visits.created_at) DESC')
+            ->select('visits.*')
+            ->first();
     }
 
     private function latestImageForRelation(?int $eventId = null, ?int $visitId = null): ?string

@@ -29,7 +29,6 @@ class User extends Authenticatable
         'phone',
         'position_ru',
         'position_uz',
-        'position_cryl',
         'department_id',
         'rank_id',
         'avatar',
@@ -45,6 +44,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+        'remember_token',
     ];
 
     /**

@@ -22,14 +22,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Nomi (KRYL)</span>
-            <input type="text" name="name_cryl" value="{{ old('name_cryl', $country->name_cryl) }}" placeholder="Қозоғистон">
-            @error('name_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field">
             <span class="field-label">ISO2</span>
             <input type="text" name="iso2" value="{{ old('iso2', $country->iso2) }}" placeholder="KZ" maxlength="2">
@@ -62,14 +54,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Mintaqa (KRYL)</span>
-            <input type="text" name="region_cryl" value="{{ old('region_cryl', $country->region_cryl) }}" placeholder="Марказий Осиё">
-            @error('region_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field">
             <span class="field-label">Latitude</span>
             <input type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $country->latitude) }}" placeholder="48.0196000">
@@ -87,14 +71,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Default zoom</span>
-            <input type="number" step="0.1" name="default_zoom" value="{{ old('default_zoom', $country->default_zoom) }}" placeholder="4.8">
-            @error('default_zoom')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Hamkorlik holati</span>
             <select name="cooperation_status" required>
                 @foreach ($statuses as $statusValue => $statusLabel)
@@ -105,21 +81,6 @@
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
-
-        <label class="field field--span-2">
-            <span class="field-label">Boundary GeoJSON yo'li</span>
-            <input type="text" name="boundary_geojson_path" value="{{ old('boundary_geojson_path', $country->boundary_geojson_path) }}" placeholder="storage/geojson/kazakhstan.json">
-            @error('boundary_geojson_path')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <div class="field field--span-2">
-            <span class="field-label">Bayroq logikasi</span>
-            <span class="row-subtitle">
-                Bayroq yo'li foydalanuvchidan olinmaydi. Tizim uni avtomatik `public/flags/{iso2}.svg` formatida ishlatadi va `flag_path` bazada bo'sh saqlanadi.
-            </span>
-        </div>
 
         <label class="field field--span-2">
             <span class="field-label">Izoh</span>

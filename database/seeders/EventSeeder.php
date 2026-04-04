@@ -34,7 +34,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'XAB',
                 'title_ru' => 'Международный семинар по обмену оперативным опытом',
                 'title_uz' => "Tezkor tajriba almashinuvi bo'yicha xalqaro seminar",
-                'title_cryl' => 'Тезкор тажриба алмашинуви бўйича халқаро семинар',
                 'city' => 'Toshkent',
                 'address' => 'Milliy gvardiya akademiyasi',
                 'start_datetime' => '2026-04-12 10:00:00',
@@ -44,7 +43,6 @@ class EventSeeder extends Seeder
                 'description' => "Seminar davomida zamonaviy yondashuvlar va amaliy holatlar ko'rib chiqiladi.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
             [
                 'country_iso3' => 'TUR',
@@ -54,7 +52,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'HQB',
                 'title_ru' => 'Конференция по вопросам подготовки кадров',
                 'title_uz' => 'Kadrlar tayyorlash masalalari bo`yicha konferensiya',
-                'title_cryl' => 'Кадрлар тайёрлаш масалалари бўйича конференция',
                 'city' => 'Anqara',
                 'address' => 'JSGA konferensiya zali',
                 'start_datetime' => '2026-02-18 09:30:00',
@@ -64,7 +61,6 @@ class EventSeeder extends Seeder
                 'description' => "Konferensiyada qo`shma o`quv kurslari va almashinuv dasturlari muhokama qilindi.",
                 'result_summary_ru' => 'Подписан протокол о расширении обменных программ.',
                 'result_summary_uz' => "Almashinuv dasturlarini kengaytirish bo`yicha protokol imzolandi.",
-                'result_summary_cryl' => 'Алмашинув дастурларини кенгайтириш бўйича протокол имзоланди.',
             ],
             [
                 'country_iso3' => 'KGZ',
@@ -74,7 +70,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'XAB',
                 'title_ru' => 'Форум дружественного сотрудничества',
                 'title_uz' => 'Do`stona hamkorlik forumi',
-                'title_cryl' => 'Дўстона ҳамкорлик форуми',
                 'city' => 'Toshkent',
                 'address' => 'Xalqaro forumlar saroyi',
                 'start_datetime' => '2026-03-05 11:00:00',
@@ -84,7 +79,6 @@ class EventSeeder extends Seeder
                 'description' => "Forum doirasida ikki tomonlama hamkorlikning yangi yo`nalishlari muhokama qilinmoqda.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
             [
                 'country_iso3' => 'CHN',
@@ -94,7 +88,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'HQB',
                 'title_ru' => 'Круглый стол по цифровой безопасности',
                 'title_uz' => 'Raqamli xavfsizlik bo`yicha davra suhbati',
-                'title_cryl' => 'Рақамли хавфсизлик бўйича давра суҳбати',
                 'city' => 'Pekin',
                 'address' => 'PPSU media markazi',
                 'start_datetime' => '2026-05-19 14:00:00',
@@ -104,7 +97,6 @@ class EventSeeder extends Seeder
                 'description' => "Mutaxassislar xavfsizlik monitoringi va tahlil platformalari yuzasidan tajriba almashadi.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
             [
                 'country_iso3' => 'RUS',
@@ -114,7 +106,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'KB',
                 'title_ru' => 'Рабочая встреча по итогам совместных мероприятий',
                 'title_uz' => 'Qo`shma tadbirlar yakunlari bo`yicha ishchi uchrashuv',
-                'title_cryl' => 'Қўшма тадбирлар якунлари бўйича ишчи учрашув',
                 'city' => 'Moskva',
                 'address' => 'Rosgvardiya shtabi',
                 'start_datetime' => '2026-01-28 10:30:00',
@@ -124,7 +115,6 @@ class EventSeeder extends Seeder
                 'description' => "Uchrashuvda o`tgan davr natijalari sarhisob qilindi.",
                 'result_summary_ru' => 'Согласован перечень приоритетных задач на следующий квартал.',
                 'result_summary_uz' => "Keyingi chorak uchun ustuvor vazifalar ro`yxati kelishildi.",
-                'result_summary_cryl' => 'Кейинги чорак учун устувор вазифалар рўйхати келишилди.',
             ],
             [
                 'country_iso3' => 'KAZ',
@@ -134,7 +124,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'XAB',
                 'title_ru' => 'Форум переводчиков и аналитиков',
                 'title_uz' => 'Tarjimonlar va tahlilchilar forumi',
-                'title_cryl' => 'Таржимонлар ва таҳлилчилар форуми',
                 'city' => 'Astana',
                 'address' => 'Hamkorlik markazi',
                 'start_datetime' => '2026-06-03 09:00:00',
@@ -144,7 +133,6 @@ class EventSeeder extends Seeder
                 'description' => "Forum tarjima, hujjatlashtirish va tahliliy yondashuvlar bo`yicha sessiyalarni o`z ichiga oladi.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
             [
                 'country_iso3' => 'KGZ',
@@ -154,7 +142,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'XAB',
                 'title_ru' => 'Семинар по церемониальному протоколу',
                 'title_uz' => 'Marosim protokoli bo`yicha seminar',
-                'title_cryl' => 'Маросим протоколи бўйича семинар',
                 'city' => 'Toshkent',
                 'address' => 'Protokol markazi',
                 'start_datetime' => '2026-03-14 13:00:00',
@@ -164,7 +151,6 @@ class EventSeeder extends Seeder
                 'description' => "Texnik sabablarga ko`ra seminar masofaviy shaklda o`tkazilishi rejalashtirilgan edi.",
                 'result_summary_ru' => 'Мероприятие перенесено на более позднюю дату.',
                 'result_summary_uz' => "Tadbir keyingi muddatga ko`chirildi.",
-                'result_summary_cryl' => 'Тадбир кейинги муддатга кўчирилди.',
             ],
             [
                 'country_iso3' => 'CHN',
@@ -174,7 +160,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'HQB',
                 'title_ru' => 'Конференция по технологиям ситуационного мониторинга',
                 'title_uz' => 'Situatsion monitoring texnologiyalari bo`yicha konferensiya',
-                'title_cryl' => 'Ситуацион мониторинг технологиялари бўйича конференция',
                 'city' => 'Pekin',
                 'address' => 'PPSU katta zal',
                 'start_datetime' => '2026-07-08 10:00:00',
@@ -184,7 +169,6 @@ class EventSeeder extends Seeder
                 'description' => "Konferensiyada sun`iy intellekt va real vaqt monitoringi muhokama qilinadi.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
             [
                 'country_iso3' => 'TUR',
@@ -194,7 +178,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'KB',
                 'title_ru' => 'Круглый стол по архивной политике',
                 'title_uz' => 'Arxiv siyosati bo`yicha davra suhbati',
-                'title_cryl' => 'Архив сиёсати бўйича давра суҳбати',
                 'city' => 'Anqara',
                 'address' => 'Arxiv markazi',
                 'start_datetime' => '2026-02-25 15:00:00',
@@ -204,7 +187,6 @@ class EventSeeder extends Seeder
                 'description' => "Hujjatlar almashinuvi va saqlash standartlari yuzasidan tajriba almashildi.",
                 'result_summary_ru' => 'Подготовлены предложения по цифровизации архивного фонда.',
                 'result_summary_uz' => "Arxiv fondini raqamlashtirish bo`yicha takliflar tayyorlandi.",
-                'result_summary_cryl' => 'Архив фондини рақамлаштириш бўйича таклифлар тайёрланди.',
             ],
             [
                 'country_iso3' => 'RUS',
@@ -214,7 +196,6 @@ class EventSeeder extends Seeder
                 'responsible_department_code' => 'XAB',
                 'title_ru' => 'Рабочая встреча по мониторингу рисков',
                 'title_uz' => 'Xatarlarni monitoring qilish bo`yicha ishchi uchrashuv',
-                'title_cryl' => 'Хатарларни мониторинг қилиш бўйича ишчи учрашув',
                 'city' => 'Toshkent',
                 'address' => 'Tahliliy markaz',
                 'start_datetime' => '2026-03-21 10:00:00',
@@ -224,7 +205,6 @@ class EventSeeder extends Seeder
                 'description' => "Uchrashuvda ehtimoliy xavf indikatorlari va javob choralari ko`rib chiqilmoqda.",
                 'result_summary_ru' => null,
                 'result_summary_uz' => null,
-                'result_summary_cryl' => null,
             ],
         ];
 
@@ -246,7 +226,6 @@ class EventSeeder extends Seeder
                 ],
                 [
                     'title_ru' => $eventData['title_ru'],
-                    'title_cryl' => $eventData['title_cryl'],
                     'event_type_id' => $eventTypeIds[$eventData['event_type_name']] ?? null,
                     'partner_organization_id' => $partnerOrganizationIds[$eventData['partner_organization_name']] ?? null,
                     'agreement_id' => $agreementId,
@@ -260,7 +239,6 @@ class EventSeeder extends Seeder
                     'description' => $eventData['description'],
                     'result_summary_ru' => $eventData['result_summary_ru'],
                     'result_summary_uz' => $eventData['result_summary_uz'],
-                    'result_summary_cryl' => $eventData['result_summary_cryl'],
                     'created_by' => $responsibleUserId,
                     'updated_by' => $responsibleUserId,
                 ]

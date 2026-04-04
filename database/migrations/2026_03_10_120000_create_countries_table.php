@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name_ru');
             $table->string('name_uz')->nullable();
-            $table->string('name_cryl')->nullable();
             $table->string('iso2', 2)->unique();
             $table->string('iso3', 3)->nullable()->unique();
             $table->string('region_ru')->nullable();
             $table->string('region_uz')->nullable();
-            $table->string('region_cryl')->nullable();
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->decimal('default_zoom', 4, 1)->nullable();

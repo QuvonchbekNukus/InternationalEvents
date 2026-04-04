@@ -20,7 +20,6 @@ class OrganizationType extends Model
     protected $fillable = [
         'name_ru',
         'name_uz',
-        'name_cryl',
     ];
 
     public function partnerOrganizations(): HasMany

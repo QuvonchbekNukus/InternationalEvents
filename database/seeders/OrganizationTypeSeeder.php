@@ -16,27 +16,22 @@ class OrganizationTypeSeeder extends Seeder
             [
                 'name_ru' => 'Министерство',
                 'name_uz' => 'Vazirlik',
-                'name_cryl' => 'Вазирлик',
             ],
             [
                 'name_ru' => 'Посольство',
                 'name_uz' => 'Elchixona',
-                'name_cryl' => 'Элчихона',
             ],
             [
                 'name_ru' => 'Компания',
                 'name_uz' => 'Kompaniya',
-                'name_cryl' => 'Компания',
             ],
             [
                 'name_ru' => 'Университет',
                 'name_uz' => 'Universitet',
-                'name_cryl' => 'Университет',
             ],
             [
                 'name_ru' => 'Международная организация',
                 'name_uz' => 'Xalqaro tashkilot',
-                'name_cryl' => 'Халкаро ташкилот',
             ],
         ];
 

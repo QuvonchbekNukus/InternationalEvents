@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name_ru');
             $table->string('name_uz');
-            $table->string('name_cryl');
         });
     }
 

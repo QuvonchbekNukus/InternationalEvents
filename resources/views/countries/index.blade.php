@@ -73,7 +73,7 @@
                                     <span class="row-title">
                                         <a class="row-title-link" href="{{ route('countries.show', $country) }}">{{ $country->display_name }}</a>
                                     </span>
-                                    <span class="row-subtitle">{{ $country->name_ru }}{{ $country->name_cryl ? ' / '.$country->name_cryl : '' }}</span>
+                                    <span class="row-subtitle">{{ $country->name_ru }}</span>
                                 </td>
                                 <td>
                                     <span class="badge">{{ $country->iso2 ?: '--' }} / {{ $country->iso3 ?: '---' }}</span>
@@ -88,7 +88,7 @@
                                     <span class="row-title">
                                         {{ $country->latitude !== null && $country->longitude !== null ? number_format($country->latitude, 4).', '.number_format($country->longitude, 4) : __('ui.pages.countries.index.values.coordinates_missing') }}
                                     </span>
-                                    <span class="row-subtitle">{{ $country->default_zoom !== null ? __('ui.pages.countries.index.values.zoom').': '.number_format($country->default_zoom, 1) : __('ui.pages.countries.index.values.zoom_missing') }}</span>
+                                    <span class="row-subtitle">{{ $country->default_zoom !== null ? __('ui.pages.countries.index.values.zoom').': '.(int) $country->default_zoom : __('ui.pages.countries.index.values.zoom_missing') }}</span>
                                 </td>
                                 <td>
                                     <span class="status-pill {{ $statusClass }}">

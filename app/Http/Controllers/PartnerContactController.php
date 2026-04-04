@@ -39,8 +39,8 @@ class PartnerContactController extends Controller implements HasMiddleware
 
         $partnerContacts = PartnerContact::query()
             ->with([
-                'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id',
-                'partnerOrganization.country:id,name_uz,name_ru,name_cryl,iso2',
+                'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
+                'partnerOrganization.country:id,name_uz,name_ru,iso2',
                 'photoDocument:id,file_name,file_ext,file_size,file_path',
                 'cvDocument:id,file_name,file_ext,file_size,file_path',
             ])
@@ -49,15 +49,12 @@ class PartnerContactController extends Controller implements HasMiddleware
                     $partnerContactQuery
                         ->where('full_name_uz', 'like', "%{$search}%")
                         ->orWhere('full_name_ru', 'like', "%{$search}%")
-                        ->orWhere('full_name_cryl', 'like', "%{$search}%")
                         ->orWhere('position_uz', 'like', "%{$search}%")
                         ->orWhere('position_ru', 'like', "%{$search}%")
-                        ->orWhere('position_cryl', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"));
 
                     if ($searchDate) {
@@ -75,9 +72,9 @@ class PartnerContactController extends Controller implements HasMiddleware
         return view('partner-contacts.index', [
             'partnerContacts' => $partnerContacts,
             'partnerOrganizations' => PartnerOrganization::query()
-                ->with('country:id,name_uz,name_ru,name_cryl,iso2')
+                ->with('country:id,name_uz,name_ru,iso2')
                 ->orderBy('name_uz')
-                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
+                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
             'filters' => [
                 'search' => $search,
                 'partner_organization_id' => $selectedOrganization,
@@ -99,11 +96,11 @@ class PartnerContactController extends Controller implements HasMiddleware
     public function show(PartnerContact $partnerContact): View
     {
         $partnerContact->load([
-            'partnerOrganization:id,country_id,organization_type_id,name_uz,name_ru,name_cryl,short_name,website,city,status',
-            'partnerOrganization.country:id,name_uz,name_ru,name_cryl,iso2',
-            'partnerOrganization.organizationType:id,name_uz,name_ru,name_cryl',
-            'photoDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,created_at',
-            'cvDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,created_at',
+            'partnerOrganization:id,country_id,organization_type_id,name_uz,name_ru,short_name,website,city,status',
+            'partnerOrganization.country:id,name_uz,name_ru,iso2',
+            'partnerOrganization.organizationType:id,name_uz,name_ru',
+            'photoDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type,created_at',
+            'cvDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type,created_at',
         ]);
 
         return view('partner-contacts.show', [
@@ -131,8 +128,8 @@ class PartnerContactController extends Controller implements HasMiddleware
     public function edit(PartnerContact $partnerContact): View
     {
         $partnerContact->load([
-            'photoDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type',
-            'cvDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type',
+            'photoDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type',
+            'cvDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type',
         ]);
 
         return view('partner-contacts.edit', [
@@ -214,12 +211,10 @@ class PartnerContactController extends Controller implements HasMiddleware
             'partner_organization_id' => ['required', 'integer', 'exists:partner_organizations,id'],
             'full_name_ru' => ['required', 'string', 'max:255'],
             'full_name_uz' => ['required', 'string', 'max:255'],
-            'full_name_cryl' => ['required', 'string', 'max:255'],
-            'birthday' => ['nullable', 'date'],
+'birthday' => ['nullable', 'date'],
             'position_ru' => ['nullable', 'string', 'max:255'],
             'position_uz' => ['nullable', 'string', 'max:255'],
-            'position_cryl' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
+'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'is_primary' => ['sometimes', 'boolean'],
@@ -240,9 +235,9 @@ class PartnerContactController extends Controller implements HasMiddleware
     {
         return [
             'partnerOrganizations' => PartnerOrganization::query()
-                ->with('country:id,name_uz,name_ru,name_cryl,iso2')
+                ->with('country:id,name_uz,name_ru,iso2')
                 ->orderBy('name_uz')
-                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
+                ->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
         ];
     }
 
@@ -332,7 +327,6 @@ class PartnerContactController extends Controller implements HasMiddleware
         $partnerContact->loadMissing('partnerOrganization:id,country_id');
         $contactNameUz = $partnerContact->full_name_uz ?: $partnerContact->display_name;
         $contactNameRu = $partnerContact->full_name_ru ?: $partnerContact->display_name;
-        $contactNameCryl = $partnerContact->full_name_cryl ?: $partnerContact->display_name;
 
         return [
             'title_uz' => match ($attribute) {
@@ -342,10 +336,6 @@ class PartnerContactController extends Controller implements HasMiddleware
             'title_ru' => match ($attribute) {
                 'photo' => "Фото {$contactNameRu}",
                 default => "CV {$contactNameRu}",
-            },
-            'title_cryl' => match ($attribute) {
-                'photo' => "{$contactNameCryl} фото",
-                default => "{$contactNameCryl} CV",
             },
             'document_number' => null,
             'document_type_id' => null,

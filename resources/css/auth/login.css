@@ -135,27 +135,25 @@ body {
 }
 
 .auth-login-card__crest {
-    display: grid;
-    place-items: center;
-    width: 92px;
-    height: 92px;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)),
-        rgba(15, 23, 42, 0.46);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        0 16px 30px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 .auth-login-card__crest img {
-    width: 56px;
-    height: 56px;
+    width: min(132px, 36vw);
+    height: min(132px, 36vw);
     object-fit: contain;
-    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.22));
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28));
 }
 
 .auth-login-card__eyebrow,
@@ -518,14 +516,9 @@ body {
         padding: 28px 22px;
     }
 
-    .auth-login-card__crest {
-        width: 82px;
-        height: 82px;
-    }
-
     .auth-login-card__crest img {
-        width: 50px;
-        height: 50px;
+        width: min(112px, 40vw);
+        height: min(112px, 40vw);
     }
 
     .auth-login-card__eyebrow {

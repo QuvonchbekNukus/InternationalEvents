@@ -23,14 +23,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Sarlavha (KRYL)</span>
-            <input type="text" name="title_cryl" value="{{ old('title_cryl', $visit->title_cryl) }}" placeholder="Расмий ташриф делегацияси" required>
-            @error('title_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Tashrif turi</span>
             <select name="visit_type_id">
                 <option value="">Biriktirilmagan</option>
@@ -190,14 +182,6 @@
             @enderror
         </label>
 
-        <label class="field">
-            <span class="field-label">Tashrif maqsadi (KRYL)</span>
-            <textarea name="purpose_cryl" placeholder="Ташриф мақсади">{{ old('purpose_cryl', $visit->purpose_cryl) }}</textarea>
-            @error('purpose_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field field--span-2">
             <span class="field-label">Natija (UZ)</span>
             <textarea name="result_summary_uz" placeholder="Tashrif yakunidagi asosiy natijalar">{{ old('result_summary_uz', $visit->result_summary_uz) }}</textarea>
@@ -210,14 +194,6 @@
             <span class="field-label">Natija (RU)</span>
             <textarea name="result_summary_ru" placeholder="Итоги визита">{{ old('result_summary_ru', $visit->result_summary_ru) }}</textarea>
             @error('result_summary_ru')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
-            <span class="field-label">Natija (KRYL)</span>
-            <textarea name="result_summary_cryl" placeholder="Ташриф натижаси">{{ old('result_summary_cryl', $visit->result_summary_cryl) }}</textarea>
-            @error('result_summary_cryl')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

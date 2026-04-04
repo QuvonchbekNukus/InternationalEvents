@@ -4,7 +4,46 @@ import '../css/leaflet-map.css';
 import '../css/dashboard-geojson-map.css';
 
 const initializedBlocks = new WeakMap();
-const lastCountrySummaryByCode = new Map();
+/** @type {Map<string, object>} Summary API javoblari — kalit sifatida to‘liq `summaryUrl` (davlatlararo aralashmaslik uchun). */
+const lastCountrySummaryByKey = new Map();
+
+/**
+ * /countries/{code}/summary URL dan davlat kodini ajratib oladi.
+ * @param {string|null|undefined} summaryUrl
+ * @returns {string}
+ */
+function summaryCountryCodeFromSummaryUrl(summaryUrl) {
+    if (!summaryUrl || typeof summaryUrl !== 'string') {
+        return '';
+    }
+
+    const match = summaryUrl.match(/\/countries\/([^/]+)\/summary(?:\?|#|$)/i);
+
+    return match ? decodeURIComponent(match[1]).trim().toUpperCase() : '';
+}
+
+/**
+ * @param {{ summaryUrl?: string|null, code?: string, name?: string }} country
+ * @returns {string}
+ */
+function summaryCacheKeyForCountry(country) {
+    if (country.summaryUrl) {
+        return country.summaryUrl.split('?')[0].split('#')[0];
+    }
+
+    const code = String(country.code || '').trim().toUpperCase();
+    const name = String(country.name || '').trim();
+
+    if (code) {
+        return `code:${code}`;
+    }
+
+    if (name) {
+        return `name:${name}`;
+    }
+
+    return '';
+}
 
 const COUNTRY_PALETTE = [
     {fill: '#93c5fd', stroke: '#3b82f6'},
@@ -86,26 +125,28 @@ function setStatus(block, variant, title, text) {
         return;
     }
 
+    if (variant === 'ready') {
+        status.dataset.variant = variant;
+        status.hidden = true;
+        spinner.hidden = true;
+        status.style.setProperty('display', 'none', 'important');
+
+        return;
+    }
+
+    status.style.removeProperty('display');
+
     status.hidden = false;
     status.dataset.variant = variant;
     spinner.hidden = variant !== 'loading';
     statusTitle.textContent = title;
     statusText.textContent = text;
-
-    if (variant === 'ready') {
-        window.setTimeout(() => {
-            if (status.dataset.variant === 'ready') {
-                status.hidden = true;
-            }
-        }, 2000);
-    }
 }
 
 function bindModal(block) {
     const modal = block.querySelector('[data-dashboard-geojson-modal]');
     const title = block.querySelector('[data-dashboard-geojson-modal-title]');
     const code = block.querySelector('[data-dashboard-geojson-modal-code]');
-    const link = block.querySelector('[data-dashboard-geojson-modal-link]');
     const eventsLink = block.querySelector('[data-dashboard-geojson-events-link]');
     const visitsLink = block.querySelector('[data-dashboard-geojson-visits-link]');
     const eventEmpty = block.querySelector('[data-dashboard-geojson-event-empty]');
@@ -119,19 +160,132 @@ function bindModal(block) {
     const closeButtons = Array.from(block.querySelectorAll('[data-dashboard-geojson-modal-close]'));
     let previousActiveElement = null;
     let pendingSummary = null;
+    let modalSummaryGeneration = 0;
+
+    const emptyEventCopy = "Hozircha bu davlat uchun tadbirlar yo'q.";
+    const emptyVisitCopy = "Hozircha bu davlat uchun tashriflar yo'q.";
+
+    /** Matn qatori (yuklanmoqda / bo‘sh) yoki kartochka — `display:grid` CSS bilan `hidden` to‘qnashmasin. */
+    const setEventRowMode = (mode) => {
+        const showCard = mode === 'card';
+
+        if (eventLink instanceof HTMLAnchorElement) {
+            if (showCard) {
+                eventLink.removeAttribute('hidden');
+                eventLink.style.setProperty('display', 'grid', 'important');
+            } else {
+                eventLink.setAttribute('hidden', '');
+                eventLink.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        if (eventEmpty) {
+            if (showCard) {
+                eventEmpty.setAttribute('hidden', '');
+                eventEmpty.style.setProperty('display', 'none', 'important');
+            } else {
+                eventEmpty.removeAttribute('hidden');
+                eventEmpty.style.removeProperty('display');
+            }
+        }
+    };
+
+    const setVisitRowMode = (mode) => {
+        const showCard = mode === 'card';
+
+        if (visitLink instanceof HTMLAnchorElement) {
+            if (showCard) {
+                visitLink.removeAttribute('hidden');
+                visitLink.style.setProperty('display', 'grid', 'important');
+            } else {
+                visitLink.setAttribute('hidden', '');
+                visitLink.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        if (visitEmpty) {
+            if (showCard) {
+                visitEmpty.setAttribute('hidden', '');
+                visitEmpty.style.setProperty('display', 'none', 'important');
+            } else {
+                visitEmpty.removeAttribute('hidden');
+                visitEmpty.style.removeProperty('display');
+            }
+        }
+    };
+
+    const normalizeRecord = (record) => {
+        if (!record || typeof record !== 'object') {
+            return null;
+        }
+
+        const id = record.id;
+
+        if (id === undefined || id === null || id === '') {
+            return null;
+        }
+
+        return record;
+    };
+
+    const resetSummaryPanelsLoading = () => {
+        if (eventTitle) {
+            eventTitle.textContent = '';
+        }
+
+        if (eventDate) {
+            eventDate.textContent = '';
+        }
+
+        if (visitTitle) {
+            visitTitle.textContent = '';
+        }
+
+        if (visitDate) {
+            visitDate.textContent = '';
+        }
+
+        if (eventLink instanceof HTMLAnchorElement) {
+            eventLink.removeAttribute('href');
+        }
+
+        if (visitLink instanceof HTMLAnchorElement) {
+            visitLink.removeAttribute('href');
+        }
+
+        const eventImg = block.querySelector('[data-dashboard-geojson-event-image]');
+        if (eventImg instanceof HTMLImageElement) {
+            eventImg.hidden = true;
+            eventImg.removeAttribute('src');
+        }
+
+        const visitImg = block.querySelector('[data-dashboard-geojson-visit-image]');
+        if (visitImg instanceof HTMLImageElement) {
+            visitImg.hidden = true;
+            visitImg.removeAttribute('src');
+        }
+
+        setEventRowMode('message');
+        setVisitRowMode('message');
+
+        if (eventEmpty) {
+            eventEmpty.textContent = "Ma'lumot yuklanmoqda...";
+        }
+
+        if (visitEmpty) {
+            visitEmpty.textContent = "Ma'lumot yuklanmoqda...";
+        }
+    };
 
     const applySummaryToUi = (payload) => {
-        const eventPayload = payload?.event ?? null;
-        const visitPayload = payload?.visit ?? null;
+        const eventPayload = normalizeRecord(payload?.event);
+        const visitPayload = normalizeRecord(payload?.visit);
 
         if (eventPayload && eventLink instanceof HTMLAnchorElement && eventTitle && eventDate) {
             eventTitle.textContent = eventPayload.title || 'Tadbir';
             eventDate.textContent = eventPayload.date || '';
             eventLink.href = eventPayload.url || '#';
-            eventLink.hidden = false;
-            if (eventEmpty) {
-                eventEmpty.hidden = true;
-            }
+            setEventRowMode('card');
 
             const imageUrl = eventPayload.image_url || null;
             const img = block.querySelector('[data-dashboard-geojson-event-image]');
@@ -145,18 +299,20 @@ function bindModal(block) {
                 }
             }
         } else if (eventEmpty) {
-            eventEmpty.textContent = "Tadbir topilmadi.";
-            eventEmpty.hidden = false;
+            eventEmpty.textContent = emptyEventCopy;
+            setEventRowMode('message');
+            const eventImg = block.querySelector('[data-dashboard-geojson-event-image]');
+            if (eventImg instanceof HTMLImageElement) {
+                eventImg.hidden = true;
+                eventImg.removeAttribute('src');
+            }
         }
 
         if (visitPayload && visitLink instanceof HTMLAnchorElement && visitTitle && visitDate) {
             visitTitle.textContent = visitPayload.title || 'Tashrif';
             visitDate.textContent = visitPayload.date || '';
             visitLink.href = visitPayload.url || '#';
-            visitLink.hidden = false;
-            if (visitEmpty) {
-                visitEmpty.hidden = true;
-            }
+            setVisitRowMode('card');
 
             const imageUrl = visitPayload.image_url || null;
             const img = block.querySelector('[data-dashboard-geojson-visit-image]');
@@ -170,8 +326,13 @@ function bindModal(block) {
                 }
             }
         } else if (visitEmpty) {
-            visitEmpty.textContent = "Tashrif topilmadi.";
-            visitEmpty.hidden = false;
+            visitEmpty.textContent = emptyVisitCopy;
+            setVisitRowMode('message');
+            const visitImg = block.querySelector('[data-dashboard-geojson-visit-image]');
+            if (visitImg instanceof HTMLImageElement) {
+                visitImg.hidden = true;
+                visitImg.removeAttribute('src');
+            }
         }
 
         if (payload?.country) {
@@ -214,22 +375,16 @@ function bindModal(block) {
 
     return {
         open(country) {
-            if (!modal || !title || !code || !link) {
+            if (!modal || !title || !code) {
                 return;
             }
+
+            const generationAtOpen = ++modalSummaryGeneration;
 
             previousActiveElement = document.activeElement;
             title.textContent = country.name || country.code || 'Davlat';
             code.hidden = !country.code;
             code.textContent = country.code || '';
-
-            if (country.countryUrl) {
-                link.hidden = false;
-                link.href = country.countryUrl;
-            } else {
-                link.hidden = true;
-                link.removeAttribute('href');
-            }
 
             if (eventsLink instanceof HTMLAnchorElement) {
                 eventsLink.href = country.eventsUrl || eventsLink.href;
@@ -239,26 +394,11 @@ function bindModal(block) {
                 visitsLink.href = country.visitsUrl || visitsLink.href;
             }
 
-            if (eventEmpty) {
-                eventEmpty.textContent = "Ma'lumot yuklanmoqda...";
-                eventEmpty.hidden = false;
-            }
-            if (eventLink instanceof HTMLAnchorElement) {
-                eventLink.hidden = true;
-                eventLink.removeAttribute('href');
-            }
-            if (visitEmpty) {
-                visitEmpty.textContent = "Ma'lumot yuklanmoqda...";
-                visitEmpty.hidden = false;
-            }
-            if (visitLink instanceof HTMLAnchorElement) {
-                visitLink.hidden = true;
-                visitLink.removeAttribute('href');
-            }
+            resetSummaryPanelsLoading();
 
-            const cacheKey = country.code || country.name || '';
-            if (cacheKey && lastCountrySummaryByCode.has(cacheKey)) {
-                applySummaryToUi(lastCountrySummaryByCode.get(cacheKey));
+            const summaryCacheKey = summaryCacheKeyForCountry(country);
+            if (summaryCacheKey && lastCountrySummaryByKey.has(summaryCacheKey)) {
+                applySummaryToUi(lastCountrySummaryByKey.get(summaryCacheKey));
             }
 
             modal.hidden = false;
@@ -273,11 +413,13 @@ function bindModal(block) {
 
             if (!country.summaryUrl) {
                 if (eventEmpty) {
-                    eventEmpty.textContent = "Tadbir topilmadi.";
+                    eventEmpty.textContent = emptyEventCopy;
                 }
+
                 if (visitEmpty) {
-                    visitEmpty.textContent = "Tashrif topilmadi.";
+                    visitEmpty.textContent = emptyVisitCopy;
                 }
+
                 return;
             }
 
@@ -285,15 +427,17 @@ function bindModal(block) {
                 pendingSummary.abort();
             }
 
-            pendingSummary = new AbortController();
+            const openedSummaryUrl = String(country.summaryUrl);
+            const abortController = new AbortController();
+            pendingSummary = abortController;
 
-            fetch(country.summaryUrl, {
+            fetch(openedSummaryUrl, {
                 headers: {
                     Accept: 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
                 },
                 credentials: 'same-origin',
-                signal: pendingSummary.signal,
+                signal: abortController.signal,
             })
                 .then((response) => {
                     if (!response.ok) {
@@ -302,9 +446,26 @@ function bindModal(block) {
                     return response.json();
                 })
                 .then((payload) => {
-                    if (cacheKey) {
-                        lastCountrySummaryByCode.set(cacheKey, payload);
+                    if (generationAtOpen !== modalSummaryGeneration) {
+                        return;
                     }
+
+                    const expectedCode = summaryCountryCodeFromSummaryUrl(openedSummaryUrl);
+                    const responseCode = String(payload?.country?.code || '').trim().toUpperCase();
+
+                    if (expectedCode && responseCode && expectedCode !== responseCode) {
+                        console.warn('Dashboard GeoJSON map: summary country mismatch', {
+                            expectedCode,
+                            responseCode,
+                        });
+                        applySummaryToUi({country: {code: expectedCode}, event: null, visit: null});
+                        return;
+                    }
+
+                    if (summaryCacheKey) {
+                        lastCountrySummaryByKey.set(summaryCacheKey, payload);
+                    }
+
                     applySummaryToUi(payload);
                 })
                 .catch((error) => {
@@ -313,19 +474,28 @@ function bindModal(block) {
                     }
 
                     console.error('Country summary could not be loaded.', error);
-                    if (!(cacheKey && lastCountrySummaryByCode.has(cacheKey))) {
+
+                    if (generationAtOpen !== modalSummaryGeneration) {
+                        return;
+                    }
+
+                    if (!(summaryCacheKey && lastCountrySummaryByKey.has(summaryCacheKey))) {
                         if (eventEmpty) {
                             eventEmpty.textContent = "Tadbir ma'lumotini yuklab bo'lmadi.";
-                            eventEmpty.hidden = false;
                         }
+
                         if (visitEmpty) {
                             visitEmpty.textContent = "Tashrif ma'lumotini yuklab bo'lmadi.";
-                            visitEmpty.hidden = false;
                         }
+
+                        setEventRowMode('message');
+                        setVisitRowMode('message');
                     }
                 })
                 .finally(() => {
-                    pendingSummary = null;
+                    if (pendingSummary === abortController) {
+                        pendingSummary = null;
+                    }
                 });
         },
         close: closeModal,

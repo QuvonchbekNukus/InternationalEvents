@@ -45,12 +45,12 @@ class AgreementController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $agreementsQuery = Agreement::query()->with([
-            'country:id,name_uz,name_ru,name_cryl,iso2',
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name,country_id',
-            'agreementType:id,name_uz,name_ru,name_cryl',
-            'agreementDirection:id,name_uz,name_ru,name_cryl',
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name,country_id',
+            'agreementType:id,name_uz,name_ru',
+            'agreementDirection:id,name_uz,name_ru',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
+            'responsibleDepartment:id,name_uz,name_ru',
         ]);
 
         $this->applyOwnScope(
@@ -74,36 +74,29 @@ class AgreementController extends Controller implements HasMiddleware
                         ->where('agreement_number', 'like', "%{$search}%")
                         ->orWhere('title_uz', 'like', "%{$search}%")
                         ->orWhere('title_ru', 'like', "%{$search}%")
-                        ->orWhere('title_cryl', 'like', "%{$search}%")
                         ->orWhere('short_title_uz', 'like', "%{$search}%")
                         ->orWhere('short_title_ru', 'like', "%{$search}%")
-                        ->orWhere('short_title_cryl', 'like', "%{$search}%")
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('partnerOrganization', fn ($organizationQuery) => $organizationQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('short_name', 'like', "%{$search}%"))
                         ->orWhereHas('agreementType', fn ($typeQuery) => $typeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%"))
                         ->orWhereHas('agreementDirection', fn ($directionQuery) => $directionQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"))
+                            ->orWhere('name_ru', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleUser', fn ($userQuery) => $userQuery
                             ->where('first_name', 'like', "%{$search}%")
                             ->orWhere('middle_name', 'like', "%{$search}%")
                             ->orWhere('last_name', 'like', "%{$search}%"))
                         ->orWhereHas('responsibleDepartment', fn ($departmentQuery) => $departmentQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -117,9 +110,9 @@ class AgreementController extends Controller implements HasMiddleware
 
         return view('agreements.index', [
             'agreements' => $agreements,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'statuses' => Agreement::STATUS_LABELS,
             'filters' => [
                 'search' => $search,
@@ -180,15 +173,15 @@ class AgreementController extends Controller implements HasMiddleware
         );
 
         $agreement->load([
-            'country:id,name_uz,name_ru,name_cryl,iso2',
-            'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
-            'agreementType:id,name_uz,name_ru,name_cryl',
-            'agreementDirection:id,name_uz,name_ru,name_cryl',
+            'country:id,name_uz,name_ru,iso2',
+            'partnerOrganization:id,name_uz,name_ru,short_name',
+            'agreementType:id,name_uz,name_ru',
+            'agreementDirection:id,name_uz,name_ru',
             'responsibleUser:id,first_name,middle_name,last_name',
-            'responsibleDepartment:id,name_uz,name_ru,name_cryl',
+            'responsibleDepartment:id,name_uz,name_ru',
             'creator:id,first_name,middle_name,last_name',
             'updater:id,first_name,middle_name,last_name',
-            'documents:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,agreement_id,uploaded_by,created_at',
+            'documents:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type,agreement_id,uploaded_by,created_at',
             'documents.uploader:id,first_name,middle_name,last_name',
         ]);
 
@@ -217,7 +210,6 @@ class AgreementController extends Controller implements HasMiddleware
                     'id',
                     'title_uz',
                     'title_ru',
-                    'title_cryl',
                     'file_name',
                     'file_ext',
                     'file_size',
@@ -314,11 +306,9 @@ class AgreementController extends Controller implements HasMiddleware
             ],
             'title_ru' => ['required', 'string', 'max:255'],
             'title_uz' => ['required', 'string', 'max:255'],
-            'title_cryl' => ['required', 'string', 'max:255'],
-            'short_title_ru' => ['nullable', 'string', 'max:255'],
+'short_title_ru' => ['nullable', 'string', 'max:255'],
             'short_title_uz' => ['nullable', 'string', 'max:255'],
-            'short_title_cryl' => ['nullable', 'string', 'max:255'],
-            'country_id' => ['required', 'integer', 'exists:countries,id'],
+'country_id' => ['required', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
             'agreement_type_id' => ['nullable', 'integer', 'exists:agreement_types,id'],
             'agreement_direction_id' => ['nullable', 'integer', 'exists:agreement_directions,id'],
@@ -362,12 +352,12 @@ class AgreementController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'name_cryl', 'short_name']),
-            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
+            'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
-            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'statuses' => Agreement::STATUS_LABELS,
         ];
     }
@@ -433,8 +423,7 @@ class AgreementController extends Controller implements HasMiddleware
         return [
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
-            'document_number' => null,
+'document_number' => null,
             'document_type_id' => null,
             'country_id' => $agreement->country_id,
             'partner_organization_id' => $agreement->partner_organization_id,

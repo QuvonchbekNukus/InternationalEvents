@@ -48,14 +48,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Nomi (KRYL)</span>
-            <input type="text" name="name_cryl" value="{{ old('name_cryl', $partnerOrganization->name_cryl) }}" placeholder="Ички ишлар вазирлиги" required>
-            @error('name_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field">
             <span class="field-label">Qisqa nom</span>
             <input type="text" name="short_name" value="{{ old('short_name', $partnerOrganization->short_name) }}" placeholder="IIV">

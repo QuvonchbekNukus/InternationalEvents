@@ -31,7 +31,6 @@ class AgreementFormFilteringTest extends TestCase
         $countryA = Country::query()->create([
             'name_ru' => 'Country A RU',
             'name_uz' => 'Country A',
-            'name_cryl' => 'Country A CY',
             'iso2' => 'AA',
             'iso3' => 'AAA',
             'cooperation_status' => 'faol',
@@ -40,7 +39,6 @@ class AgreementFormFilteringTest extends TestCase
         $countryB = Country::query()->create([
             'name_ru' => 'Country B RU',
             'name_uz' => 'Country B',
-            'name_cryl' => 'Country B CY',
             'iso2' => 'BB',
             'iso3' => 'BBB',
             'cooperation_status' => 'faol',
@@ -50,7 +48,6 @@ class AgreementFormFilteringTest extends TestCase
             'country_id' => $countryA->id,
             'name_ru' => 'Organization A RU',
             'name_uz' => 'Organization A',
-            'name_cryl' => 'Organization A CY',
             'status' => 'faol',
         ]);
 
@@ -58,7 +55,6 @@ class AgreementFormFilteringTest extends TestCase
             'country_id' => $countryB->id,
             'name_ru' => 'Organization B RU',
             'name_uz' => 'Organization B',
-            'name_cryl' => 'Organization B CY',
             'status' => 'faol',
         ]);
 

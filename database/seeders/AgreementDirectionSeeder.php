@@ -16,27 +16,22 @@ class AgreementDirectionSeeder extends Seeder
             [
                 'name_ru' => 'Технология',
                 'name_uz' => 'Texnologiya',
-                'name_cryl' => 'Технология',
             ],
             [
                 'name_ru' => 'Безопасность',
                 'name_uz' => 'Xavfsizlik',
-                'name_cryl' => 'Хавфсизлик',
             ],
             [
                 'name_ru' => 'Кибербезопасность',
                 'name_uz' => 'Kiberxavfsizlik',
-                'name_cryl' => 'Киберхавфсизлик',
             ],
             [
                 'name_ru' => 'Образование',
                 'name_uz' => "Ta'lim",
-                'name_cryl' => 'Таълим',
             ],
             [
                 'name_ru' => 'Обмен опытом',
                 'name_uz' => 'Tajriba almashinuvi',
-                'name_cryl' => 'Тажриба алмашинуви',
             ],
         ];
 

@@ -84,8 +84,8 @@
                             <tr>
                                 <td>
                                     <span class="row-title">{{ $document->display_title }}</span>
-                                    @if ($document->title_ru || $document->title_cryl)
-                                        <span class="row-subtitle">{{ $document->title_ru ?: '-' }}{{ $document->title_cryl ? ' / '.$document->title_cryl : '' }}</span>
+                                    @if ($document->title_ru)
+                                        <span class="row-subtitle">{{ $document->title_ru }}</span>
                                     @endif
                                     <span class="row-subtitle">{{ $document->document_number ?: "Raqam biriktirilmagan" }}</span>
                                     <span class="row-subtitle">{{ $document->documentType?->display_name ?: "Tur biriktirilmagan" }}</span>

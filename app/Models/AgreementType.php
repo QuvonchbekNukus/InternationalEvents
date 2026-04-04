@@ -19,7 +19,6 @@ class AgreementType extends Model
     protected $fillable = [
         'name_ru',
         'name_uz',
-        'name_cryl',
     ];
 
     public function getDisplayNameAttribute(): string

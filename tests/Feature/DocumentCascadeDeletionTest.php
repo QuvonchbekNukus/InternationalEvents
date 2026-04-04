@@ -56,7 +56,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'partner_organization_id' => $organization->id,
             'full_name_ru' => 'Contact RU',
             'full_name_uz' => 'Contact UZ',
-            'full_name_cryl' => 'Contact CY',
             'photo' => $photoDocument->id,
             'cv' => $cvDocument->id,
         ]);
@@ -84,7 +83,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'partner_organization_id' => $organization->id,
             'title_ru' => 'Agreement RU',
             'title_uz' => 'Agreement UZ',
-            'title_cryl' => 'Agreement CY',
             'status' => 'draft',
         ]);
 
@@ -94,7 +92,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'agreement_id' => $agreement->id,
             'title_ru' => 'Event RU',
             'title_uz' => 'Event UZ',
-            'title_cryl' => 'Event CY',
             'start_datetime' => '2026-04-10 09:00:00',
             'format' => 'offline',
             'status' => 'rejada',
@@ -144,7 +141,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'partner_organization_id' => $organization->id,
             'title_ru' => 'Event RU',
             'title_uz' => 'Event UZ',
-            'title_cryl' => 'Event CY',
             'start_datetime' => '2026-04-10 09:00:00',
             'format' => 'offline',
             'status' => 'rejada',
@@ -181,7 +177,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'partner_organization_id' => $organization->id,
             'title_ru' => 'Visit RU',
             'title_uz' => 'Visit UZ',
-            'title_cryl' => 'Visit CY',
             'start_date' => '2026-05-12',
             'status' => 'planned',
         ]);
@@ -217,7 +212,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'partner_organization_id' => $organization->id,
             'title_ru' => 'Agreement RU',
             'title_uz' => 'Agreement UZ',
-            'title_cryl' => 'Agreement CY',
             'status' => 'draft',
         ]);
 
@@ -317,7 +311,6 @@ class DocumentCascadeDeletionTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Organization RU',
             'name_uz' => 'Organization UZ',
-            'name_cryl' => 'Organization CY',
             'status' => 'faol',
         ]);
 
@@ -329,7 +322,6 @@ class DocumentCascadeDeletionTest extends TestCase
         return Country::query()->create([
             'name_ru' => 'Country RU',
             'name_uz' => 'Country UZ',
-            'name_cryl' => 'Country CY',
             'iso2' => fake()->unique()->bothify('??'),
             'iso3' => fake()->unique()->bothify('???'),
             'cooperation_status' => 'faol',
@@ -347,7 +339,6 @@ class DocumentCascadeDeletionTest extends TestCase
         return Document::query()->create(array_merge([
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
             'document_number' => null,
             'document_type_id' => null,
             'country_id' => null,

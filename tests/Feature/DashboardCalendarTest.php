@@ -37,7 +37,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Strategicheskaya sessiya',
             'title_uz' => 'Strategik sessiya',
-            'title_cryl' => 'Strategik sessiya',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-12 09:00:00',
             'end_datetime' => '2026-03-14 18:00:00',
@@ -70,7 +69,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Moiy sobstvenniy event',
             'title_uz' => 'Mening tadbirim',
-            'title_cryl' => 'Mening tadbirim',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-18 10:00:00',
             'end_datetime' => '2026-03-18 16:00:00',
@@ -84,7 +82,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Chuzhoy event',
             'title_uz' => 'Begona tadbir',
-            'title_cryl' => 'Begona tadbir',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-19 10:00:00',
             'end_datetime' => '2026-03-19 12:00:00',
@@ -116,7 +113,6 @@ class DashboardCalendarTest extends TestCase
         Visit::create([
             'title_ru' => 'Delegatsiya',
             'title_uz' => 'Xizmat tashrifi',
-            'title_cryl' => 'Xizmat tashrifi',
             'country_id' => $country->id,
             'start_date' => '2026-03-21',
             'end_date' => '2026-03-23',
@@ -150,7 +146,6 @@ class DashboardCalendarTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Canonical partner',
             'name_uz' => 'Canonical hamkor',
-            'name_cryl' => 'Canonical hamkor',
             'short_name' => 'CH',
             'status' => 'faol',
         ]);
@@ -158,7 +153,6 @@ class DashboardCalendarTest extends TestCase
         $event = Event::create([
             'title_ru' => 'Canonical event',
             'title_uz' => 'Canonical tadbir',
-            'title_cryl' => 'Canonical tadbir',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-10 09:00:00',
             'end_datetime' => '2026-03-10 18:00:00',
@@ -171,7 +165,6 @@ class DashboardCalendarTest extends TestCase
         $visit = Visit::create([
             'title_ru' => 'Canonical visit',
             'title_uz' => 'Canonical tashrif',
-            'title_cryl' => 'Canonical tashrif',
             'country_id' => $country->id,
             'start_date' => '2026-03-11',
             'end_date' => '2026-03-11',
@@ -184,7 +177,6 @@ class DashboardCalendarTest extends TestCase
             'partner_organization_id' => $organization->id,
             'full_name_ru' => 'Canonical contact',
             'full_name_uz' => 'Canonical kontakt',
-            'full_name_cryl' => 'Canonical kontakt',
             'birthday' => '1992-03-12',
             'position_uz' => 'Coordinator',
         ]);
@@ -216,14 +208,14 @@ class DashboardCalendarTest extends TestCase
         $response->assertDontSee('"state":"planned"', false);
         $response->assertSee("let activeTypeFilter = 'all';", false);
         $response->assertSee("const matchesTypeFilter = (item, typeFilter = activeTypeFilter) => typeFilter === 'all'", false);
-        $response->assertSee("const refreshFilteredState = () => {", false);
-        $response->assertSee("const addDaysToIsoDate = (isoDate, days = 1) => {", false);
-        $response->assertSee("const filteredItemsForDate = (date) => {", false);
+        $response->assertSee('const refreshFilteredState = () => {', false);
+        $response->assertSee('const addDaysToIsoDate = (isoDate, days = 1) => {', false);
+        $response->assertSee('const filteredItemsForDate = (date) => {', false);
         $response->assertSee('data-calendar-endpoint=', false);
         $response->assertSee('const requestCalendar = async (monthKey) => {', false);
         $response->assertDontSee('form.requestSubmit();', false);
-        $response->assertDontSee("cursor = nextDay.toISOString().slice(0, 10);", false);
-        $response->assertDontSee("const activeTypeFilters = new Set();", false);
+        $response->assertDontSee('cursor = nextDay.toISOString().slice(0, 10);', false);
+        $response->assertDontSee('const activeTypeFilters = new Set();', false);
         $response->assertSee('"source_id":'.$event->id, false);
         $response->assertSee('"source_id":'.$visit->id, false);
         $response->assertSee('"source_id":'.$partnerContact->id, false);
@@ -247,7 +239,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Async event',
             'title_uz' => 'Asinxron tadbir',
-            'title_cryl' => 'Asinxron tadbir',
             'country_id' => $country->id,
             'start_datetime' => '2026-04-09 09:00:00',
             'end_datetime' => '2026-04-11 18:00:00',
@@ -299,7 +290,6 @@ class DashboardCalendarTest extends TestCase
             Event::create([
                 'title_ru' => 'Aprelskiy forum',
                 'title_uz' => 'Aprel forumi',
-                'title_cryl' => 'Aprel forumi',
                 'country_id' => $country->id,
                 'start_datetime' => '2026-04-10 09:00:00',
                 'end_datetime' => '2026-04-10 18:00:00',
@@ -334,7 +324,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Mejdunarodniy forum',
             'title_uz' => 'Xalqaro forum',
-            'title_cryl' => 'Xalqaro forum',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-27 09:00:00',
             'end_datetime' => '2026-04-02 18:00:00',
@@ -350,8 +339,8 @@ class DashboardCalendarTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Xalqaro forum');
-        $response->assertSee('grid-column: 5 / span 3');
-        $response->assertSee('grid-column: 1 / span 4');
+        $response->assertSee('event-calendar-compact__marker-dot', false);
+        $response->assertDontSee('grid-column:', false);
     }
 
     public function test_dashboard_keeps_multi_week_event_visible_in_each_week_of_the_same_month(): void
@@ -366,7 +355,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Nedelnaya sessiya',
             'title_uz' => 'Haftalik sessiya',
-            'title_cryl' => 'Haftalik sessiya',
             'country_id' => $country->id,
             'start_datetime' => '2026-04-01 09:00:00',
             'end_datetime' => '2026-04-08 18:00:00',
@@ -382,15 +370,9 @@ class DashboardCalendarTest extends TestCase
 
         $response->assertOk();
 
-        $segments = $this->extractSpanPlacementsForTitle(
-            $response->json('eventCalendar.weeks') ?? [],
-            'Haftalik sessiya'
-        );
-
-        $this->assertSame([
-            ['start_column' => 3, 'span' => 5],
-            ['start_column' => 1, 'span' => 3],
-        ], $segments);
+        $weeks = $response->json('eventCalendar.weeks') ?? [];
+        $this->assertSame([], $this->extractSpanPlacementsForTitle($weeks, 'Haftalik sessiya'));
+        $this->assertContains('Haftalik sessiya', $this->extractPreviewTitlesForDate($weeks, '2026-04-01'));
     }
 
     public function test_dashboard_keeps_multi_week_visit_visible_in_each_week_of_the_same_month(): void
@@ -405,7 +387,6 @@ class DashboardCalendarTest extends TestCase
         Visit::create([
             'title_ru' => 'Nedelniy vizit',
             'title_uz' => 'Haftalik tashrif',
-            'title_cryl' => 'Haftalik tashrif',
             'country_id' => $country->id,
             'start_date' => '2026-04-01',
             'end_date' => '2026-04-07',
@@ -420,15 +401,9 @@ class DashboardCalendarTest extends TestCase
 
         $response->assertOk();
 
-        $segments = $this->extractSpanPlacementsForTitle(
-            $response->json('eventCalendar.weeks') ?? [],
-            'Haftalik tashrif'
-        );
-
-        $this->assertSame([
-            ['start_column' => 3, 'span' => 5],
-            ['start_column' => 1, 'span' => 2],
-        ], $segments);
+        $weeks = $response->json('eventCalendar.weeks') ?? [];
+        $this->assertSame([], $this->extractSpanPlacementsForTitle($weeks, 'Haftalik tashrif'));
+        $this->assertContains('Haftalik tashrif', $this->extractPreviewTitlesForDate($weeks, '2026-04-01'));
     }
 
     public function test_dashboard_displays_completed_events_and_visits_with_completed_filter(): void
@@ -445,7 +420,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Zavershenniy event',
             'title_uz' => 'Tugagan tadbir',
-            'title_cryl' => 'Tugаган tadbir',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-05 09:00:00',
             'end_datetime' => '2026-03-07 18:00:00',
@@ -458,7 +432,6 @@ class DashboardCalendarTest extends TestCase
         Visit::create([
             'title_ru' => 'Zavershenniy vizit',
             'title_uz' => 'Tugatilgan tashrif',
-            'title_cryl' => 'Tugatilgan tashrif',
             'country_id' => $country->id,
             'start_date' => '2026-03-06',
             'end_date' => '2026-03-06',
@@ -489,7 +462,6 @@ class DashboardCalendarTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Partner organization',
             'name_uz' => 'Hamkor tashkilot',
-            'name_cryl' => 'Hamkor tashkilot',
             'short_name' => 'HT',
             'status' => 'faol',
         ]);
@@ -498,7 +470,6 @@ class DashboardCalendarTest extends TestCase
             'partner_organization_id' => $organization->id,
             'full_name_ru' => 'Kontakt birthday',
             'full_name_uz' => 'Sherik kontakti',
-            'full_name_cryl' => 'Sherik kontakti',
             'birthday' => '1990-03-05',
             'position_uz' => 'Maslahatchi',
         ]);
@@ -513,7 +484,7 @@ class DashboardCalendarTest extends TestCase
         $response->assertSee('Hamkor tashkilot');
     }
 
-    public function test_dashboard_renders_birthdays_as_separate_week_spans_even_when_day_is_busy(): void
+    public function test_dashboard_renders_birthday_start_markers_alongside_events_on_same_day(): void
     {
         $viewEventsPermission = Permission::findOrCreate('view events', 'web');
         $viewVisitsPermission = Permission::findOrCreate('view visits', 'web');
@@ -529,7 +500,6 @@ class DashboardCalendarTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => 'Busy organization',
             'name_uz' => 'Band tashkilot',
-            'name_cryl' => 'Band tashkilot',
             'short_name' => 'BT',
             'status' => 'faol',
         ]);
@@ -537,7 +507,6 @@ class DashboardCalendarTest extends TestCase
         Event::create([
             'title_ru' => 'Busy event RU',
             'title_uz' => 'Band tadbir',
-            'title_cryl' => 'Band tadbir',
             'country_id' => $country->id,
             'start_datetime' => '2026-03-05 09:00:00',
             'end_datetime' => '2026-03-07 18:00:00',
@@ -550,7 +519,6 @@ class DashboardCalendarTest extends TestCase
         Visit::create([
             'title_ru' => 'Busy visit RU',
             'title_uz' => 'Band tashrif',
-            'title_cryl' => 'Band tashrif',
             'country_id' => $country->id,
             'start_date' => '2026-03-05',
             'end_date' => '2026-03-06',
@@ -563,7 +531,6 @@ class DashboardCalendarTest extends TestCase
             'partner_organization_id' => $organization->id,
             'full_name_ru' => 'Li Vey',
             'full_name_uz' => 'Li Vey',
-            'full_name_cryl' => 'Li Vey',
             'birthday' => '1990-03-05',
             'position_uz' => 'Maslahatchi',
         ]);
@@ -574,15 +541,13 @@ class DashboardCalendarTest extends TestCase
 
         $response->assertOk();
 
-        $birthdaySegments = $this->extractSegmentsForTitle(
-            $response->json('eventCalendar.weeks') ?? [],
-            'Li Vey'
-        );
+        $weeks = $response->json('eventCalendar.weeks') ?? [];
+        $titles = $this->extractPreviewTitlesForDate($weeks, '2026-03-05');
 
-        $this->assertCount(1, $birthdaySegments);
-        $this->assertSame('birthday', $birthdaySegments[0]['type']);
-        $this->assertSame(4, $birthdaySegments[0]['start_column']);
-        $this->assertSame(1, $birthdaySegments[0]['span']);
+        $this->assertContains('Li Vey', $titles);
+        $this->assertContains('Band tadbir', $titles);
+        $this->assertContains('Band tashrif', $titles);
+        $this->assertSame([], $this->extractSegmentsForTitle($weeks, 'Li Vey'));
     }
 
     private function createCountry(string $iso2, string $iso3): Country
@@ -590,7 +555,6 @@ class DashboardCalendarTest extends TestCase
         return Country::create([
             'name_ru' => 'Test country '.$iso2,
             'name_uz' => 'Test davlat '.$iso2,
-            'name_cryl' => 'Test davlat '.$iso2,
             'iso2' => $iso2,
             'iso3' => $iso3,
             'cooperation_status' => 'faol',
@@ -621,6 +585,30 @@ class DashboardCalendarTest extends TestCase
         }
 
         return $placements;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $weeks
+     * @return list<string>
+     */
+    private function extractPreviewTitlesForDate(array $weeks, string $date): array
+    {
+        foreach ($weeks as $week) {
+            foreach (($week['days'] ?? []) as $day) {
+                if (($day['date'] ?? '') !== $date) {
+                    continue;
+                }
+
+                $titles = [];
+                foreach (($day['preview_items'] ?? []) as $marker) {
+                    $titles[] = (string) ($marker['title'] ?? '');
+                }
+
+                return $titles;
+            }
+        }
+
+        return [];
     }
 
     /**

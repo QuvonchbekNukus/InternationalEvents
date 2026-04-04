@@ -34,7 +34,6 @@ class DocumentEditFileDeletionTest extends TestCase
         $document = Document::query()->create([
             'title_uz' => 'Delete me',
             'title_ru' => 'Delete me',
-            'title_cryl' => 'Delete me',
             'document_number' => 'DOC-DEL-001',
             'document_type_id' => null,
             'country_id' => $country->id,
@@ -80,7 +79,6 @@ class DocumentEditFileDeletionTest extends TestCase
         return Country::query()->create([
             'name_ru' => 'Delete Country RU',
             'name_uz' => 'Delete Country',
-            'name_cryl' => 'Delete Country CY',
             'iso2' => 'DD',
             'iso3' => 'DDE',
             'cooperation_status' => 'faol',

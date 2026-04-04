@@ -30,8 +30,7 @@ class AgreementTypeController extends Controller implements HasMiddleware
                 $query->where(function ($agreementTypeQuery) use ($search) {
                     $agreementTypeQuery
                         ->where('name_uz', 'like', "%{$search}%")
-                        ->orWhere('name_ru', 'like', "%{$search}%")
-                        ->orWhere('name_cryl', 'like', "%{$search}%");
+                        ->orWhere('name_ru', 'like', "%{$search}%");
                 });
             })
             ->orderBy('name_uz')
@@ -94,7 +93,6 @@ class AgreementTypeController extends Controller implements HasMiddleware
         return $request->validate([
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['required', 'string', 'max:255'],
-            'name_cryl' => ['required', 'string', 'max:255'],
-        ]);
+]);
     }
 }

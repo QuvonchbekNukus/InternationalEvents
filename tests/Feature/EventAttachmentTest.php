@@ -40,7 +40,6 @@ class EventAttachmentTest extends TestCase
         $response = $this->actingAs($user)->post(route('events.store'), [
             'title_ru' => 'Event RU',
             'title_uz' => 'Event UZ',
-            'title_cryl' => 'Event CY',
             'country_id' => $country->id,
             'partner_organization_id' => $partnerOrganization->id,
             'agreement_id' => $agreement->id,
@@ -88,7 +87,6 @@ class EventAttachmentTest extends TestCase
         $event = Event::query()->create([
             'title_ru' => 'Old Event RU',
             'title_uz' => 'Old Event UZ',
-            'title_cryl' => 'Old Event CY',
             'country_id' => $countryA->id,
             'partner_organization_id' => $partnerOrganizationA->id,
             'agreement_id' => $agreementA->id,
@@ -104,7 +102,6 @@ class EventAttachmentTest extends TestCase
         $existingDocument = Document::query()->create([
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
             'document_number' => null,
             'document_type_id' => null,
             'file_name' => 'existing-event-file.pdf',
@@ -124,7 +121,6 @@ class EventAttachmentTest extends TestCase
         $response = $this->actingAs($user)->put(route('events.update', $event), [
             'title_ru' => 'Updated Event RU',
             'title_uz' => 'Updated Event UZ',
-            'title_cryl' => 'Updated Event CY',
             'country_id' => $countryB->id,
             'partner_organization_id' => $partnerOrganizationB->id,
             'agreement_id' => $agreementB->id,
@@ -166,7 +162,6 @@ class EventAttachmentTest extends TestCase
         $event = Event::query()->create([
             'title_ru' => 'Delete Event RU',
             'title_uz' => 'Delete Event UZ',
-            'title_cryl' => 'Delete Event CY',
             'country_id' => $country->id,
             'partner_organization_id' => $partnerOrganization->id,
             'agreement_id' => $agreement->id,
@@ -182,7 +177,6 @@ class EventAttachmentTest extends TestCase
         $document = Document::query()->create([
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
             'document_number' => null,
             'document_type_id' => null,
             'file_name' => 'event-delete.pdf',
@@ -230,7 +224,6 @@ class EventAttachmentTest extends TestCase
         $country = Country::query()->create([
             'name_ru' => "Country {$suffix} RU",
             'name_uz' => "Country {$suffix}",
-            'name_cryl' => "Country {$suffix} CY",
             'iso2' => "E{$suffix}",
             'iso3' => "EV{$suffix}",
             'cooperation_status' => 'faol',
@@ -240,14 +233,12 @@ class EventAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => "Organization {$suffix} RU",
             'name_uz' => "Organization {$suffix}",
-            'name_cryl' => "Organization {$suffix} CY",
             'status' => 'faol',
         ]);
 
         $agreement = Agreement::query()->create([
             'title_ru' => "Agreement {$suffix} RU",
             'title_uz' => "Agreement {$suffix}",
-            'title_cryl' => "Agreement {$suffix} CY",
             'country_id' => $country->id,
             'partner_organization_id' => $partnerOrganization->id,
             'status' => 'draft',

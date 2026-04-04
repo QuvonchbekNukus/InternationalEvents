@@ -49,7 +49,6 @@ class Event extends Model
     protected $fillable = [
         'title_ru',
         'title_uz',
-        'title_cryl',
         'event_type_id',
         'country_id',
         'partner_organization_id',
@@ -65,7 +64,6 @@ class Event extends Model
         'description',
         'result_summary_ru',
         'result_summary_uz',
-        'result_summary_cryl',
         'created_by',
         'updated_by',
     ];

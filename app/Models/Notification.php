@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Str;
 
 class Notification extends Model
 {
@@ -72,6 +73,7 @@ class Notification extends Model
             Agreement::class => route('agreements.show', $resource),
             Event::class => route('events.show', $resource),
             Visit::class => route('visits.show', $resource),
+            PartnerContact::class => route('partner-contacts.show', $resource),
             default => null,
         };
     }
@@ -94,5 +96,62 @@ class Notification extends Model
             'danger' => 'priority_high',
             default => 'notifications',
         };
+    }
+
+    /**
+     * Material icon for the related record category (event, visit, etc.).
+     */
+    public function getRelatedCategoryIconAttribute(): string
+    {
+        return match ($this->related_type) {
+            Event::class => 'event',
+            Visit::class => 'place',
+            Agreement::class => 'description',
+            PartnerContact::class => 'cake',
+            default => 'notifications',
+        };
+    }
+
+    /**
+     * Short CSS slug for styling: event, visit, agreement, birthday, generic.
+     */
+    public function getRelatedKindSlugAttribute(): string
+    {
+        return match ($this->related_type) {
+            Event::class => 'event',
+            Visit::class => 'visit',
+            Agreement::class => 'agreement',
+            PartnerContact::class => 'birthday',
+            default => 'generic',
+        };
+    }
+
+    public function getRelatedKindLabelAttribute(): string
+    {
+        return match ($this->related_type) {
+            Event::class => __('ui.notifications_dropdown.kind_event'),
+            Visit::class => __('ui.notifications_dropdown.kind_visit'),
+            Agreement::class => __('ui.notifications_dropdown.kind_agreement'),
+            PartnerContact::class => __('ui.notifications_dropdown.kind_birthday'),
+            default => __('ui.notifications_dropdown.kind_other'),
+        };
+    }
+
+    /**
+     * One-line summary for dropdown / list (linked record title when available).
+     */
+    public function getPreviewTextAttribute(): string
+    {
+        $resource = $this->related;
+
+        if ($resource instanceof Agreement || $resource instanceof Event || $resource instanceof Visit) {
+            return Str::limit($resource->display_title, 88);
+        }
+
+        if ($resource instanceof PartnerContact) {
+            return Str::limit($resource->display_name, 88);
+        }
+
+        return Str::limit((string) $this->message, 100);
     }
 }

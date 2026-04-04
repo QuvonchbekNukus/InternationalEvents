@@ -38,7 +38,6 @@ class UserNotificationTest extends TestCase
         $country = Country::create([
             'name_ru' => 'Kazahstan',
             'name_uz' => "Qozog'iston",
-            'name_cryl' => 'Qozogiston',
             'iso2' => 'KZ',
             'iso3' => 'KAZ',
             'cooperation_status' => 'faol',
@@ -50,7 +49,6 @@ class UserNotificationTest extends TestCase
                 'agreement_number' => 'MG-TEST-001',
                 'title_ru' => 'Test soglashenie',
                 'title_uz' => 'Sinov kelishuvi',
-                'title_cryl' => 'Sinov kelishuvi',
                 'country_id' => $country->id,
                 'status' => 'draft',
                 'responsible_user_id' => $responsibleUser->id,

@@ -45,7 +45,6 @@
                         <tr>
                             <th>Nomi (UZ)</th>
                             <th>Nomi (RU)</th>
-                            <th>Nomi (KRYL)</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -57,9 +56,6 @@
                                 </td>
                                 <td>
                                     <span class="row-subtitle">{{ $agreementType->name_ru }}</span>
-                                </td>
-                                <td>
-                                    <span class="row-subtitle">{{ $agreementType->name_cryl }}</span>
                                 </td>
                                 <td>
                                     <div class="row-actions">

@@ -96,7 +96,7 @@
                                     <span class="row-title">
                                         <a class="row-title-link" href="{{ route('visits.show', $visit) }}">{{ $visit->display_title }}</a>
                                     </span>
-                                    <span class="row-subtitle">{{ $visit->title_ru }}{{ $visit->title_cryl ? ' / '.$visit->title_cryl : '' }}</span>
+                                    <span class="row-subtitle">{{ $visit->title_ru }}</span>
                                 </td>
                                 <td>
                                     <span class="row-title">{{ $visit->country?->display_name ?: '-' }}</span>

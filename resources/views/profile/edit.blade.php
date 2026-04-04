@@ -177,15 +177,20 @@
                             class="notification-item {{ $notification->is_read ? '' : 'is-unread' }}"
                             href="{{ route('notifications.open', $notification) }}"
                         >
-                            <span class="notification-item__icon notification-item__icon--{{ $notification->type ?: 'info' }}" aria-hidden="true">
-                                <i class="material-icons">{{ $notification->type_icon }}</i>
+                            <span
+                                class="notification-item__icon notification-item__icon--related notification-item__icon--related-{{ $notification->related_kind_slug }}"
+                                aria-hidden="true"
+                            >
+                                <i class="material-icons">{{ $notification->related_category_icon }}</i>
                             </span>
 
                             <span class="notification-item__content">
+                                <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
                                 <span class="notification-item__topline">
                                     <span class="notification-item__title">{{ $notification->title }}</span>
                                     <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
                                 </span>
+                                <span class="notification-item__preview">{{ $notification->preview_text }}</span>
                                 <span class="notification-item__message">{{ $notification->message }}</span>
                             </span>
 

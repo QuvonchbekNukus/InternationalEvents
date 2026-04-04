@@ -22,13 +22,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">Nomi (KRYL)</span>
-            <input type="text" name="name_cryl" value="{{ old('name_cryl', $rank->name_cryl) }}" placeholder="Лейтенант" required>
-            @error('name_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
     </div>
 
     <div class="form-actions">

@@ -20,7 +20,6 @@ class EventType extends Model
     protected $fillable = [
         'name_ru',
         'name_uz',
-        'name_cryl',
     ];
 
     public function events(): HasMany

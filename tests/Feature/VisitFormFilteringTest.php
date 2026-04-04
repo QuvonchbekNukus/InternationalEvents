@@ -31,7 +31,6 @@ class VisitFormFilteringTest extends TestCase
         $countryA = Country::query()->create([
             'name_ru' => 'Visit Country A RU',
             'name_uz' => 'Visit Country A',
-            'name_cryl' => 'Visit Country A CY',
             'iso2' => 'VA',
             'iso3' => 'VAA',
             'cooperation_status' => 'faol',
@@ -40,7 +39,6 @@ class VisitFormFilteringTest extends TestCase
         $countryB = Country::query()->create([
             'name_ru' => 'Visit Country B RU',
             'name_uz' => 'Visit Country B',
-            'name_cryl' => 'Visit Country B CY',
             'iso2' => 'VB',
             'iso3' => 'VBB',
             'cooperation_status' => 'faol',
@@ -50,7 +48,6 @@ class VisitFormFilteringTest extends TestCase
             'country_id' => $countryA->id,
             'name_ru' => 'Visit Organization A RU',
             'name_uz' => 'Visit Organization A',
-            'name_cryl' => 'Visit Organization A CY',
             'status' => 'faol',
         ]);
 
@@ -58,7 +55,6 @@ class VisitFormFilteringTest extends TestCase
             'country_id' => $countryB->id,
             'name_ru' => 'Visit Organization B RU',
             'name_uz' => 'Visit Organization B',
-            'name_cryl' => 'Visit Organization B CY',
             'status' => 'faol',
         ]);
 

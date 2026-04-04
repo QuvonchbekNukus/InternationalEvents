@@ -10,7 +10,7 @@
             default => 'is-active',
         };
         $countryHasCoordinates = $country->latitude !== null && $country->longitude !== null;
-        $countryMapZoom = $country->default_zoom !== null ? (float) $country->default_zoom : 5;
+        $countryMapZoom = (int) ($country->default_zoom ?? \App\Models\Country::DEFAULT_MAP_ZOOM);
         $countryMapDescription = implode(' | ', array_filter([
             $country->display_region,
             $statuses[$country->cooperation_status] ?? $country->cooperation_status,

@@ -41,13 +41,12 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $partnerOrganizations = PartnerOrganization::query()
-            ->with(['country:id,name_uz,name_ru,name_cryl,iso2', 'organizationType:id,name_uz,name_ru,name_cryl'])
+            ->with(['country:id,name_uz,name_ru,iso2', 'organizationType:id,name_uz,name_ru'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($partnerOrganizationQuery) use ($search) {
                     $partnerOrganizationQuery
                         ->where('name_uz', 'like', "%{$search}%")
                         ->orWhere('name_ru', 'like', "%{$search}%")
-                        ->orWhere('name_cryl', 'like', "%{$search}%")
                         ->orWhere('short_name', 'like', "%{$search}%")
                         ->orWhere('city', 'like', "%{$search}%")
                         ->orWhere('website', 'like', "%{$search}%")
@@ -56,12 +55,10 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%")
                             ->orWhere('iso2', 'like', "%{$search}%"))
                         ->orWhereHas('organizationType', fn ($typeQuery) => $typeQuery
                             ->where('name_uz', 'like', "%{$search}%")
-                            ->orWhere('name_ru', 'like', "%{$search}%")
-                            ->orWhere('name_cryl', 'like', "%{$search}%"));
+                            ->orWhere('name_ru', 'like', "%{$search}%"));
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -73,8 +70,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return view('partner-organizations.index', [
             'partnerOrganizations' => $partnerOrganizations,
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'statuses' => PartnerOrganization::STATUS_LABELS,
             'filters' => [
                 'search' => $search,
@@ -98,9 +95,9 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     public function show(Request $request, PartnerOrganization $partnerOrganization): View
     {
         $partnerOrganization->load([
-            'country:id,name_uz,name_ru,name_cryl,iso2,iso3',
-            'organizationType:id,name_uz,name_ru,name_cryl',
-            'organizationInfoDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type,created_at',
+            'country:id,name_uz,name_ru,iso2,iso3',
+            'organizationType:id,name_uz,name_ru',
+            'organizationInfoDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type,created_at',
         ]);
 
         $canViewPartnerContacts = (bool) $request->user()?->can('view partner contacts');
@@ -120,7 +117,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                     'cvDocument:id,file_name,file_ext,file_size,file_path,mime_type',
                 ])
                 ->orderByDesc('is_primary')
-                ->orderByRaw('coalesce(full_name_uz, full_name_ru, full_name_cryl) asc')
+                ->orderByRaw('coalesce(full_name_uz, full_name_ru) asc')
                 ->get()
             : collect();
 
@@ -160,7 +157,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
     public function edit(PartnerOrganization $partnerOrganization): View
     {
-        $partnerOrganization->load('organizationInfoDocument:id,title_uz,title_ru,title_cryl,file_name,file_ext,file_size,file_path,mime_type');
+        $partnerOrganization->load('organizationInfoDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type');
 
         return view('partner-organizations.edit', [
             'partnerOrganization' => $partnerOrganization,
@@ -226,8 +223,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['required', 'string', 'max:255'],
-            'name_cryl' => ['required', 'string', 'max:255'],
-            'short_name' => ['nullable', 'string', 'max:100'],
+'short_name' => ['nullable', 'string', 'max:100'],
             'organization_type_id' => ['nullable', 'integer', 'exists:organization_types,id'],
             'address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -249,8 +245,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     private function formOptions(): array
     {
         return [
-            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
-            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru', 'name_cryl']),
+            'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
+            'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'statuses' => PartnerOrganization::STATUS_LABELS,
         ];
     }
@@ -264,8 +260,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         }
 
         $query = $partnerOrganization->agreements()->with([
-            'agreementType:id,name_uz,name_ru,name_cryl',
-            'agreementDirection:id,name_uz,name_ru,name_cryl',
+            'agreementType:id,name_uz,name_ru',
+            'agreementDirection:id,name_uz,name_ru',
         ]);
 
         if (! $user->can('view agreements') && $user->can('view own agreements')) {
@@ -278,7 +274,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('signed_date')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -291,7 +287,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         }
 
         $query = $partnerOrganization->visits()->with([
-            'visitType:id,name_uz,name_ru,name_cryl',
+            'visitType:id,name_uz,name_ru',
         ]);
 
         if (! $user->can('view visits') && $user->can('view own visits')) {
@@ -304,7 +300,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('start_date')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -317,8 +313,8 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         }
 
         $query = $partnerOrganization->events()->with([
-            'eventType:id,name_uz,name_ru,name_cryl',
-            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
+            'eventType:id,name_uz,name_ru',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
         ]);
 
         if (! $user->can('view events') && $user->can('view own events')) {
@@ -331,7 +327,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('start_datetime')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru) asc')
             ->get();
     }
 
@@ -344,10 +340,10 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         }
 
         $query = $partnerOrganization->documents()->with([
-            'documentType:id,name_uz,name_ru,name_cryl',
-            'agreement:id,title_uz,title_ru,title_cryl,short_title_uz,short_title_ru,short_title_cryl',
-            'visit:id,title_uz,title_ru,title_cryl',
-            'event:id,title_uz,title_ru,title_cryl',
+            'documentType:id,name_uz,name_ru',
+            'agreement:id,title_uz,title_ru,short_title_uz,short_title_ru',
+            'visit:id,title_uz,title_ru',
+            'event:id,title_uz,title_ru',
             'uploader:id,first_name,middle_name,last_name',
         ]);
 
@@ -357,7 +353,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return $query
             ->orderByDesc('created_at')
-            ->orderByRaw('coalesce(title_uz, title_ru, title_cryl, file_name) asc')
+            ->orderByRaw('coalesce(title_uz, title_ru,  file_name) asc')
             ->get();
     }
 
@@ -432,12 +428,10 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     {
         $organizationNameUz = $partnerOrganization->name_uz ?: $partnerOrganization->display_name;
         $organizationNameRu = $partnerOrganization->name_ru ?: $partnerOrganization->display_name;
-        $organizationNameCryl = $partnerOrganization->name_cryl ?: $partnerOrganization->display_name;
 
         return [
             'title_uz' => "{$organizationNameUz} info fayli",
             'title_ru' => "{$organizationNameRu} info file",
-            'title_cryl' => "{$organizationNameCryl} info fayli",
             'document_number' => null,
             'document_type_id' => null,
             'country_id' => $partnerOrganization->country_id,

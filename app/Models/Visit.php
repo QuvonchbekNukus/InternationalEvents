@@ -47,7 +47,6 @@ class Visit extends Model
     protected $fillable = [
         'title_ru',
         'title_uz',
-        'title_cryl',
         'visit_type_id',
         'country_id',
         'partner_organization_id',
@@ -63,10 +62,8 @@ class Visit extends Model
         'responsible_department_id',
         'purpose_ru',
         'purpose_uz',
-        'purpose_cryl',
         'result_summary_ru',
         'result_summary_uz',
-        'result_summary_cryl',
         'description',
         'created_by',
         'updated_by',

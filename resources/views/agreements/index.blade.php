@@ -98,7 +98,7 @@
                                     <span class="row-subtitle">
                                         {{ $agreement->agreement_number ?: __('ui.pages.agreements.index.values.number_missing') }}
                                         {{ ' - ' }}
-                                        {{ $agreement->title_ru }}{{ $agreement->title_cryl ? ' / '.$agreement->title_cryl : '' }}
+                                        {{ $agreement->title_ru }}
                                     </span>
                                 </td>
                                 <td>

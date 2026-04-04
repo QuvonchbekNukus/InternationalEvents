@@ -37,7 +37,6 @@ class Document extends Model
     protected $fillable = [
         'title_ru',
         'title_uz',
-        'title_cryl',
         'document_number',
         'document_type_id',
         'file_name',

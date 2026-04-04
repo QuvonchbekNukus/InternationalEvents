@@ -320,11 +320,18 @@
                                                         </span>
                                                     </span>
 
-                                                    <span class="event-calendar-compact__items" data-day-preview>
-                                                        @foreach ($day['preview_items'] as $item)
-                                                            <span class="event-calendar-compact__item event-calendar-compact__item--{{ $item['tone'] }} {{ $item['type'] }}-chip" data-calendar-item-type="{{ $item['type'] }}" title="{{ $item['tooltip'] }}">
-                                                                <i class="material-icons" aria-hidden="true">{{ $item['icon'] }}</i>
-                                                                <span>{{ $item['title'] }}</span>
+                                                    <span class="event-calendar-compact__items event-calendar-compact__markers" data-day-preview>
+                                                        @foreach ($day['preview_items'] as $marker)
+                                                            <span
+                                                                class="event-calendar-compact__marker event-calendar-compact__marker--{{ $marker['type'] }}"
+                                                                role="link"
+                                                                tabindex="0"
+                                                                data-calendar-marker-url="{{ $marker['url'] }}"
+                                                                title="{{ $marker['tooltip'] }}"
+                                                                aria-label="{{ $marker['title'] }}"
+                                                                data-calendar-item-type="{{ $marker['type'] }}"
+                                                            >
+                                                                <span class="event-calendar-compact__marker-dot" aria-hidden="true"></span>
                                                             </span>
                                                         @endforeach
                                                     </span>
@@ -498,7 +505,7 @@
                 const resolveCalendarItemType = (item) => item?.type ?? 'unknown';
                 const resolveCalendarItemStatus = (item) => item?.status ?? null;
                 const resolveCalendarItemId = (item) => String(item?.id ?? '');
-                const rendersAsWeekSpan = (item) => Boolean(item?.is_multi_day) || resolveCalendarItemType(item) === 'birthday';
+                const DAY_MARKER_LIMIT = 14;
 
                 const parseJsonScript = (scriptElement, fallback) => {
                     if (!scriptElement) {
@@ -641,20 +648,23 @@
                     return icon;
                 };
 
-                const createPreviewItem = (item) => {
-                    const chip = document.createElement('span');
+                const createPreviewMarker = (item) => {
+                    const marker = document.createElement('span');
                     const itemType = resolveCalendarItemType(item);
-                    chip.className = `event-calendar-compact__item event-calendar-compact__item--${item.tone} ${itemType}-chip`;
-                    chip.dataset.calendarItemType = itemType;
-                    chip.title = item.tooltip;
+                    marker.className = `event-calendar-compact__marker event-calendar-compact__marker--${itemType}`;
+                    marker.setAttribute('role', 'link');
+                    marker.tabIndex = 0;
+                    marker.dataset.calendarMarkerUrl = item.url || '';
+                    marker.title = item.tooltip || '';
+                    marker.setAttribute('aria-label', item.title || '');
+                    marker.dataset.calendarItemType = itemType;
 
-                    chip.append(createIcon(item.icon));
+                    const dot = document.createElement('span');
+                    dot.className = 'event-calendar-compact__marker-dot';
+                    dot.setAttribute('aria-hidden', 'true');
+                    marker.append(dot);
 
-                    const title = document.createElement('span');
-                    title.textContent = item.title;
-                    chip.append(title);
-
-                    return chip;
+                    return marker;
                 };
 
                 const createDayButton = (day, countTemplate, emptyCountLabel, moreTemplate) => {
@@ -704,10 +714,10 @@
                     head.append(time, count);
 
                     const preview = document.createElement('span');
-                    preview.className = 'event-calendar-compact__items';
+                    preview.className = 'event-calendar-compact__items event-calendar-compact__markers';
                     preview.dataset.dayPreview = '';
                     (Array.isArray(day.preview_items) ? day.preview_items : []).forEach((item) => {
-                        preview.append(createPreviewItem(item));
+                        preview.append(createPreviewMarker(item));
                     });
 
                     const more = document.createElement('span');
@@ -1281,7 +1291,7 @@
                             const date = button.dataset.date;
                             const dayEntry = filteredDayLookup[date] ?? createEmptyDayEntry(date);
                             const items = Array.isArray(dayEntry.items) ? dayEntry.items : [];
-                            const previewableItems = items.filter((item) => !rendersAsWeekSpan(item));
+                            const startItems = items.filter((item) => item.start_date === date);
                             const preview = button.querySelector('[data-day-preview]');
                             const more = button.querySelector('[data-day-more]');
                             const count = button.querySelector('[data-day-count]');
@@ -1292,11 +1302,11 @@
                             }
 
                             preview.replaceChildren();
-                            previewableItems.slice(0, 2).forEach((item) => preview.append(createPreviewItem(item)));
+                            startItems.slice(0, DAY_MARKER_LIMIT).forEach((item) => preview.append(createPreviewMarker(item)));
 
-                            if (previewableItems.length > 2) {
+                            if (startItems.length > DAY_MARKER_LIMIT) {
                                 more.hidden = false;
-                                more.textContent = replaceCount(module.dataset.moreTemplate, previewableItems.length - 2);
+                                more.textContent = replaceCount(module.dataset.moreTemplate, startItems.length - DAY_MARKER_LIMIT);
                             } else {
                                 more.hidden = true;
                                 more.textContent = '';
@@ -1452,6 +1462,20 @@
                     });
 
                     weeksContainer.addEventListener('click', (event) => {
+                        const marker = event.target.closest('[data-calendar-marker-url]');
+
+                        if (marker && weeksContainer.contains(marker)) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const url = marker.getAttribute('data-calendar-marker-url') || '';
+
+                            if (url !== '') {
+                                window.location.assign(url);
+                            }
+
+                            return;
+                        }
+
                         const button = event.target.closest('[data-calendar-day]');
 
                         if (!button || !weeksContainer.contains(button)) {
@@ -1460,6 +1484,26 @@
 
                         selectedDate = button.dataset.date || selectedDate;
                         renderDetail();
+                    });
+
+                    weeksContainer.addEventListener('keydown', (event) => {
+                        const marker = event.target.closest('[data-calendar-marker-url]');
+
+                        if (!marker || !weeksContainer.contains(marker)) {
+                            return;
+                        }
+
+                        if (event.key !== 'Enter' && event.key !== ' ') {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        event.stopPropagation();
+                        const url = marker.getAttribute('data-calendar-marker-url') || '';
+
+                        if (url !== '') {
+                            window.location.assign(url);
+                        }
                     });
 
                     form.addEventListener('submit', (event) => {

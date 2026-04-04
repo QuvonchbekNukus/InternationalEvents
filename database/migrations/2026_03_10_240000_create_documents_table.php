@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('title_ru')->nullable();
             $table->string('title_uz')->nullable();
-            $table->string('title_cryl')->nullable();
             $table->string('document_number')->nullable();
             $table->foreignId('document_type_id')->nullable()->constrained()->nullOnDelete();
             $table->string('file_name');
@@ -34,6 +33,17 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->timestamps();
         });
+
+        // `documents` mavjud bo‘lgach: hamkor tashkilotning “ma’lumotnoma” hujjatiga FK (aylanma bog‘lanish).
+        if (! Schema::hasColumn('partner_organizations', 'organization_info_document_id')) {
+            Schema::table('partner_organizations', function (Blueprint $table) {
+                $table->foreignId('organization_info_document_id')
+                    ->nullable()
+                    ->after('organization_type_id')
+                    ->constrained('documents')
+                    ->nullOnDelete();
+            });
+        }
     }
 
     /**
@@ -41,6 +51,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (Schema::hasColumn('partner_organizations', 'organization_info_document_id')) {
+            Schema::table('partner_organizations', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('organization_info_document_id');
+            });
+        }
+
         Schema::dropIfExists('documents');
     }
 };

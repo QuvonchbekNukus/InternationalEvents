@@ -30,7 +30,6 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'position_ru' => null,
             'position_uz' => null,
-            'position_cryl' => null,
             'department_id' => null,
             'rank_id' => 1,
             'avatar' => null,
@@ -47,3 +46,4 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => []);
     }
 }
+

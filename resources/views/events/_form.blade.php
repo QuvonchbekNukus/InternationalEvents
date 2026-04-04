@@ -23,14 +23,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Sarlavha (KRYL)</span>
-            <input type="text" name="title_cryl" value="{{ old('title_cryl', $event->title_cryl) }}" placeholder="Халқаро семинар" required>
-            @error('title_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">Tadbir turi</span>
             <select name="event_type_id">
                 <option value="">Biriktirilmagan</option>
@@ -188,14 +180,6 @@
             <span class="field-label">Natija (RU)</span>
             <textarea name="result_summary_ru" placeholder="Итоги мероприятия">{{ old('result_summary_ru', $event->result_summary_ru) }}</textarea>
             @error('result_summary_ru')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
-            <span class="field-label">Natija (KRYL)</span>
-            <textarea name="result_summary_cryl" placeholder="Тадбир натижалари">{{ old('result_summary_cryl', $event->result_summary_cryl) }}</textarea>
-            @error('result_summary_cryl')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

@@ -62,7 +62,8 @@ class DashboardController extends Controller
 
     private const CALENDAR_RECURRENCE_YEARLY = 'yearly';
 
-    private const DAY_PREVIEW_LIMIT = 2;
+    /** Kun kataklarida boshlanish sanasi bo‘yicha ko‘rinadigan markerlar (doiracha) soni. */
+    private const CALENDAR_DAY_MARKER_LIMIT = 14;
 
     public function __invoke(Request $request): View
     {
@@ -187,7 +188,7 @@ class DashboardController extends Controller
 
             $calendar['weeks'][] = [
                 'days' => $days,
-                'span_lanes' => $this->buildWeekSpanLanes($items, $weekStart, $weekEnd),
+                'span_lanes' => [],
             ];
         }
 
@@ -288,8 +289,8 @@ class DashboardController extends Controller
     ): Collection {
         $eventsQuery = Event::query()
             ->with([
-                'country:id,name_uz,name_ru,name_cryl,iso2',
-                'eventType:id,name_uz,name_ru,name_cryl',
+                'country:id,name_uz,name_ru,iso2',
+                'eventType:id,name_uz,name_ru',
             ])
             ->whereIn('status', self::DISPLAY_EVENT_STATUSES)
             ->where(function ($query) use ($visibleStart, $visibleEnd): void {
@@ -335,8 +336,8 @@ class DashboardController extends Controller
     ): Collection {
         $visitsQuery = Visit::query()
             ->with([
-                'country:id,name_uz,name_ru,name_cryl,iso2',
-                'visitType:id,name_uz,name_ru,name_cryl',
+                'country:id,name_uz,name_ru,iso2',
+                'visitType:id,name_uz,name_ru',
             ])
             ->whereIn('status', self::DISPLAY_VISIT_STATUSES)
             ->where(function ($query) use ($visibleStart, $visibleEnd): void {
@@ -389,7 +390,7 @@ class DashboardController extends Controller
 
         return PartnerContact::query()
             ->with([
-                'partnerOrganization:id,name_uz,name_ru,name_cryl,short_name',
+                'partnerOrganization:id,name_uz,name_ru,short_name',
             ])
             ->whereNotNull('birthday')
             ->where(function ($query) use ($visibleMonths): void {
@@ -398,6 +399,7 @@ class DashboardController extends Controller
                 foreach ($monthKeys as $index => $monthNumber) {
                     if ($index === 0) {
                         $query->whereMonth('birthday', $monthNumber);
+
                         continue;
                     }
 
@@ -624,7 +626,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param Collection<int, array<string, mixed>> $items
+     * @param  Collection<int, array<string, mixed>>  $items
      * @return array<string, array<string, mixed>>
      */
     private function buildCalendarDayLookup(
@@ -635,6 +637,7 @@ class DashboardController extends Controller
         array $texts
     ): array {
         $groupedItems = [];
+        $markersByStartDate = [];
 
         foreach ($items as $item) {
             $cursor = $this->calendarDateCursor($item['start_date'] ?? null)?->max($calendarStart);
@@ -648,6 +651,20 @@ class DashboardController extends Controller
                 $groupedItems[$cursor->toDateString()][] = $this->exportCalendarItem($item);
                 $cursor = $cursor->addDay();
             }
+
+            $startKey = $item['start_date'] ?? null;
+            if (is_string($startKey) && $startKey !== '') {
+                $startCursor = $this->calendarDateCursor($startKey);
+                if ($startCursor && $startCursor->betweenIncluded($calendarStart, $calendarEnd)) {
+                    $exported = $this->exportCalendarItem($item);
+                    $markersByStartDate[$startKey][] = [
+                        'type' => $exported['type'],
+                        'title' => $exported['title'],
+                        'url' => $exported['url'],
+                        'tooltip' => $exported['tooltip'],
+                    ];
+                }
+            }
         }
 
         $lookup = [];
@@ -656,10 +673,8 @@ class DashboardController extends Controller
         for ($day = $calendarStart; $day->lte($calendarEnd); $day = $day->addDay()) {
             $dateKey = $day->toDateString();
             $dayItems = $groupedItems[$dateKey] ?? [];
-            $previewableItems = array_values(array_filter(
-                $dayItems,
-                fn (array $item): bool => ! $this->rendersAsWeekSpan($item)
-            ));
+            $startMarkers = $markersByStartDate[$dateKey] ?? [];
+            $previewItems = array_slice($startMarkers, 0, self::CALENDAR_DAY_MARKER_LIMIT);
 
             $lookup[$dateKey] = [
                 'date' => $dateKey,
@@ -667,17 +682,8 @@ class DashboardController extends Controller
                 'is_current_month' => $day->month === $monthStart->month,
                 'is_today' => $day->isSameDay($today),
                 'item_count' => count($dayItems),
-                'preview_items' => array_slice(array_map(
-                    fn (array $item): array => [
-                        'type' => $item['type'],
-                        'title' => $item['title'],
-                        'icon' => $item['icon'],
-                        'tone' => $item['tone'],
-                        'tooltip' => $item['tooltip'],
-                    ],
-                    $previewableItems
-                ), 0, self::DAY_PREVIEW_LIMIT),
-                'hidden_count' => max(count($previewableItems) - self::DAY_PREVIEW_LIMIT, 0),
+                'preview_items' => $previewItems,
+                'hidden_count' => max(count($startMarkers) - count($previewItems), 0),
                 'items' => $dayItems,
                 'count_label' => count($dayItems) > 0
                     ? $this->replaceCountPlaceholder($texts['item_count'], count($dayItems))
@@ -686,76 +692,6 @@ class DashboardController extends Controller
         }
 
         return $lookup;
-    }
-
-    /**
-     * @param Collection<int, array<string, mixed>> $items
-     * @return array<int, array<int, array<string, mixed>>>
-     */
-    private function buildWeekSpanLanes(
-        Collection $items,
-        CarbonImmutable $weekStart,
-        CarbonImmutable $weekEnd
-    ): array {
-        $laneEndColumns = [];
-        $lanes = [];
-
-        foreach ($items as $item) {
-            if (! $this->rendersAsWeekSpan($item)) {
-                continue;
-            }
-
-            $itemStart = $this->calendarDateCursor($item['start_date'] ?? null);
-            $itemEnd = $this->calendarDateCursor($item['end_date'] ?? $item['start_date'] ?? null);
-
-            if (! $itemStart || ! $itemEnd) {
-                continue;
-            }
-
-            if ($itemEnd->lt($weekStart) || $itemStart->gt($weekEnd)) {
-                continue;
-            }
-
-            $segmentStart = $itemStart->max($weekStart);
-            $segmentEnd = $itemEnd->min($weekEnd);
-            $startColumn = $weekStart->diffInDays($segmentStart) + 1;
-            $span = $segmentStart->diffInDays($segmentEnd) + 1;
-
-            $segment = [
-                'id' => $item['id'],
-                'title' => $item['title'],
-                'url' => $item['url'],
-                'icon' => $item['icon'],
-                'tone' => $item['tone'],
-                'tooltip' => $item['tooltip'],
-                'type' => $item['type'],
-                'status' => $item['status'],
-                'status_label' => $item['status_label'],
-                'type_label' => $item['type_label'],
-                'duration_label' => $item['duration_label'],
-                'start_column' => $startColumn,
-                'span' => $span,
-                'starts_before' => $itemStart->lt($weekStart),
-                'ends_after' => $itemEnd->gt($weekEnd),
-            ];
-
-            $laneIndex = $this->resolveLaneIndex($laneEndColumns, $startColumn);
-            $laneEndColumns[$laneIndex] = $startColumn + $span - 1;
-            $lanes[$laneIndex][] = $segment;
-        }
-
-        ksort($lanes);
-
-        return array_values($lanes);
-    }
-
-    /**
-     * @param array<string, mixed> $item
-     */
-    private function rendersAsWeekSpan(array $item): bool
-    {
-        return (bool) ($item['is_multi_day'] ?? false)
-            || ($item['type'] ?? null) === self::CALENDAR_ITEM_TYPE_BIRTHDAY;
     }
 
     private function calendarDateCursor(?string $date): ?CarbonImmutable
@@ -769,20 +705,6 @@ class DashboardController extends Controller
         } catch (\Throwable) {
             return null;
         }
-    }
-
-    /**
-     * @param array<int, int> $laneEndColumns
-     */
-    private function resolveLaneIndex(array $laneEndColumns, int $startColumn): int
-    {
-        foreach ($laneEndColumns as $laneIndex => $lastColumn) {
-            if ($startColumn > $lastColumn) {
-                return $laneIndex;
-            }
-        }
-
-        return count($laneEndColumns);
     }
 
     /**
@@ -815,7 +737,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param Collection<int, array<string, mixed>> $items
+     * @param  Collection<int, array<string, mixed>>  $items
      * @return array<int, array{key: string, label: string, count: int, icon: string, tone: string}>
      */
     private function buildCalendarSummary(Collection $items, array $texts): array
@@ -860,7 +782,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param Collection<int, array<string, mixed>> $items
+     * @param  Collection<int, array<string, mixed>>  $items
      * @return array{
      *     types: array<int, array{key: string, group: string, value: string, label: string, count: int, icon: string}>,
      *     statuses: array<int, array{key: string, group: string, value: string, label: string, count: int, icon: string}>
@@ -933,7 +855,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param array<string, array<string, mixed>> $dayLookup
+     * @param  array<string, array<string, mixed>>  $dayLookup
      */
     private function resolveSelectedCalendarDate(
         array $dayLookup,
@@ -986,7 +908,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param array<int, string|null> $parts
+     * @param  array<int, string|null>  $parts
      */
     private function formatTooltip(array $parts): string
     {

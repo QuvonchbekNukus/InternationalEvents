@@ -109,14 +109,6 @@
             @enderror
         </label>
 
-        <label class="field">
-            <span class="field-label">Lavozimi (KRYL)</span>
-            <input type="text" name="position_cryl" value="{{ old('position_cryl', $user->position_cryl) }}" placeholder="Етакчи мутахассис">
-            @error('position_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         @can('edit users')
             <label class="checkbox-field field--span-2">
                 <input type="hidden" name="is_active" value="0">

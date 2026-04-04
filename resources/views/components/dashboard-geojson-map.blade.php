@@ -69,23 +69,12 @@
             aria-label="{{ $title ?: 'Davlatlar xaritasi' }}"
         ></div>
 
-        <div class="dashboard-geojson-map__status" data-dashboard-geojson-status role="status" aria-live="polite">
-            <span class="dashboard-geojson-map__status-spinner" data-dashboard-geojson-spinner aria-hidden="true"></span>
+        <div class="dashboard-geojson-map__status" data-dashboard-geojson-status role="status" aria-live="polite" hidden>
+            <span class="dashboard-geojson-map__status-spinner" data-dashboard-geojson-spinner aria-hidden="true" hidden></span>
             <div class="dashboard-geojson-map__status-copy">
                 <strong data-dashboard-geojson-status-title>Davlat qatlamlari tayyorlanmoqda</strong>
                 <span data-dashboard-geojson-status-text>GeoJSON fayllar serverdan olinib, xaritaga bosqichma-bosqich joylanadi.</span>
             </div>
-        </div>
-
-        <div class="dashboard-geojson-map__legend" aria-label="Xarita legendasi">
-            <span class="dashboard-geojson-map__legend-item">
-                <span class="dashboard-geojson-map__legend-swatch"></span>
-                <span>Davlat hududi</span>
-            </span>
-            <span class="dashboard-geojson-map__legend-item">
-                <span class="dashboard-geojson-map__legend-swatch dashboard-geojson-map__legend-swatch--active"></span>
-                <span>Tanlangan hudud</span>
-            </span>
         </div>
     </div>
 
@@ -95,11 +84,8 @@
         <div class="dashboard-geojson-map__modal-dialog" role="dialog" aria-modal="true" aria-labelledby="{{ $modalTitleId }}">
             <div class="dashboard-geojson-map__modal-head">
                 <div class="dashboard-geojson-map__modal-copy">
-                    <p class="dashboard-geojson-map__modal-eyebrow">Test modal oynasi</p>
+                    <p class="dashboard-geojson-map__modal-eyebrow">Davlat bo‘yicha</p>
                     <h3 class="dashboard-geojson-map__modal-title" id="{{ $modalTitleId }}" data-dashboard-geojson-modal-title>Davlat nomi</h3>
-                    <p class="dashboard-geojson-map__modal-text">
-                        Tanlangan GeoJSON qatlamining nomi shu yerda ko‘rsatiladi.
-                    </p>
                 </div>
 
                 <button type="button" class="dashboard-geojson-map__modal-close" data-dashboard-geojson-modal-close aria-label="Yopish">
@@ -109,21 +95,20 @@
 
             <div class="dashboard-geojson-map__modal-meta">
                 <span class="dashboard-geojson-map__modal-chip" data-dashboard-geojson-modal-code hidden></span>
-                <a class="dashboard-geojson-map__modal-link" href="#" data-dashboard-geojson-modal-link hidden>
-                    Davlat sahifasini ochish
-                </a>
             </div>
 
             <div class="dashboard-geojson-map__modal-body" data-dashboard-geojson-modal-body>
-                <div class="dashboard-geojson-map__modal-grid" role="group" aria-label="Davlat bo'yicha yaqin tadbirlar va tashriflar">
-                    <section class="dashboard-geojson-map__modal-panel" aria-label="Yaqin tadbir">
-                        <p class="dashboard-geojson-map__modal-panel-title">Yaqin tadbir</p>
+                <div class="dashboard-geojson-map__modal-grid" role="group" aria-label="Davlat bo'yicha oxirgi yuklangan tadbir va tashrif">
+                    <section class="dashboard-geojson-map__modal-panel" aria-label="Oxirgi yuklangan tadbir">
+                        <p class="dashboard-geojson-map__modal-panel-title">Oxirgi yuklangan tadbir</p>
                         <div class="dashboard-geojson-map__modal-panel-content" data-dashboard-geojson-event>
                             <p class="dashboard-geojson-map__modal-muted" data-dashboard-geojson-event-empty>Ma'lumot yuklanmoqda...</p>
                             <a class="dashboard-geojson-map__modal-item" href="#" data-dashboard-geojson-event-link hidden>
                                 <img class="dashboard-geojson-map__modal-item-image" alt="" loading="lazy" data-dashboard-geojson-event-image hidden>
-                                <strong data-dashboard-geojson-event-title></strong>
-                                <span data-dashboard-geojson-event-date></span>
+                                <div class="dashboard-geojson-map__modal-item-main">
+                                    <strong data-dashboard-geojson-event-title></strong>
+                                    <span data-dashboard-geojson-event-date></span>
+                                </div>
                             </a>
                         </div>
                         <a class="btn btn--ghost dashboard-geojson-map__modal-action" href="{{ route('events.index') }}" data-dashboard-geojson-events-link>
@@ -131,14 +116,16 @@
                         </a>
                     </section>
 
-                    <section class="dashboard-geojson-map__modal-panel" aria-label="Yaqin tashrif">
-                        <p class="dashboard-geojson-map__modal-panel-title">Yaqin tashrif</p>
+                    <section class="dashboard-geojson-map__modal-panel" aria-label="Oxirgi yuklangan tashrif">
+                        <p class="dashboard-geojson-map__modal-panel-title">Oxirgi yuklangan tashrif</p>
                         <div class="dashboard-geojson-map__modal-panel-content" data-dashboard-geojson-visit>
                             <p class="dashboard-geojson-map__modal-muted" data-dashboard-geojson-visit-empty>Ma'lumot yuklanmoqda...</p>
                             <a class="dashboard-geojson-map__modal-item" href="#" data-dashboard-geojson-visit-link hidden>
                                 <img class="dashboard-geojson-map__modal-item-image" alt="" loading="lazy" data-dashboard-geojson-visit-image hidden>
-                                <strong data-dashboard-geojson-visit-title></strong>
-                                <span data-dashboard-geojson-visit-date></span>
+                                <div class="dashboard-geojson-map__modal-item-main">
+                                    <strong data-dashboard-geojson-visit-title></strong>
+                                    <span data-dashboard-geojson-visit-date></span>
+                                </div>
                             </a>
                         </div>
                         <a class="btn btn--ghost dashboard-geojson-map__modal-action" href="{{ route('visits.index') }}" data-dashboard-geojson-visits-link>

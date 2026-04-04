@@ -39,7 +39,6 @@ class VisitAttachmentTest extends TestCase
         $response = $this->actingAs($user)->post(route('visits.store'), [
             'title_ru' => 'Visit RU',
             'title_uz' => 'Visit UZ',
-            'title_cryl' => 'Visit CY',
             'country_id' => $country->id,
             'partner_organization_id' => $partnerOrganization->id,
             'start_date' => '2026-04-15',
@@ -92,7 +91,6 @@ class VisitAttachmentTest extends TestCase
         $visit = Visit::query()->create([
             'title_ru' => 'Old Visit RU',
             'title_uz' => 'Old Visit UZ',
-            'title_cryl' => 'Old Visit CY',
             'country_id' => $countryA->id,
             'partner_organization_id' => $partnerOrganizationA->id,
             'start_date' => '2026-04-16',
@@ -106,7 +104,6 @@ class VisitAttachmentTest extends TestCase
         $existingDocument = Document::query()->create([
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
             'document_number' => null,
             'document_type_id' => null,
             'file_name' => 'existing-visit-file.pdf',
@@ -125,7 +122,6 @@ class VisitAttachmentTest extends TestCase
         $response = $this->actingAs($user)->put(route('visits.update', $visit), [
             'title_ru' => 'Updated Visit RU',
             'title_uz' => 'Updated Visit UZ',
-            'title_cryl' => 'Updated Visit CY',
             'country_id' => $countryB->id,
             'partner_organization_id' => $partnerOrganizationB->id,
             'start_date' => '2026-04-17',
@@ -166,7 +162,6 @@ class VisitAttachmentTest extends TestCase
         $visit = Visit::query()->create([
             'title_ru' => 'Delete Visit RU',
             'title_uz' => 'Delete Visit UZ',
-            'title_cryl' => 'Delete Visit CY',
             'country_id' => $country->id,
             'partner_organization_id' => $partnerOrganization->id,
             'start_date' => '2026-04-18',
@@ -180,7 +175,6 @@ class VisitAttachmentTest extends TestCase
         $document = Document::query()->create([
             'title_ru' => null,
             'title_uz' => null,
-            'title_cryl' => null,
             'document_number' => null,
             'document_type_id' => null,
             'file_name' => 'visit-delete.docx',
@@ -227,7 +221,6 @@ class VisitAttachmentTest extends TestCase
         $country = Country::query()->create([
             'name_ru' => "Visit Country {$suffix} RU",
             'name_uz' => "Visit Country {$suffix}",
-            'name_cryl' => "Visit Country {$suffix} CY",
             'iso2' => "V{$suffix}",
             'iso3' => "VIS{$suffix}",
             'cooperation_status' => 'faol',
@@ -237,7 +230,6 @@ class VisitAttachmentTest extends TestCase
             'country_id' => $country->id,
             'name_ru' => "Visit Organization {$suffix} RU",
             'name_uz' => "Visit Organization {$suffix}",
-            'name_cryl' => "Visit Organization {$suffix} CY",
             'status' => 'faol',
         ]);
 

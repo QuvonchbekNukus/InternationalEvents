@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\DeletesOwnedDocuments;
-use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -26,6 +26,9 @@ class Country extends Model
         'tugatilgan' => 'Yakunlangan',
     ];
 
+    /** Xarita uchun standart masshtab (forma orqali o‘zgartirilmaydi). */
+    public const DEFAULT_MAP_ZOOM = 5;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -34,12 +37,10 @@ class Country extends Model
     protected $fillable = [
         'name_ru',
         'name_uz',
-        'name_cryl',
         'iso2',
         'iso3',
         'region_ru',
         'region_uz',
-        'region_cryl',
         'latitude',
         'longitude',
         'default_zoom',
@@ -59,7 +60,7 @@ class Country extends Model
         return [
             'latitude' => 'float',
             'longitude' => 'float',
-            'default_zoom' => 'float',
+            'default_zoom' => 'integer',
         ];
     }
 

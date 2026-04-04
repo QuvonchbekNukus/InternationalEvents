@@ -41,14 +41,6 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
-            <span class="field-label">F.I.Sh (KRYL)</span>
-            <input type="text" name="full_name_cryl" value="{{ old('full_name_cryl', $partnerContact->full_name_cryl) }}" placeholder="Алиев Алишер Анварович" required>
-            @error('full_name_cryl')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field">
             <span class="field-label">Tug'ilgan sana</span>
             <input type="date" name="birthday" value="{{ old('birthday', $partnerContact->birthday?->format('Y-m-d')) }}">
@@ -69,14 +61,6 @@
             <span class="field-label">Lavozimi (RU)</span>
             <input type="text" name="position_ru" value="{{ old('position_ru', $partnerContact->position_ru) }}" placeholder="Главный специалист">
             @error('position_ru')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field field--span-2">
-            <span class="field-label">Lavozimi (KRYL)</span>
-            <input type="text" name="position_cryl" value="{{ old('position_cryl', $partnerContact->position_cryl) }}" placeholder="Бош мутахассис">
-            @error('position_cryl')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

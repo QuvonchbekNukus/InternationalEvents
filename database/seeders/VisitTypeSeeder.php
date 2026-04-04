@@ -16,32 +16,26 @@ class VisitTypeSeeder extends Seeder
             [
                 'name_ru' => 'Официальный визит',
                 'name_uz' => 'Rasmiy tashrif',
-                'name_cryl' => 'Расмий ташриф',
             ],
             [
                 'name_ru' => 'Рабочий визит',
                 'name_uz' => 'Ishchi tashrif',
-                'name_cryl' => 'Ишчи ташриф',
             ],
             [
                 'name_ru' => 'Дружеский визит',
                 'name_uz' => "Do'stona tashrif",
-                'name_cryl' => 'Дўстона ташриф',
             ],
             [
                 'name_ru' => 'Государственный визит',
                 'name_uz' => 'Davlat tashrifi',
-                'name_cryl' => 'Давлат ташрифи',
             ],
             [
                 'name_ru' => 'Неофициальный визит',
                 'name_uz' => 'Norasmiy tashrif',
-                'name_cryl' => 'Норасмий ташриф',
             ],
             [
                 'name_ru' => 'Ответный визит',
                 'name_uz' => 'Javob tashrifi',
-                'name_cryl' => 'Жавоб ташрифи',
             ],
         ];
 

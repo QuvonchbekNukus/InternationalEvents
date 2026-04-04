@@ -42,10 +42,10 @@ class DashboardGeoJsonController extends Controller
             ->header('Cache-Control', 'private, max-age=300');
     }
 
-    public function summary(string $country, DashboardGeoJsonService $geoJsonService): JsonResponse
+    public function summary(Request $request, string $country, DashboardGeoJsonService $geoJsonService): JsonResponse
     {
         try {
-            return response()->json($geoJsonService->countryDashboardSummary($country));
+            return response()->json($geoJsonService->countryDashboardSummary($country, $request->user()));
         } catch (RuntimeException $exception) {
             report($exception);
 

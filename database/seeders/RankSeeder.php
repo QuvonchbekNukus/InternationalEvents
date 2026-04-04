@@ -16,17 +16,14 @@ class RankSeeder extends Seeder
             [
                 'name_ru' => 'Лейтенант',
                 'name_uz' => 'Leytenant',
-                'name_cryl' => 'Лейтенант',
             ],
             [
                 'name_ru' => 'Капитан',
                 'name_uz' => 'Kapitan',
-                'name_cryl' => 'Капитан',
             ],
             [
                 'name_ru' => 'Майор',
                 'name_uz' => 'Mayor',
-                'name_cryl' => 'Майор',
             ],
         ];
 
