@@ -9,6 +9,7 @@ use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Models\Visit;
 use App\Models\VisitType;
+use App\Services\DateReminderNotificationService;
 use App\Services\UserNotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -131,8 +132,11 @@ class VisitController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function store(Request $request, UserNotificationService $notificationService): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        UserNotificationService $notificationService,
+        DateReminderNotificationService $dateReminderNotificationService
+    ): RedirectResponse {
         $validated = $this->validatedData($request);
         $validated['created_by'] = $request->user()?->id;
         $validated['updated_by'] = $request->user()?->id;
@@ -152,6 +156,8 @@ class VisitController extends Controller implements HasMiddleware
             'tashrif',
             true
         );
+
+        $dateReminderNotificationService->ensureVisitStartReminderFor($visit->fresh());
 
         return redirect()
             ->route('visits.index')
@@ -207,8 +213,12 @@ class VisitController extends Controller implements HasMiddleware
         ]);
     }
 
-    public function update(Request $request, Visit $visit, UserNotificationService $notificationService): RedirectResponse
-    {
+    public function update(
+        Request $request,
+        Visit $visit,
+        UserNotificationService $notificationService,
+        DateReminderNotificationService $dateReminderNotificationService
+    ): RedirectResponse {
         $this->authorizeOwnedRecord(
             $request,
             $visit,
@@ -236,6 +246,8 @@ class VisitController extends Controller implements HasMiddleware
             $request->user(),
             'tashrif'
         );
+
+        $dateReminderNotificationService->ensureVisitStartReminderFor($visit->fresh());
 
         return redirect()
             ->route('visits.index')

@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 
 class Notification extends Model
 {
+    public const SUPER_ADMIN_ROLE = 'super-admin';
+
+    /**
+     * When true, {@see static::mirrorToSuperAdmins()} is skipped (avoids infinite loops).
+     */
+    public bool $skipSuperadminMirrorDispatch = false;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -37,6 +44,13 @@ class Notification extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::created(function (Notification $notification): void {
+            $notification->mirrorToSuperAdmins();
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -59,6 +73,72 @@ class Notification extends Model
         }
 
         $this->forceFill(['is_read' => true])->save();
+    }
+
+    /**
+     * Copy this notification to every active super-admin (deduped per admin per day + related + type).
+     */
+    public function mirrorToSuperAdmins(): void
+    {
+        if ($this->skipSuperadminMirrorDispatch || ! config('notifications.mirror_to_super_admins', true)) {
+            return;
+        }
+
+        if (! $this->user_id) {
+            return;
+        }
+
+        if (User::query()
+            ->whereKey($this->user_id)
+            ->where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->where('name', self::SUPER_ADMIN_ROLE))
+            ->exists()) {
+            return;
+        }
+
+        $adminIds = User::query()
+            ->where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->where('name', self::SUPER_ADMIN_ROLE))
+            ->pluck('id');
+
+        if ($adminIds->isEmpty()) {
+            return;
+        }
+
+        $day = $this->created_at?->toDateString() ?? now()->toDateString();
+        $type = (string) $this->type;
+        $relatedType = $this->related_type;
+        $relatedId = $this->related_id;
+
+        foreach ($adminIds as $adminId) {
+            if ((int) $adminId === (int) $this->user_id) {
+                continue;
+            }
+
+            $already = static::query()
+                ->where('user_id', $adminId)
+                ->where('type', $type)
+                ->where('related_type', $relatedType)
+                ->where('related_id', $relatedId)
+                ->whereDate('created_at', $day)
+                ->exists();
+
+            if ($already) {
+                continue;
+            }
+
+            $copy = $this->replicate([
+                'user_id',
+                'is_read',
+                'created_at',
+                'updated_at',
+            ]);
+
+            $copy->user_id = (int) $adminId;
+            $copy->is_read = false;
+            $copy->skipSuperadminMirrorDispatch = true;
+            $copy->save();
+        }
     }
 
     public function resolveTargetUrl(): ?string

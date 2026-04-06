@@ -17,6 +17,7 @@ return [
         'panel_aria' => 'So\'nggi bildirishnomalar ro\'yxati',
         'empty' => 'Hozircha bildirishnomalar yo\'q.',
         'open_notifications' => 'Bildirishnomalarni ochish',
+        'mark_read' => 'O\'qildi',
         'kind_event' => 'Tadbir',
         'kind_visit' => 'Tashrif',
         'kind_agreement' => 'Kelishuv',

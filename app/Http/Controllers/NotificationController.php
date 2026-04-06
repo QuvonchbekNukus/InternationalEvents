@@ -10,9 +10,12 @@ class NotificationController extends Controller
 {
     public function open(Request $request, Notification $notification): RedirectResponse
     {
-        abort_unless((int) $notification->user_id === (int) $request->user()?->id, 403);
+        return $this->go($request, $notification);
+    }
 
-        $notification->markAsRead();
+    public function go(Request $request, Notification $notification): RedirectResponse
+    {
+        abort_unless((int) $notification->user_id === (int) $request->user()?->id, 403);
 
         $targetUrl = $notification->resolveTargetUrl();
 
@@ -23,5 +26,14 @@ class NotificationController extends Controller
         }
 
         return redirect()->to($targetUrl);
+    }
+
+    public function markRead(Request $request, Notification $notification): RedirectResponse
+    {
+        abort_unless((int) $notification->user_id === (int) $request->user()?->id, 403);
+
+        $notification->markAsRead();
+
+        return redirect()->back();
     }
 }

@@ -14,6 +14,37 @@
         <section class="content-card permission-role-overview">
             <p class="eyebrow">BARCHA ROLLAR</p>
 
+            <form class="permission-new-role" method="POST" action="{{ route('role-permissions.store') }}">
+                @csrf
+                <div class="permission-new-role__row">
+                    <label class="permission-new-role__field">
+                        <span class="permission-new-role__label">Yangi role</span>
+                        <input
+                            type="text"
+                            name="name"
+                            value="{{ old('name') }}"
+                            class="permission-new-role__input"
+                            placeholder="masalan: moderator"
+                            autocomplete="off"
+                            maxlength="255"
+                            pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                            title="Kichik lotin harflari, raqam va tire (masalan: yangi-role)"
+                            required
+                        >
+                    </label>
+                    <button class="btn btn--secondary permission-new-role__submit" type="submit">
+                        <i class="material-icons" aria-hidden="true">add</i>
+                        <span>Qo‘shish</span>
+                    </button>
+                </div>
+                @error('name')
+                    <p class="form-error permission-new-role__error">{{ $message }}</p>
+                @enderror
+                <p class="permission-new-role__hint">
+                    Faqat kichik lotin harflari, raqam va tire; bo‘sh joy bo‘lmasin (tizim identifikatori).
+                </p>
+            </form>
+
             <div class="permission-role-grid">
                 @foreach ($roles as $role)
                     @php

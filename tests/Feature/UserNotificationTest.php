@@ -84,6 +84,13 @@ class UserNotificationTest extends TestCase
             ->get(route('notifications.open', $notification))
             ->assertRedirect(route('agreements.show', $agreement));
 
+        $this->assertFalse($notification->fresh()->is_read);
+
+        $this->actingAs($responsibleUser)
+            ->from(route('profile.edit'))
+            ->post(route('notifications.read', $notification))
+            ->assertRedirect(route('profile.edit'));
+
         $this->assertTrue($notification->fresh()->is_read);
 
         $this->actingAs($responsibleUser)

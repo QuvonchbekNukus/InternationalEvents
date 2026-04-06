@@ -103,4 +103,56 @@ class RolePermissionManagementTest extends TestCase
         $response->assertSee("Ruxsatlarni boshqarish");
         $response->assertDontSee("Foydalanuvchilar");
     }
+
+    public function test_authorized_user_can_create_new_role(): void
+    {
+        Permission::findOrCreate('manage role permissions', 'web');
+
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        $superAdminRole->givePermissionTo('manage role permissions');
+
+        Role::findOrCreate('operator', 'web');
+
+        $user = User::factory()->create();
+        $user->assignRole($superAdminRole);
+
+        $response = $this->actingAs($user)->post(route('role-permissions.store'), [
+            'name' => 'moderator',
+        ]);
+
+        $response->assertRedirect(route('role-permissions.index', ['role' => 'moderator']));
+
+        $this->assertDatabaseHas('roles', [
+            'name' => 'moderator',
+            'guard_name' => 'web',
+        ]);
+    }
+
+    public function test_role_store_rejects_invalid_name_for_unauthorized_user(): void
+    {
+        Role::findOrCreate('operator', 'web');
+
+        $response = $this->actingAs(User::factory()->create())->post(route('role-permissions.store'), [
+            'name' => 'hacker-role',
+        ]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_role_store_validates_name_format(): void
+    {
+        Permission::findOrCreate('manage role permissions', 'web');
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        $superAdminRole->givePermissionTo('manage role permissions');
+        Role::findOrCreate('operator', 'web');
+
+        $user = User::factory()->create();
+        $user->assignRole($superAdminRole);
+
+        $response = $this->actingAs($user)->post(route('role-permissions.store'), [
+            'name' => 'Not Valid',
+        ]);
+
+        $response->assertSessionHasErrors('name');
+    }
 }

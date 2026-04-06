@@ -29,7 +29,8 @@ class AppServiceProvider extends ServiceProvider
                 $recent = Notification::query()
                     ->where('user_id', $user->id)
                     ->with('related')
-                    ->latest()
+                    ->orderBy('is_read')
+                    ->orderByDesc('created_at')
                     ->limit(12)
                     ->get();
             }

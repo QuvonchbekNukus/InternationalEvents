@@ -173,34 +173,74 @@
             @if ($notifications->count())
                 <div class="notification-list">
                     @foreach ($notifications as $notification)
-                        <a
-                            class="notification-item {{ $notification->is_read ? '' : 'is-unread' }}"
-                            href="{{ route('notifications.open', $notification) }}"
-                        >
-                            <span
-                                class="notification-item__icon notification-item__icon--related notification-item__icon--related-{{ $notification->related_kind_slug }}"
-                                aria-hidden="true"
-                            >
-                                <i class="material-icons">{{ $notification->related_category_icon }}</i>
-                            </span>
+                        @php
+                            $targetUrl = $notification->resolveTargetUrl();
+                        @endphp
+                        <div class="notification-item notification-item--row {{ $notification->is_read ? '' : 'is-unread' }}">
+                            @if ($targetUrl)
+                                <a class="notification-item__link" href="{{ route('notifications.go', $notification) }}">
+                                    <span
+                                        class="notification-item__icon notification-item__icon--related notification-item__icon--related-{{ $notification->related_kind_slug }}"
+                                        aria-hidden="true"
+                                    >
+                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                    </span>
 
-                            <span class="notification-item__content">
-                                <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
-                                <span class="notification-item__topline">
-                                    <span class="notification-item__title">{{ $notification->title }}</span>
-                                    <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
-                                </span>
-                                <span class="notification-item__preview">{{ $notification->preview_text }}</span>
-                                <span class="notification-item__message">{{ $notification->message }}</span>
-                            </span>
+                                    <span class="notification-item__content">
+                                        <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                        <span class="notification-item__topline">
+                                            <span class="notification-item__title">{{ $notification->title }}</span>
+                                            <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                        </span>
+                                        <span class="notification-item__preview">{{ $notification->preview_text }}</span>
+                                        <span class="notification-item__message">{{ $notification->message }}</span>
+                                    </span>
 
-                            <span class="notification-item__aside">
-                                <span class="badge">{{ $notification->type_label }}</span>
-                                @if (! $notification->is_read)
-                                    <span class="notification-item__open">Yangi</span>
-                                @endif
-                            </span>
-                        </a>
+                                    <span class="notification-item__aside">
+                                        <span class="badge">{{ $notification->type_label }}</span>
+                                        @if (! $notification->is_read)
+                                            <span class="notification-item__open">Yangi</span>
+                                        @endif
+                                    </span>
+                                </a>
+                            @else
+                                <div class="notification-item__link notification-item__link--static">
+                                    <span
+                                        class="notification-item__icon notification-item__icon--related notification-item__icon--related-{{ $notification->related_kind_slug }}"
+                                        aria-hidden="true"
+                                    >
+                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                    </span>
+
+                                    <span class="notification-item__content">
+                                        <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                        <span class="notification-item__topline">
+                                            <span class="notification-item__title">{{ $notification->title }}</span>
+                                            <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                        </span>
+                                        <span class="notification-item__preview">{{ $notification->preview_text }}</span>
+                                        <span class="notification-item__message">{{ $notification->message }}</span>
+                                    </span>
+
+                                    <span class="notification-item__aside">
+                                        <span class="badge">{{ $notification->type_label }}</span>
+                                    </span>
+                                </div>
+                            @endif
+
+                            @if (! $notification->is_read)
+                                <form
+                                    class="notification-item__read-form"
+                                    method="post"
+                                    action="{{ route('notifications.read', $notification) }}"
+                                >
+                                    @csrf
+                                    <button class="btn btn--secondary notification-item__read-btn" type="submit">
+                                        {{ __('ui.notifications_dropdown.mark_read') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     @endforeach
                 </div>
 

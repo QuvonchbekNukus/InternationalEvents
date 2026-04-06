@@ -60,9 +60,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::get('notifications/{notification}/go', [NotificationController::class, 'go'])->name('notifications.go');
+    Route::post('notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
 
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
+    Route::post('role-permissions', [RolePermissionController::class, 'store'])->name('role-permissions.store');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::delete('documents/{document}/file', [DocumentController::class, 'destroyFile'])->name('documents.file.destroy');

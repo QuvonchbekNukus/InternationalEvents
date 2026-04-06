@@ -85,6 +85,32 @@ class RolePermissionController extends Controller implements HasMiddleware
         ]);
     }
 
+    public function store(Request $request): RedirectResponse
+    {
+        $this->ensureAccess($request);
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('roles', 'name')->where(fn ($query) => $query->where('guard_name', 'web')),
+            ],
+        ]);
+
+        $role = Role::create([
+            'name' => $validated['name'],
+            'guard_name' => 'web',
+        ]);
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return redirect()
+            ->route('role-permissions.index', ['role' => $role->name])
+            ->with('status', "Yangi role «{$role->name}» yaratildi. Endi unga ruxsatlarni belgilang.");
+    }
+
     public function update(Request $request, Role $role): RedirectResponse
     {
         $this->ensureAccess($request);

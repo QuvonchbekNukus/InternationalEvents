@@ -109,37 +109,53 @@
                             @php
                                 $targetUrl = $notification->resolveTargetUrl();
                             @endphp
-                            @if ($targetUrl)
-                                <a
-                                    class="topbar-notification-item topbar-notification-item--{{ $notification->related_kind_slug }} {{ $notification->is_read ? '' : 'is-unread' }}"
-                                    href="{{ route('notifications.open', $notification) }}"
-                                >
-                                    <span class="topbar-notification-item__icon" aria-hidden="true">
-                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
-                                    </span>
-                                    <span class="topbar-notification-item__text">
-                                        <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
-                                        <span class="topbar-notification-item__title">{{ $notification->title }}</span>
-                                        <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
-                                        <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
-                                    </span>
-                                    @if (! $notification->is_read)
-                                        <span class="topbar-notification-item__dot" aria-hidden="true"></span>
-                                    @endif
-                                </a>
-                            @else
-                                <div class="topbar-notification-item topbar-notification-item--generic is-disabled">
-                                    <span class="topbar-notification-item__icon" aria-hidden="true">
-                                        <i class="material-icons">{{ $notification->related_category_icon }}</i>
-                                    </span>
-                                    <span class="topbar-notification-item__text">
-                                        <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
-                                        <span class="topbar-notification-item__title">{{ $notification->title }}</span>
-                                        <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
-                                        <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
-                                    </span>
-                                </div>
-                            @endif
+                            <div
+                                class="topbar-notification-row topbar-notification-item--{{ $notification->related_kind_slug }} {{ $notification->is_read ? '' : 'is-unread' }}"
+                            >
+                                @if ($targetUrl)
+                                    <a
+                                        class="topbar-notification-item__main"
+                                        href="{{ route('notifications.go', $notification) }}"
+                                    >
+                                        <span class="topbar-notification-item__icon" aria-hidden="true">
+                                            <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                        </span>
+                                        <span class="topbar-notification-item__text">
+                                            <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                            <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                            <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
+                                            <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                        </span>
+                                        @if (! $notification->is_read)
+                                            <span class="topbar-notification-item__dot" aria-hidden="true"></span>
+                                        @endif
+                                    </a>
+                                @else
+                                    <div class="topbar-notification-item__main topbar-notification-item__main--static is-disabled">
+                                        <span class="topbar-notification-item__icon" aria-hidden="true">
+                                            <i class="material-icons">{{ $notification->related_category_icon }}</i>
+                                        </span>
+                                        <span class="topbar-notification-item__text">
+                                            <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
+                                            <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                            <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
+                                            <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
+                                        </span>
+                                    </div>
+                                @endif
+                                @if (! $notification->is_read)
+                                    <form
+                                        class="topbar-notification-item__read-form"
+                                        method="post"
+                                        action="{{ route('notifications.read', $notification) }}"
+                                    >
+                                        @csrf
+                                        <button class="topbar-notification-item__read-btn" type="submit">
+                                            {{ __('ui.notifications_dropdown.mark_read') }}
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         @empty
                             <p class="topbar-notification-panel__empty">{{ __('ui.notifications_dropdown.empty') }}</p>
                         @endforelse

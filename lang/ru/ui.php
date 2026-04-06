@@ -17,6 +17,7 @@ return [
         'panel_aria' => 'Список последних уведомлений',
         'empty' => 'Уведомлений пока нет.',
         'open_notifications' => 'Открыть уведомления',
+        'mark_read' => 'Прочитано',
         'kind_event' => 'Мероприятие',
         'kind_visit' => 'Визит',
         'kind_agreement' => 'Соглашение',
