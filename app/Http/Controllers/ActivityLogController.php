@@ -2,22 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agreement;
-use App\Models\AgreementDirection;
-use App\Models\AgreementType;
-use App\Models\Country;
-use App\Models\Department;
-use App\Models\Document;
-use App\Models\DocumentType;
-use App\Models\Event;
-use App\Models\EventType;
-use App\Models\OrganizationType;
-use App\Models\PartnerContact;
-use App\Models\PartnerOrganization;
-use App\Models\Rank;
 use App\Models\User;
-use App\Models\Visit;
-use App\Models\VisitType;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -26,34 +11,6 @@ use Spatie\Activitylog\Models\Activity;
 
 class ActivityLogController extends Controller implements HasMiddleware
 {
-    private const EVENT_LABELS = [
-        'login' => 'Tizimga kirdi',
-        'logout' => 'Tizimdan chiqdi',
-        'created' => 'Yaratildi',
-        'updated' => 'Tahrirlandi',
-        'deleted' => "O'chirildi",
-        'downloaded' => 'Yuklab olindi',
-    ];
-
-    private const SUBJECT_TYPE_LABELS = [
-        User::class => 'Foydalanuvchi',
-        Department::class => "Bo'lim",
-        Rank::class => 'Unvon',
-        Country::class => 'Davlat',
-        PartnerOrganization::class => 'Hamkor tashkilot',
-        PartnerContact::class => 'Hamkor kontakt',
-        OrganizationType::class => 'Tashkilot turi',
-        Agreement::class => 'Kelishuv',
-        AgreementType::class => 'Kelishuv turi',
-        AgreementDirection::class => "Kelishuv yo'nalishi",
-        Visit::class => 'Tashrif',
-        VisitType::class => 'Tashrif turi',
-        Event::class => 'Tadbir',
-        EventType::class => 'Tadbir turi',
-        Document::class => 'Hujjat',
-        DocumentType::class => 'Hujjat turi',
-    ];
-
     public static function middleware(): array
     {
         return [
@@ -81,7 +38,11 @@ class ActivityLogController extends Controller implements HasMiddleware
                         ->orWhere('properties->subject_type_label', 'like', "%{$search}%")
                         ->orWhere('properties->causer_name', 'like', "%{$search}%")
                         ->orWhere('properties->ip_address', 'like', "%{$search}%")
-                        ->orWhere('properties->file_name', 'like', "%{$search}%");
+                        ->orWhere('properties->file_name', 'like', "%{$search}%")
+                        ->orWhere('properties->route', 'like', "%{$search}%")
+                        ->orWhere('properties->phone_masked', 'like', "%{$search}%")
+                        ->orWhere('properties->roles', 'like', "%{$search}%")
+                        ->orWhere('properties->permissions', 'like', "%{$search}%");
                 });
             })
             ->when($selectedCauser !== '', function ($query) use ($selectedCauser) {
@@ -98,14 +59,17 @@ class ActivityLogController extends Controller implements HasMiddleware
             ->paginate(20)
             ->withQueryString();
 
+        $eventLabels = trans('ui.activity_log.events');
+        $subjectTypeLabels = trans('ui.activity_log.subject_types');
+
         return view('activity-logs.index', [
             'activities' => $activities,
             'users' => User::query()
                 ->orderBy('last_name')
                 ->orderBy('first_name')
                 ->get(['id', 'first_name', 'middle_name', 'last_name']),
-            'eventLabels' => self::EVENT_LABELS,
-            'subjectTypeLabels' => self::SUBJECT_TYPE_LABELS,
+            'eventLabels' => is_array($eventLabels) ? $eventLabels : [],
+            'subjectTypeLabels' => is_array($subjectTypeLabels) ? $subjectTypeLabels : [],
             'filters' => [
                 'search' => $search,
                 'causer_id' => $selectedCauser,

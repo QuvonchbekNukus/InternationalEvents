@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Models\Agreement;
 use App\Models\Country;
 use App\Models\Notification;
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -71,7 +71,7 @@ class UserNotificationTest extends TestCase
         $this->actingAs($responsibleUser)
             ->get(route('profile.edit'))
             ->assertOk()
-            ->assertSee('Shaxsiy notificationlar')
+            ->assertSee(__('ui.profile.notifications_title'))
             ->assertSee('Yangi kelishuv biriktirildi')
             ->assertSee('Sinov kelishuvi');
 
@@ -97,6 +97,47 @@ class UserNotificationTest extends TestCase
             ->get(route('agreements.show', $agreement))
             ->assertOk()
             ->assertSee('Sinov kelishuvi')
-            ->assertSee("Kelishuv tafsilotlari");
+            ->assertSee('Kelishuv tafsilotlari');
+    }
+
+    public function test_notification_copy_on_profile_uses_russian_when_locale_is_ru(): void
+    {
+        $createPermission = Permission::findOrCreate('create agreements', 'web');
+        $viewOwnPermission = Permission::findOrCreate('view own agreements', 'web');
+
+        $actor = User::factory()->create();
+        $actor->givePermissionTo($createPermission);
+
+        $responsibleUser = User::factory()->create();
+        $responsibleUser->givePermissionTo($viewOwnPermission);
+
+        $country = Country::create([
+            'name_ru' => 'Kazahstan',
+            'name_uz' => "Qozog'iston",
+            'iso2' => 'KZ',
+            'iso3' => 'KAZ',
+            'cooperation_status' => 'faol',
+        ]);
+
+        $this->actingAs($actor)
+            ->post(route('agreements.store'), [
+                'agreement_number' => 'MG-RU-001',
+                'title_ru' => 'Соглашение RU',
+                'title_uz' => 'Kelishuv UZ',
+                'country_id' => $country->id,
+                'status' => 'draft',
+                'responsible_user_id' => $responsibleUser->id,
+            ])
+            ->assertRedirect(route('agreements.index'));
+
+        $this->from(route('profile.edit'))
+            ->actingAs($responsibleUser)
+            ->post(route('locale.switch'), ['locale' => 'ru']);
+
+        $this->actingAs($responsibleUser)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertSee('Назначено новое соглашение', false)
+            ->assertSee('назначил(а) вам соглашение', false);
     }
 }

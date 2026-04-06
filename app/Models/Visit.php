@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\DeletesOwnedDocuments;
-use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -25,12 +25,16 @@ class Visit extends Model
         'outgoing' => 'Chiquvchi',
     ];
 
+    public const DIRECTION_TRANSLATION_KEY = 'ui.directions.visit';
+
     public const STATUSES = [
         'planned',
         'ongoing',
         'completed',
         'cancelled',
     ];
+
+    public const STATUS_TRANSLATION_KEY = 'ui.statuses.visit';
 
     public const STATUS_LABELS = [
         'planned' => 'Rejalashtirilgan',

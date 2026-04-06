@@ -508,7 +508,7 @@ class DashboardController extends Controller
             'meta' => implode(' | ', array_filter([
                 $visit->visitType?->display_name,
                 $visit->country?->display_name,
-                $visit->direction ? (Visit::DIRECTION_LABELS[$visit->direction] ?? null) : null,
+                $visit->direction ? (__('ui.directions.visit.'.$visit->direction) ?: null) : null,
             ])),
             'schedule' => $this->formatDateRange($start, $end),
             'schedule_icon' => 'event_available',
@@ -883,7 +883,10 @@ class DashboardController extends Controller
 
     private function formatDayLabel(CarbonImmutable $day): string
     {
-        $weekdayLabel = self::DEFAULT_WEEKDAY_NAMES[$day->dayOfWeekIso] ?? '';
+        $weekdayLabel = trans('ui.dashboard.calendar.weekday_names.'.$day->dayOfWeekIso);
+        if (! is_string($weekdayLabel) || $weekdayLabel === 'ui.dashboard.calendar.weekday_names.'.$day->dayOfWeekIso) {
+            $weekdayLabel = self::DEFAULT_WEEKDAY_NAMES[$day->dayOfWeekIso] ?? '';
+        }
         $monthLabel = $this->formatMonthLabel($day->startOfMonth());
 
         return trim(sprintf('%d %s, %s', $day->day, strtok($monthLabel, ' '), $weekdayLabel), ', ');

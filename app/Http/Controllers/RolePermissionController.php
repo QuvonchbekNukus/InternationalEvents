@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Permission;
+use App\Models\Role;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -9,31 +11,56 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionController extends Controller implements HasMiddleware
 {
-    private const SECTION_DEFINITIONS = [
-        'users' => ['category' => 'Sozlamalar', 'label' => 'Foydalanuvchilar'],
-        'departments' => ['category' => 'Sozlamalar', 'label' => "Bo'limlar"],
-        'ranks' => ['category' => 'Sozlamalar', 'label' => 'Unvonlar'],
-        'activity logs' => ['category' => 'Sozlamalar', 'label' => 'Tizim loglari'],
-        'role permissions' => ['category' => 'Sozlamalar', 'label' => "Ruxsatlarni boshqarish"],
-        'countries' => ['category' => 'Hamkorlik', 'label' => 'Davlatlar'],
-        'partner organizations' => ['category' => 'Hamkorlik', 'label' => 'Hamkor tashkilotlar'],
-        'partner contacts' => ['category' => 'Hamkorlik', 'label' => 'Hamkor kontaktlar'],
-        'organization types' => ['category' => 'Hamkorlik', 'label' => 'Tashkilot turlari'],
-        'agreements' => ['category' => 'Kelishuvlar', 'label' => 'Barcha kelishuvlar'],
-        'agreement types' => ['category' => 'Kelishuvlar', 'label' => 'Kelishuv turlari'],
-        'agreement directions' => ['category' => 'Kelishuvlar', 'label' => "Kelishuv yo'nalishlari"],
-        'events' => ['category' => 'Tadbirlar', 'label' => 'Barcha tadbirlar'],
-        'event types' => ['category' => 'Tadbirlar', 'label' => 'Tadbir turlari'],
-        'visits' => ['category' => 'Tashriflar', 'label' => 'Barcha tashriflar'],
-        'visit types' => ['category' => 'Tashriflar', 'label' => 'Tashrif turlari'],
-        'documents' => ['category' => 'Hujjatlar', 'label' => 'Barcha hujjatlar'],
-        'document types' => ['category' => 'Hujjatlar', 'label' => 'Hujjat turlari'],
+    /**
+     * @var list<string>
+     */
+    private const SECTION_RESOURCES = [
+        'users',
+        'departments',
+        'ranks',
+        'activity logs',
+        'role permissions',
+        'countries',
+        'partner organizations',
+        'partner contacts',
+        'organization types',
+        'agreements',
+        'agreement types',
+        'agreement directions',
+        'events',
+        'event types',
+        'visits',
+        'visit types',
+        'documents',
+        'document types',
+    ];
+
+    /**
+     * @var array<string, string>
+     */
+    private const RESOURCE_CATEGORY = [
+        'users' => 'settings',
+        'departments' => 'settings',
+        'ranks' => 'settings',
+        'activity logs' => 'settings',
+        'role permissions' => 'settings',
+        'countries' => 'cooperation',
+        'partner organizations' => 'cooperation',
+        'partner contacts' => 'cooperation',
+        'organization types' => 'cooperation',
+        'agreements' => 'agreements',
+        'agreement types' => 'agreements',
+        'agreement directions' => 'agreements',
+        'events' => 'events',
+        'event types' => 'events',
+        'visits' => 'visits',
+        'visit types' => 'visits',
+        'documents' => 'documents',
+        'document types' => 'documents',
     ];
 
     private const ACTION_ORDER = [
@@ -108,7 +135,61 @@ class RolePermissionController extends Controller implements HasMiddleware
 
         return redirect()
             ->route('role-permissions.index', ['role' => $role->name])
-            ->with('status', "Yangi role «{$role->name}» yaratildi. Endi unga ruxsatlarni belgilang.");
+            ->with('status', __('ui.role_permissions.flash.created', ['name' => $role->name]));
+    }
+
+    public function rename(Request $request, Role $role): RedirectResponse
+    {
+        $this->ensureAccess($request);
+
+        abort_unless($role->guard_name === 'web', 404);
+
+        abort_if($role->name === 'super-admin', 403, __('ui.role_permissions.abort.super_admin_rename'));
+
+        $validated = $request->validate([
+            'new_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
+                Rule::unique('roles', 'name')->where(fn ($query) => $query->where('guard_name', 'web'))->ignore($role->id),
+            ],
+        ]);
+
+        $oldName = $role->name;
+        $newName = $validated['new_name'];
+
+        if ($newName !== $oldName) {
+            $role->update(['name' => $newName]);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        }
+
+        return redirect()
+            ->route('role-permissions.index', ['role' => $newName])
+            ->with(
+                'status',
+                $newName === $oldName
+                    ? __('ui.role_permissions.flash.renamed_same')
+                    : __('ui.role_permissions.flash.renamed', ['old' => $oldName, 'new' => $newName])
+            );
+    }
+
+    public function destroy(Request $request, Role $role): RedirectResponse
+    {
+        $this->ensureAccess($request);
+
+        abort_unless($role->guard_name === 'web', 404);
+
+        abort_if($role->name === 'super-admin', 403, __('ui.role_permissions.abort.super_admin_delete'));
+
+        $label = $role->name;
+        $role->delete();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        return redirect()
+            ->route('role-permissions.index')
+            ->with('status', __('ui.role_permissions.flash.deleted', ['name' => $label]));
     }
 
     public function update(Request $request, Role $role): RedirectResponse
@@ -137,7 +218,7 @@ class RolePermissionController extends Controller implements HasMiddleware
 
         return redirect()
             ->route('role-permissions.index', ['role' => $role->name])
-            ->with('status', "Role {$role->name} uchun ruxsatlar yangilandi.");
+            ->with('status', __('ui.role_permissions.flash.permissions_updated', ['name' => $role->name]));
     }
 
     /**
@@ -149,9 +230,10 @@ class RolePermissionController extends Controller implements HasMiddleware
         $protectedPermissions = collect($this->protectedPermissionNames($selectedRole))->flip();
         $sections = [];
 
-        foreach (self::SECTION_DEFINITIONS as $resource => $definition) {
+        foreach (self::SECTION_RESOURCES as $resource) {
+            $definition = $this->sectionMeta($resource);
             $sectionPermissions = $permissions
-                ->map(function (Permission $permission) use ($resource, $assignedPermissions, $protectedPermissions): ?array {
+                ->map(function (Permission $permission) use ($resource, $assignedPermissions, $protectedPermissions, $definition): ?array {
                     $parsed = $this->parsePermissionName($permission->name);
 
                     if ($parsed['resource'] !== $resource) {
@@ -161,7 +243,7 @@ class RolePermissionController extends Controller implements HasMiddleware
                     return [
                         'name' => $permission->name,
                         'action_label' => $this->permissionActionLabel($parsed['action']),
-                        'description' => $this->permissionDescription($parsed['action'], self::SECTION_DEFINITIONS[$resource]['label']),
+                        'description' => $this->permissionDescription($parsed['action'], $definition['label']),
                         'assigned' => $assignedPermissions->has($permission->name),
                         'protected' => $protectedPermissions->has($permission->name),
                     ];
@@ -218,32 +300,36 @@ class RolePermissionController extends Controller implements HasMiddleware
         ];
     }
 
+    /**
+     * @return array{category: string, label: string}
+     */
+    private function sectionMeta(string $resource): array
+    {
+        $categoryKey = self::RESOURCE_CATEGORY[$resource] ?? 'settings';
+
+        return [
+            'category' => __('ui.role_permissions.categories.'.$categoryKey),
+            'label' => __('ui.role_permissions.sections.'.$resource),
+        ];
+    }
+
     private function permissionActionLabel(string $action): string
     {
-        return match ($action) {
-            'view' => "Ko'rish",
-            'view own' => "Faqat o'ziniki",
-            'create' => 'Yaratish',
-            'edit' => 'Tahrirlash',
-            'edit own' => "Faqat o'ziniki tahrir",
-            'delete' => "O'chirish",
-            'manage' => 'Boshqarish',
-            default => Str::headline($action),
-        };
+        $key = 'ui.role_permissions.actions.'.$action;
+        $label = __($key);
+
+        return $label !== $key ? $label : Str::headline($action);
     }
 
     private function permissionDescription(string $action, string $sectionLabel): string
     {
-        return match ($action) {
-            'view' => "{$sectionLabel} bo'limini ko'rish",
-            'view own' => "{$sectionLabel} bo'yicha faqat o'ziga tegishli yozuvlarni ko'rish",
-            'create' => "{$sectionLabel} bo'yicha yangi yozuv yaratish",
-            'edit' => "{$sectionLabel} bo'yicha yozuvlarni tahrirlash",
-            'edit own' => "{$sectionLabel} bo'yicha faqat o'ziga tegishli yozuvlarni tahrirlash",
-            'delete' => "{$sectionLabel} bo'yicha yozuvlarni o'chirish",
-            'manage' => "Role va permission bog'lanishlarini boshqarish",
-            default => $sectionLabel,
-        };
+        $key = 'ui.role_permissions.descriptions.'.$action;
+
+        if (trans($key) === $key) {
+            return __('ui.role_permissions.descriptions.default', ['module' => $sectionLabel]);
+        }
+
+        return __($key, ['module' => $sectionLabel]);
     }
 
     /**

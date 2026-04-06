@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +21,8 @@ class Document extends Model
         'nazoratda',
         'arxivlangan',
     ];
+
+    public const STATUS_TRANSLATION_KEY = 'ui.statuses.document';
 
     public const STATUS_LABELS = [
         'qoralama' => 'Qoralama',

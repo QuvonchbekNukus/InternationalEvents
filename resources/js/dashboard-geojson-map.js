@@ -75,6 +75,22 @@ function parseConfig(block) {
     }
 }
 
+function interpolateUi(template, vars) {
+    if (template == null) {
+        return '';
+    }
+
+    const stringTemplate = String(template);
+
+    if (stringTemplate === '') {
+        return '';
+    }
+
+    return stringTemplate.replace(/\{(\w+)\}/g, (_, name) =>
+        vars[name] !== undefined && vars[name] != null ? String(vars[name]) : `{${name}}`
+    );
+}
+
 function hashCode(value) {
     return Array.from(String(value)).reduce((hash, character) => {
         return ((hash << 5) - hash) + character.charCodeAt(0);
@@ -144,6 +160,8 @@ function setStatus(block, variant, title, text) {
 }
 
 function bindModal(block) {
+    const cfg = parseConfig(block) || {};
+    const i18n = cfg.i18n || {};
     const modal = block.querySelector('[data-dashboard-geojson-modal]');
     const title = block.querySelector('[data-dashboard-geojson-modal-title]');
     const code = block.querySelector('[data-dashboard-geojson-modal-code]');
@@ -162,8 +180,8 @@ function bindModal(block) {
     let pendingSummary = null;
     let modalSummaryGeneration = 0;
 
-    const emptyEventCopy = "Hozircha bu davlat uchun tadbirlar yo'q.";
-    const emptyVisitCopy = "Hozircha bu davlat uchun tashriflar yo'q.";
+    const emptyEventCopy = i18n.modal_event_empty || '';
+    const emptyVisitCopy = i18n.modal_visit_empty || '';
 
     /** Matn qatori (yuklanmoqda / bo‘sh) yoki kartochka — `display:grid` CSS bilan `hidden` to‘qnashmasin. */
     const setEventRowMode = (mode) => {
@@ -269,11 +287,11 @@ function bindModal(block) {
         setVisitRowMode('message');
 
         if (eventEmpty) {
-            eventEmpty.textContent = "Ma'lumot yuklanmoqda...";
+            eventEmpty.textContent = i18n.loading_detail || '';
         }
 
         if (visitEmpty) {
-            visitEmpty.textContent = "Ma'lumot yuklanmoqda...";
+            visitEmpty.textContent = i18n.loading_detail || '';
         }
     };
 
@@ -282,7 +300,7 @@ function bindModal(block) {
         const visitPayload = normalizeRecord(payload?.visit);
 
         if (eventPayload && eventLink instanceof HTMLAnchorElement && eventTitle && eventDate) {
-            eventTitle.textContent = eventPayload.title || 'Tadbir';
+            eventTitle.textContent = eventPayload.title || i18n.fallback_event || '';
             eventDate.textContent = eventPayload.date || '';
             eventLink.href = eventPayload.url || '#';
             setEventRowMode('card');
@@ -309,7 +327,7 @@ function bindModal(block) {
         }
 
         if (visitPayload && visitLink instanceof HTMLAnchorElement && visitTitle && visitDate) {
-            visitTitle.textContent = visitPayload.title || 'Tashrif';
+            visitTitle.textContent = visitPayload.title || i18n.fallback_visit || '';
             visitDate.textContent = visitPayload.date || '';
             visitLink.href = visitPayload.url || '#';
             setVisitRowMode('card');
@@ -382,7 +400,7 @@ function bindModal(block) {
             const generationAtOpen = ++modalSummaryGeneration;
 
             previousActiveElement = document.activeElement;
-            title.textContent = country.name || country.code || 'Davlat';
+            title.textContent = country.name || country.code || i18n.fallback_country || '';
             code.hidden = !country.code;
             code.textContent = country.code || '';
 
@@ -481,11 +499,11 @@ function bindModal(block) {
 
                     if (!(summaryCacheKey && lastCountrySummaryByKey.has(summaryCacheKey))) {
                         if (eventEmpty) {
-                            eventEmpty.textContent = "Tadbir ma'lumotini yuklab bo'lmadi.";
+                            eventEmpty.textContent = i18n.error_event || '';
                         }
 
                         if (visitEmpty) {
-                            visitEmpty.textContent = "Tashrif ma'lumotini yuklab bo'lmadi.";
+                            visitEmpty.textContent = i18n.error_visit || '';
                         }
 
                         setEventRowMode('message');
@@ -619,7 +637,7 @@ function renderCountryLayer(map, modalController, country, geoJson) {
     decorateCountryLayer(layer, country, map, modalController);
 }
 
-function renderCountryCollectionLayer(map, modalController, geoJsonCollection) {
+function renderCountryCollectionLayer(map, modalController, geoJsonCollection, i18n = {}) {
     const safeCollection = geoJsonCollection && typeof geoJsonCollection === 'object'
         ? geoJsonCollection
         : {type: 'FeatureCollection', features: []};
@@ -627,7 +645,7 @@ function renderCountryCollectionLayer(map, modalController, geoJsonCollection) {
     const layer = L.geoJSON(safeCollection, {
         style: (feature) => baseStyleForCountry(feature?.properties?.code || feature?.properties?.name || ''),
         onEachFeature: (feature, featureLayer) => {
-            const name = feature?.properties?.name || feature?.properties?.NAME || feature?.properties?.name_en || 'Davlat';
+            const name = feature?.properties?.name || feature?.properties?.NAME || feature?.properties?.name_en || i18n.fallback_country || '';
             const code = feature?.properties?.code || null;
             const countryUrl = feature?.properties?.country_url || null;
             const summaryUrl = feature?.properties?.summary_url || null;
@@ -682,7 +700,7 @@ function renderCountryCollectionLayer(map, modalController, geoJsonCollection) {
     return layer;
 }
 
-async function loadCountriesProgressively(block, map, modalController, countries) {
+async function loadCountriesProgressively(block, map, modalController, countries, i18n = {}) {
     let loadedCount = 0;
     let failedCount = 0;
     const concurrency = 8;
@@ -697,8 +715,12 @@ async function loadCountriesProgressively(block, map, modalController, countries
             setStatus(
                 block,
                 'loading',
-                'Davlat qatlamlari yuklanmoqda',
-                `${loadedCount + failedCount}/${countries.length} tayyor. Hozir: ${country.name}`,
+                i18n.layer_loading_title || '',
+                interpolateUi(i18n.progress_loading, {
+                    current: loadedCount + failedCount,
+                    total: countries.length,
+                    name: country.name || '',
+                }),
             );
 
             try {
@@ -720,8 +742,8 @@ async function loadCountriesProgressively(block, map, modalController, countries
         setStatus(
             block,
             'error',
-            'GeoJSON qatlamlari yuklanmadi',
-            "Fayllarni o'qib bo'lmadi yoki papka bo'sh.",
+            i18n.layer_error_title || '',
+            i18n.layer_error_text || '',
         );
         return;
     }
@@ -730,8 +752,8 @@ async function loadCountriesProgressively(block, map, modalController, countries
         setStatus(
             block,
             'warning',
-            'Qisman yuklandi',
-            `${loadedCount} ta davlat ko'rsatildi, ${failedCount} tasida xatolik bo'ldi.`,
+            i18n.layer_partial_title || '',
+            interpolateUi(i18n.layers_partial, {loaded: loadedCount, failed: failedCount}),
         );
         return;
     }
@@ -739,8 +761,8 @@ async function loadCountriesProgressively(block, map, modalController, countries
     setStatus(
         block,
         'ready',
-        'Xarita tayyor',
-        `${loadedCount} ta davlat qatlamlari muvaffaqiyatli joylandi.`,
+        i18n.layer_ready_title || '',
+        interpolateUi(i18n.layers_success, {count: loadedCount}),
     );
 }
 
@@ -764,14 +786,15 @@ async function buildGeoJsonMap(block) {
     observeMap(block, map);
 
     const modalController = bindModal(block);
+    const i18n = config.i18n || {};
 
     try {
         if (config.collectionUrl) {
             setStatus(
                 block,
                 'loading',
-                'GeoJSON kolleksiyasi yuklanmoqda',
-                'Davlatlar bittalab emas, bitta fayl orqali yuklanmoqda...',
+                i18n.collection_loading_title || '',
+                i18n.collection_loading_text || '',
             );
 
             const geoJsonCollection = await fetchJson(config.collectionUrl);
@@ -781,20 +804,20 @@ async function buildGeoJsonMap(block) {
                 setStatus(
                     block,
                     'empty',
-                    'GeoJSON fayllari topilmadi',
-                    "storage/geojson/countries papkasiga davlat fayllarini joylang.",
+                    i18n.geojson_not_found || '',
+                    i18n.geojson_empty_hint || '',
                 );
 
                 return null;
             }
 
-            renderCountryCollectionLayer(map, modalController, geoJsonCollection);
+            renderCountryCollectionLayer(map, modalController, geoJsonCollection, i18n);
 
             setStatus(
                 block,
                 'ready',
-                'Xarita tayyor',
-                `${featureCount} ta GeoJSON feature muvaffaqiyatli joylandi.`,
+                i18n.layer_ready_title || '',
+                interpolateUi(i18n.collection_ready_detail, {count: featureCount}),
             );
         } else {
         const payload = await fetchJson(config.listUrl);
@@ -804,22 +827,22 @@ async function buildGeoJsonMap(block) {
             setStatus(
                 block,
                 'empty',
-                'GeoJSON fayllari topilmadi',
-                "storage/geojson/countries papkasiga davlat fayllarini joylang.",
+                i18n.geojson_not_found || '',
+                i18n.geojson_empty_hint || '',
             );
 
             return null;
         }
 
-        await loadCountriesProgressively(block, map, modalController, countries);
+        await loadCountriesProgressively(block, map, modalController, countries, i18n);
         }
     } catch (error) {
         console.error('Dashboard GeoJSON map failed to initialize.', error);
         setStatus(
             block,
             'error',
-            'Xaritani yuklab bo‘lmadi',
-            "Dashboard GeoJSON endpointlarini yoki storage fayllarini tekshirib ko'ring.",
+            i18n.init_error_title || '',
+            i18n.init_error_text || '',
         );
     }
 

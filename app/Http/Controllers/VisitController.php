@@ -11,13 +11,13 @@ use App\Models\Visit;
 use App\Models\VisitType;
 use App\Services\DateReminderNotificationService;
 use App\Services\UserNotificationService;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -110,8 +110,8 @@ class VisitController extends Controller implements HasMiddleware
             'visits' => $visits,
             'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'visitTypes' => VisitType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'directions' => Visit::DIRECTION_LABELS,
-            'statuses' => Visit::STATUS_LABELS,
+            'directions' => LocaleLabels::map(Visit::DIRECTION_TRANSLATION_KEY, Visit::DIRECTIONS),
+            'statuses' => LocaleLabels::map(Visit::STATUS_TRANSLATION_KEY, Visit::STATUSES),
             'filters' => [
                 'search' => $search,
                 'country_id' => $selectedCountry,
@@ -153,7 +153,7 @@ class VisitController extends Controller implements HasMiddleware
             null,
             $visit->responsible_user_id,
             $request->user(),
-            'tashrif',
+            'visit',
             true
         );
 
@@ -189,8 +189,8 @@ class VisitController extends Controller implements HasMiddleware
 
         return view('visits.show', [
             'visit' => $visit,
-            'directions' => Visit::DIRECTION_LABELS,
-            'statuses' => Visit::STATUS_LABELS,
+            'directions' => LocaleLabels::map(Visit::DIRECTION_TRANSLATION_KEY, Visit::DIRECTIONS),
+            'statuses' => LocaleLabels::map(Visit::STATUS_TRANSLATION_KEY, Visit::STATUSES),
         ]);
     }
 
@@ -244,7 +244,7 @@ class VisitController extends Controller implements HasMiddleware
             $previousResponsibleUserId,
             $visit->responsible_user_id,
             $request->user(),
-            'tashrif'
+            'visit'
         );
 
         $dateReminderNotificationService->ensureVisitStartReminderFor($visit->fresh());
@@ -292,7 +292,7 @@ class VisitController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title_ru' => ['required', 'string', 'max:255'],
             'title_uz' => ['required', 'string', 'max:255'],
-'visit_type_id' => ['nullable', 'integer', 'exists:visit_types,id'],
+            'visit_type_id' => ['nullable', 'integer', 'exists:visit_types,id'],
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -307,9 +307,9 @@ class VisitController extends Controller implements HasMiddleware
             'responsible_department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'purpose_ru' => ['nullable', 'string'],
             'purpose_uz' => ['nullable', 'string'],
-'result_summary_ru' => ['nullable', 'string'],
+            'result_summary_ru' => ['nullable', 'string'],
             'result_summary_uz' => ['nullable', 'string'],
-'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'visit_files' => ['nullable', 'array'],
             'visit_files.*' => ['file', 'mimes:jpg,jpeg,png,gif,webp,bmp,svg,pdf,doc,docx', 'max:51200'],
         ]);
@@ -323,7 +323,7 @@ class VisitController extends Controller implements HasMiddleware
 
             if ((int) $organizationCountryId !== (int) $validated['country_id']) {
                 throw ValidationException::withMessages([
-                    'partner_organization_id' => "Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.",
+                    'partner_organization_id' => 'Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.',
                 ]);
             }
         }
@@ -348,8 +348,8 @@ class VisitController extends Controller implements HasMiddleware
             'partnerOrganizations' => PartnerOrganization::query()->orderBy('name_uz')->get(['id', 'country_id', 'name_uz', 'name_ru', 'short_name']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'directions' => Visit::DIRECTION_LABELS,
-            'statuses' => Visit::STATUS_LABELS,
+            'directions' => LocaleLabels::map(Visit::DIRECTION_TRANSLATION_KEY, Visit::DIRECTIONS),
+            'statuses' => LocaleLabels::map(Visit::STATUS_TRANSLATION_KEY, Visit::STATUSES),
         ];
     }
 
@@ -357,6 +357,7 @@ class VisitController extends Controller implements HasMiddleware
     {
         if (! $request->hasFile('visit_files')) {
             $this->syncVisitDocumentMetadata($visit);
+
             return;
         }
 
@@ -404,7 +405,7 @@ class VisitController extends Controller implements HasMiddleware
         return [
             'title_ru' => null,
             'title_uz' => null,
-'document_number' => null,
+            'document_number' => null,
             'document_type_id' => null,
             'country_id' => $visit->country_id,
             'partner_organization_id' => $visit->partner_organization_id,

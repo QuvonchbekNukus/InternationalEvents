@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Facades\Activity;
 
 class Notification extends Model
 {
+    use Concerns\LogsModelActivity;
+
     public const SUPER_ADMIN_ROLE = 'super-admin';
 
     /**
@@ -26,6 +30,9 @@ class Notification extends Model
         'user_id',
         'title',
         'message',
+        'title_key',
+        'message_key',
+        'message_params',
         'type',
         'is_read',
         'related_type',
@@ -41,6 +48,7 @@ class Notification extends Model
     {
         return [
             'is_read' => 'boolean',
+            'message_params' => 'array',
         ];
     }
 
@@ -137,7 +145,7 @@ class Notification extends Model
             $copy->user_id = (int) $adminId;
             $copy->is_read = false;
             $copy->skipSuperadminMirrorDispatch = true;
-            $copy->save();
+            Activity::withoutLogs(fn () => $copy->save());
         }
     }
 
@@ -158,14 +166,197 @@ class Notification extends Model
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function resolvedTranslationParams(): array
+    {
+        $params = is_array($this->message_params) ? $this->message_params : [];
+        $related = $this->related;
+
+        if ($related instanceof Agreement || $related instanceof Event || $related instanceof Visit) {
+            $params['subject'] = $related->display_title;
+        }
+
+        if ($related instanceof PartnerContact) {
+            $params['subject'] = $related->display_name;
+        }
+
+        if (! empty($params['date_raw'])) {
+            $params['date'] = Carbon::parse((string) $params['date_raw'])
+                ->locale(app()->getLocale())
+                ->translatedFormat('d F');
+            unset($params['date_raw']);
+        } elseif ($this->effectiveMessageKey() === 'ui.notifications.in_app.birthday_message') {
+            $anchor = $this->created_at ?? Carbon::now();
+            $celebration = Carbon::instance($anchor)->addDay()->startOfDay();
+            $params['date'] = $celebration->locale(app()->getLocale())->translatedFormat('d F');
+        }
+
+        if (empty($params['actor']) && ! $this->message_key && ! $this->title_key) {
+            $legacy = $this->legacyI18nKeys();
+            if (($legacy['message_key'] ?? null) !== null && in_array($this->type, ['success', 'info'], true)) {
+                $parsed = $this->legacyParsedActorFromMessage();
+                if ($parsed !== []) {
+                    $params = array_merge($params, $parsed);
+                }
+            }
+        }
+
+        return $params;
+    }
+
+    public function effectiveTitleKey(): ?string
+    {
+        if ($this->title_key) {
+            return $this->title_key;
+        }
+
+        return $this->legacyI18nKeys()['title_key'] ?? null;
+    }
+
+    public function effectiveMessageKey(): ?string
+    {
+        if ($this->message_key) {
+            return $this->message_key;
+        }
+
+        return $this->legacyI18nKeys()['message_key'] ?? null;
+    }
+
+    /**
+     * Eski yozuvlar: title_key bo‘lmasa, type va o‘zbekcha sarlavha/matndan kalitni taxmin qiladi.
+     *
+     * @return array{title_key: ?string, message_key: ?string}
+     */
+    private function legacyI18nKeys(): array
+    {
+        if ($this->legacyI18nKeysCache !== null) {
+            return $this->legacyI18nKeysCache;
+        }
+
+        $type = (string) $this->type;
+
+        if ($type === DateReminderNotificationService::EVENT_START_TYPE) {
+            $this->legacyI18nKeysCache = [
+                'title_key' => 'ui.notifications.in_app.event_start_title',
+                'message_key' => 'ui.notifications.in_app.event_start_message',
+            ];
+
+            return $this->legacyI18nKeysCache;
+        }
+
+        if ($type === DateReminderNotificationService::VISIT_START_TYPE) {
+            $this->legacyI18nKeysCache = [
+                'title_key' => 'ui.notifications.in_app.visit_start_title',
+                'message_key' => 'ui.notifications.in_app.visit_start_message',
+            ];
+
+            return $this->legacyI18nKeysCache;
+        }
+
+        if ($type === DateReminderNotificationService::PARTNER_CONTACT_BIRTHDAY_TYPE) {
+            $this->legacyI18nKeysCache = [
+                'title_key' => 'ui.notifications.in_app.birthday_title',
+                'message_key' => 'ui.notifications.in_app.birthday_message',
+            ];
+
+            return $this->legacyI18nKeysCache;
+        }
+
+        if (! in_array($type, ['success', 'info'], true)) {
+            $this->legacyI18nKeysCache = ['title_key' => null, 'message_key' => null];
+
+            return $this->legacyI18nKeysCache;
+        }
+
+        $prefix = match ($this->related_type) {
+            Event::class => 'ui.notifications.in_app.event',
+            Visit::class => 'ui.notifications.in_app.visit',
+            Agreement::class => 'ui.notifications.in_app.agreement',
+            default => null,
+        };
+
+        if ($prefix === null) {
+            $this->legacyI18nKeysCache = ['title_key' => null, 'message_key' => null];
+
+            return $this->legacyI18nKeysCache;
+        }
+
+        $title = (string) ($this->attributes['title'] ?? '');
+        $message = (string) ($this->attributes['message'] ?? '');
+
+        $titleKey = null;
+        if (str_contains($title, 'yangilandi')) {
+            $titleKey = "{$prefix}.title_updated";
+        } elseif (str_contains($title, 'Yangi') || str_contains($title, 'yangi')) {
+            $titleKey = "{$prefix}.title_new";
+        } elseif (str_contains($title, 'sizga biriktirildi')) {
+            $titleKey = "{$prefix}.title_reassigned";
+        }
+
+        $messageKey = null;
+        if (str_contains($message, "ma'lumotlarni yangiladi") || str_contains($message, 'maʼlumotlarni yangiladi')) {
+            $messageKey = "{$prefix}.msg_updated";
+        } elseif (str_contains($message, 'biriktirildi')) {
+            $messageKey = "{$prefix}.msg_new";
+        }
+
+        $this->legacyI18nKeysCache = [
+            'title_key' => $titleKey,
+            'message_key' => $messageKey,
+        ];
+
+        return $this->legacyI18nKeysCache;
+    }
+
+    /**
+     * @return array{actor?: string}
+     */
+    private function legacyParsedActorFromMessage(): array
+    {
+        $msg = trim((string) ($this->attributes['message'] ?? ''));
+        if ($msg === '') {
+            return [];
+        }
+
+        if (preg_match('/^(.+?)\s+tomonidan\s+[\"«“]/u', $msg, $m)) {
+            return ['actor' => trim($m[1])];
+        }
+
+        if (preg_match('/^(.+?)\s+[\"«“]/u', $msg, $m)) {
+            return ['actor' => trim($m[1])];
+        }
+
+        return [];
+    }
+
+    public function getDisplayTitleAttribute(): string
+    {
+        $key = $this->effectiveTitleKey();
+        if ($key) {
+            return __($key, $this->resolvedTranslationParams());
+        }
+
+        return (string) ($this->attributes['title'] ?? '');
+    }
+
+    public function getDisplayMessageAttribute(): string
+    {
+        $key = $this->effectiveMessageKey();
+        if ($key) {
+            return __($key, $this->resolvedTranslationParams());
+        }
+
+        return (string) ($this->attributes['message'] ?? '');
+    }
+
     public function getTypeLabelAttribute(): string
     {
-        return match ($this->type) {
-            'success' => 'Muvaffaqiyatli',
-            'warning' => 'Ogohlantirish',
-            'danger' => 'Muhim',
-            default => "Ma'lumot",
-        };
+        $key = 'ui.notifications.types.'.$this->type;
+        $label = __($key);
+
+        return $label !== $key ? $label : __('ui.notifications.types.default');
     }
 
     public function getTypeIconAttribute(): string
@@ -232,6 +423,10 @@ class Notification extends Model
             return Str::limit($resource->display_name, 88);
         }
 
-        return Str::limit((string) $this->message, 100);
+        $body = $this->effectiveMessageKey()
+            ? $this->display_message
+            : (string) ($this->attributes['message'] ?? '');
+
+        return Str::limit($body, 100);
     }
 }

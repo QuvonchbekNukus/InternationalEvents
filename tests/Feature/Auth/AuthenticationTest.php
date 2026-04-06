@@ -47,6 +47,9 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertGuest();
+        $this->assertDatabaseHas('activity_log', [
+            'event' => 'login_failed',
+        ]);
     }
 
     public function test_users_can_logout(): void

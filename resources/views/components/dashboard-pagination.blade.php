@@ -8,17 +8,17 @@
 
         <div class="pagination-links">
             @if ($paginator->onFirstPage())
-                <span class="page-link is-disabled">Oldingi</span>
+                <span class="page-link is-disabled">{{ __('ui.common.pagination.previous') }}</span>
             @else
-                <a class="page-link" href="{{ $paginator->previousPageUrl() }}">Oldingi</a>
+                <a class="page-link" href="{{ $paginator->previousPageUrl() }}">{{ __('ui.common.pagination.previous') }}</a>
             @endif
 
             <span class="page-indicator">{{ $paginator->currentPage() }} / {{ $paginator->lastPage() }}</span>
 
             @if ($paginator->hasMorePages())
-                <a class="page-link" href="{{ $paginator->nextPageUrl() }}">Keyingi</a>
+                <a class="page-link" href="{{ $paginator->nextPageUrl() }}">{{ __('ui.common.pagination.next') }}</a>
             @else
-                <span class="page-link is-disabled">Keyingi</span>
+                <span class="page-link is-disabled">{{ __('ui.common.pagination.next') }}</span>
             @endif
         </div>
     </div>

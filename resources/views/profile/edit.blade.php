@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Profil')
+@section('title', __('ui.profile.page_title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
-                <p class="eyebrow">SETTINGS / PROFILE</p>
-                <h1 class="page-title">Profil sozlamalari</h1>
+                <p class="eyebrow">{{ __('ui.profile.eyebrow') }}</p>
+                <h1 class="page-title">{{ __('ui.profile.heading') }}</h1>
                 <p class="page-subtitle">
-                    Shaxsiy ma'lumotlar va parol xavfsizligini shu sahifada boshqaring.
+                    {{ __('ui.profile.subtitle') }}
                 </p>
             </div>
 
             <a class="btn btn--ghost" href="{{ route('dashboard') }}">
                 <i class="material-icons" aria-hidden="true">dashboard</i>
-                <span>Dashboard</span>
+                <span>{{ __('ui.profile.back_dashboard') }}</span>
             </a>
         </div>
 
@@ -25,14 +25,14 @@
 
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">Asosiy ma'lumotlar</p>
-                    <h2 class="section-title">Profil ma'lumotlari</h2>
+                    <p class="eyebrow">{{ __('ui.profile.section_profile') }}</p>
+                    <h2 class="section-title">{{ __('ui.profile.section_profile_title') }}</h2>
                 </div>
             </div>
 
             <div class="form-grid">
                 <label class="field">
-                    <span class="field-label">Ism</span>
+                    <span class="field-label">{{ __('ui.profile.fields.first_name') }}</span>
                     <input
                         id="first_name"
                         name="first_name"
@@ -47,7 +47,7 @@
                 </label>
 
                 <label class="field">
-                    <span class="field-label">Otasining ismi</span>
+                    <span class="field-label">{{ __('ui.profile.fields.middle_name') }}</span>
                     <input
                         id="middle_name"
                         name="middle_name"
@@ -62,7 +62,7 @@
                 </label>
 
                 <label class="field">
-                    <span class="field-label">Familiya</span>
+                    <span class="field-label">{{ __('ui.profile.fields.last_name') }}</span>
                     <input
                         id="last_name"
                         name="last_name"
@@ -77,7 +77,7 @@
                 </label>
 
                 <label class="field">
-                    <span class="field-label">Telefon</span>
+                    <span class="field-label">{{ __('ui.profile.fields.phone') }}</span>
                     <input
                         id="phone"
                         name="phone"
@@ -95,7 +95,7 @@
             <div class="form-actions">
                 <button class="btn btn--primary" type="submit">
                     <i class="material-icons" aria-hidden="true">save</i>
-                    <span>Saqlash</span>
+                    <span>{{ __('ui.common.actions.save') }}</span>
                 </button>
             </div>
         </form>
@@ -106,14 +106,14 @@
 
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">Xavfsizlik</p>
-                    <h2 class="section-title">Parolni yangilash</h2>
+                    <p class="eyebrow">{{ __('ui.profile.section_password') }}</p>
+                    <h2 class="section-title">{{ __('ui.profile.section_password_title') }}</h2>
                 </div>
             </div>
 
             <div class="form-grid">
                 <label class="field field--span-2">
-                    <span class="field-label">Joriy parol</span>
+                    <span class="field-label">{{ __('ui.profile.current_password') }}</span>
                     <input
                         id="current_password"
                         name="current_password"
@@ -127,7 +127,7 @@
                 </label>
 
                 <label class="field">
-                    <span class="field-label">Yangi parol</span>
+                    <span class="field-label">{{ __('ui.profile.new_password') }}</span>
                     <input
                         id="password"
                         name="password"
@@ -141,7 +141,7 @@
                 </label>
 
                 <label class="field">
-                    <span class="field-label">Parolni tasdiqlang</span>
+                    <span class="field-label">{{ __('ui.profile.confirm_password') }}</span>
                     <input
                         id="password_confirmation"
                         name="password_confirmation"
@@ -155,7 +155,7 @@
             <div class="form-actions">
                 <button class="btn btn--primary" type="submit">
                     <i class="material-icons" aria-hidden="true">vpn_key</i>
-                    <span>Parolni yangilash</span>
+                    <span>{{ __('ui.profile.password_submit') }}</span>
                 </button>
             </div>
         </form>
@@ -163,11 +163,11 @@
         <section class="content-card" id="profile-notifications">
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">Bildirishnomalar</p>
-                    <h2 class="section-title">Shaxsiy notificationlar</h2>
+                    <p class="eyebrow">{{ __('ui.profile.notifications_eyebrow') }}</p>
+                    <h2 class="section-title">{{ __('ui.profile.notifications_title') }}</h2>
                 </div>
 
-                <span class="badge">{{ $notifications->total() }} ta</span>
+                <span class="badge">{{ __('ui.profile.notifications_count', ['count' => $notifications->total()]) }}</span>
             </div>
 
             @if ($notifications->count())
@@ -189,17 +189,17 @@
                                     <span class="notification-item__content">
                                         <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
                                         <span class="notification-item__topline">
-                                            <span class="notification-item__title">{{ $notification->title }}</span>
+                                            <span class="notification-item__title">{{ $notification->display_title }}</span>
                                             <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
                                         </span>
                                         <span class="notification-item__preview">{{ $notification->preview_text }}</span>
-                                        <span class="notification-item__message">{{ $notification->message }}</span>
+                                        <span class="notification-item__message">{{ $notification->display_message }}</span>
                                     </span>
 
                                     <span class="notification-item__aside">
                                         <span class="badge">{{ $notification->type_label }}</span>
                                         @if (! $notification->is_read)
-                                            <span class="notification-item__open">Yangi</span>
+                                            <span class="notification-item__open">{{ __('ui.profile.notification_new') }}</span>
                                         @endif
                                     </span>
                                 </a>
@@ -215,11 +215,11 @@
                                     <span class="notification-item__content">
                                         <span class="notification-item__kind">{{ $notification->related_kind_label }}</span>
                                         <span class="notification-item__topline">
-                                            <span class="notification-item__title">{{ $notification->title }}</span>
+                                            <span class="notification-item__title">{{ $notification->display_title }}</span>
                                             <span class="notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
                                         </span>
                                         <span class="notification-item__preview">{{ $notification->preview_text }}</span>
-                                        <span class="notification-item__message">{{ $notification->message }}</span>
+                                        <span class="notification-item__message">{{ $notification->display_message }}</span>
                                     </span>
 
                                     <span class="notification-item__aside">
@@ -247,7 +247,7 @@
                 <x-dashboard-pagination :paginator="$notifications" />
             @else
                 <div class="table-empty">
-                    Hozircha sizga biriktirilgan o'zgarishlar bo'yicha bildirishnomalar yo'q.
+                    {{ __('ui.profile.notifications_empty') }}
                 </div>
             @endif
         </section>

@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\DeletesOwnedDocuments;
-use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -21,6 +21,8 @@ class PartnerOrganization extends Model
         'rejada',
         'tugallangan',
     ];
+
+    public const STATUS_TRANSLATION_KEY = 'ui.statuses.partner_organization';
 
     public const STATUS_LABELS = [
         'faol' => 'Faol',

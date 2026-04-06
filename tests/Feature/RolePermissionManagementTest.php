@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -37,10 +37,10 @@ class RolePermissionManagementTest extends TestCase
         $response = $this->actingAs($user)->get(route('role-permissions.index'));
 
         $response->assertOk();
-        $response->assertSee("Ruxsatlarni boshqarish");
-        $response->assertSee("Super Admin");
-        $response->assertDontSee("Foydalanuvchilar");
-        $response->assertDontSee("manage role permissions");
+        $response->assertSee('Rollar va ruxsatlar');
+        $response->assertSee('Super Admin');
+        $response->assertDontSee('Foydalanuvchilar');
+        $response->assertDontSee('manage role permissions');
     }
 
     public function test_permissions_are_visible_after_role_is_selected(): void
@@ -58,8 +58,8 @@ class RolePermissionManagementTest extends TestCase
         $response = $this->actingAs($user)->get(route('role-permissions.index', ['role' => $superAdminRole->name]));
 
         $response->assertOk();
-        $response->assertSee("Foydalanuvchilar");
-        $response->assertSee("manage role permissions");
+        $response->assertSee('Foydalanuvchilar');
+        $response->assertSee('manage role permissions');
     }
 
     public function test_authorized_user_can_update_role_permissions(): void
@@ -100,8 +100,8 @@ class RolePermissionManagementTest extends TestCase
         $response = $this->actingAs($user)->get(route('role-permissions.index'));
 
         $response->assertOk();
-        $response->assertSee("Ruxsatlarni boshqarish");
-        $response->assertDontSee("Foydalanuvchilar");
+        $response->assertSee('Rollar va ruxsatlar');
+        $response->assertDontSee('Foydalanuvchilar');
     }
 
     public function test_authorized_user_can_create_new_role(): void
@@ -154,5 +154,87 @@ class RolePermissionManagementTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('name');
+    }
+
+    public function test_can_rename_non_system_role(): void
+    {
+        Permission::findOrCreate('manage role permissions', 'web');
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        $superAdminRole->givePermissionTo('manage role permissions');
+        $operatorRole = Role::findOrCreate('operator', 'web');
+
+        $user = User::factory()->create();
+        $user->assignRole($superAdminRole);
+
+        $response = $this->actingAs($user)->patch(route('role-permissions.rename', $operatorRole), [
+            'new_name' => 'operator-renamed',
+        ]);
+
+        $response->assertRedirect(route('role-permissions.index', ['role' => 'operator-renamed']));
+
+        $this->assertDatabaseHas('roles', [
+            'name' => 'operator-renamed',
+            'guard_name' => 'web',
+        ]);
+        $this->assertDatabaseMissing('roles', [
+            'name' => 'operator',
+            'guard_name' => 'web',
+        ]);
+    }
+
+    public function test_cannot_rename_super_admin_role(): void
+    {
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        Role::findOrCreate('operator', 'web');
+
+        $user = User::factory()->create();
+        $user->assignRole($superAdminRole);
+
+        $this->actingAs($user)
+            ->patch(route('role-permissions.rename', $superAdminRole), ['new_name' => 'root'])
+            ->assertForbidden();
+    }
+
+    public function test_cannot_destroy_super_admin_role(): void
+    {
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        Role::findOrCreate('operator', 'web');
+
+        $user = User::factory()->create();
+        $user->assignRole($superAdminRole);
+
+        $this->actingAs($user)
+            ->delete(route('role-permissions.destroy', $superAdminRole))
+            ->assertForbidden();
+    }
+
+    public function test_can_destroy_role_and_detach_users(): void
+    {
+        Permission::findOrCreate('manage role permissions', 'web');
+        $superAdminRole = Role::findOrCreate('super-admin', 'web');
+        $superAdminRole->givePermissionTo('manage role permissions');
+        Role::findOrCreate('operator', 'web');
+
+        $tempRole = Role::create([
+            'name' => 'temp-role',
+            'guard_name' => 'web',
+        ]);
+
+        $admin = User::factory()->create();
+        $admin->assignRole($superAdminRole);
+
+        $member = User::factory()->create();
+        $member->assignRole($tempRole);
+
+        $tempRoleId = $tempRole->id;
+
+        $this->actingAs($admin)
+            ->delete(route('role-permissions.destroy', $tempRole))
+            ->assertRedirect(route('role-permissions.index'));
+
+        $this->assertDatabaseMissing('roles', ['id' => $tempRoleId]);
+
+        $member->refresh();
+        $this->assertFalse($member->roles()->where('roles.id', $tempRoleId)->exists());
     }
 }

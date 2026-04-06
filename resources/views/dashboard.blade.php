@@ -10,8 +10,8 @@
             ? \Illuminate\Support\Str::headline(str_replace('-', ' ', $currentRole))
             : $translatedRole;
         $dashboardGeoJsonMap = [
-            'eyebrow' => '',
-            'title' => '',
+            'eyebrow' => __('ui.map.geojson.eyebrow'),
+            'title' => __('ui.map.geojson.title'),
             'subtitle' => '',
             'height' => 460,
             'center' => [20, 0],
@@ -169,7 +169,7 @@
                                     <label class="dashboard-calendar-card__select-wrap">
                                         <select
                                             class="dashboard-calendar-card__select dashboard-calendar-card__select--month"
-                                            aria-label="Oy tanlang"
+                                            aria-label="{{ __('ui.common.calendar_aria.pick_month') }}"
                                             data-calendar-period-month
                                         >
                                             @foreach ($calendarMonthOptions as $monthNumber => $monthLabel)
@@ -184,7 +184,7 @@
                                     <label class="dashboard-calendar-card__select-wrap dashboard-calendar-card__select-wrap--year">
                                         <select
                                             class="dashboard-calendar-card__select dashboard-calendar-card__select--year"
-                                            aria-label="Yil tanlang"
+                                            aria-label="{{ __('ui.common.calendar_aria.pick_year') }}"
                                             data-calendar-period-year
                                         >
                                             @foreach ($calendarYearOptions as $yearOption)
@@ -452,7 +452,7 @@
 
                 <div class="dashboard-calendar-card__loading" data-calendar-loading hidden>
                     <span class="dashboard-calendar-card__spinner" aria-hidden="true"></span>
-                    <span>Kalendardagi ma'lumotlar yangilanmoqda...</span>
+                    <span>{{ __('ui.common.loading.calendar_refresh') }}</span>
                 </div>
             </section>
         @endif

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -32,7 +33,7 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
 
         if ($user) {
-            DB::transaction(function () use ($user): void {
+            DB::transaction(function () use ($user, $request): void {
                 activity()->withoutLogs(function () use ($user): void {
                     $user->forceFill([
                         'last_login_at' => now(),
@@ -43,7 +44,14 @@ class AuthenticatedSessionController extends Controller
                     ->causedBy($user)
                     ->performedOn($user)
                     ->event('login')
-                    ->log('Tizimga kirdi');
+                    ->withProperties([
+                        'subject_label' => $user->full_name,
+                        'subject_type_label' => 'Foydalanuvchi',
+                        'causer_name' => $user->full_name,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => Str::limit((string) $request->userAgent(), 255, ''),
+                    ])
+                    ->log(__('ui.activity_log.events.login'));
             });
         }
 
@@ -62,7 +70,14 @@ class AuthenticatedSessionController extends Controller
                 ->causedBy($user)
                 ->performedOn($user)
                 ->event('logout')
-                ->log('Tizimdan chiqdi');
+                ->withProperties([
+                    'subject_label' => $user->full_name,
+                    'subject_type_label' => 'Foydalanuvchi',
+                    'causer_name' => $user->full_name,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => Str::limit((string) $request->userAgent(), 255, ''),
+                ])
+                ->log(__('ui.activity_log.events.logout'));
         }
 
         Auth::guard('web')->logout();

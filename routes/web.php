@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\AgreementController;
 use App\Http\Controllers\AgreementDirectionController;
 use App\Http\Controllers\AgreementTypeController;
-use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CountryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DashboardGeoJsonController;
@@ -66,7 +66,9 @@ Route::middleware('auth')->group(function () {
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('role-permissions', [RolePermissionController::class, 'index'])->name('role-permissions.index');
     Route::post('role-permissions', [RolePermissionController::class, 'store'])->name('role-permissions.store');
+    Route::patch('role-permissions/{role}/name', [RolePermissionController::class, 'rename'])->name('role-permissions.rename');
     Route::put('role-permissions/{role}', [RolePermissionController::class, 'update'])->name('role-permissions.update');
+    Route::delete('role-permissions/{role}', [RolePermissionController::class, 'destroy'])->name('role-permissions.destroy');
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::delete('documents/{document}/file', [DocumentController::class, 'destroyFile'])->name('documents.file.destroy');
     Route::delete('agreements/{agreement}/attachments/{document}', [AgreementController::class, 'destroyAttachment'])->name('agreements.attachments.destroy');

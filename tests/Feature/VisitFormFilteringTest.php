@@ -4,9 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Country;
 use App\Models\PartnerOrganization;
+use App\Models\Permission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

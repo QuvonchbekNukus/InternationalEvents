@@ -122,7 +122,7 @@
                                         </span>
                                         <span class="topbar-notification-item__text">
                                             <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
-                                            <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                            <span class="topbar-notification-item__title">{{ $notification->display_title }}</span>
                                             <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
                                             <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
                                         </span>
@@ -137,7 +137,7 @@
                                         </span>
                                         <span class="topbar-notification-item__text">
                                             <span class="topbar-notification-item__kind">{{ $notification->related_kind_label }}</span>
-                                            <span class="topbar-notification-item__title">{{ $notification->title }}</span>
+                                            <span class="topbar-notification-item__title">{{ $notification->display_title }}</span>
                                             <span class="topbar-notification-item__preview">{{ $notification->preview_text }}</span>
                                             <span class="topbar-notification-item__meta">{{ $notification->created_at?->diffForHumans() }}</span>
                                         </span>

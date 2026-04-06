@@ -6,11 +6,11 @@ use App\Models\Country;
 use App\Models\Notification;
 use App\Models\PartnerContact;
 use App\Models\PartnerOrganization;
+use App\Models\Permission;
 use App\Models\User;
 use App\Services\DateReminderNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

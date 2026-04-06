@@ -2,9 +2,15 @@
 
 namespace App\Providers;
 
+use App\Listeners\RecordSpatiePermissionActivity;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\Events\PermissionAttached;
+use Spatie\Permission\Events\PermissionDetached;
+use Spatie\Permission\Events\RoleAttached;
+use Spatie\Permission\Events\RoleDetached;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(RoleAttached::class, [RecordSpatiePermissionActivity::class, 'handleRoleAttached']);
+        Event::listen(RoleDetached::class, [RecordSpatiePermissionActivity::class, 'handleRoleDetached']);
+        Event::listen(PermissionAttached::class, [RecordSpatiePermissionActivity::class, 'handlePermissionAttached']);
+        Event::listen(PermissionDetached::class, [RecordSpatiePermissionActivity::class, 'handlePermissionDetached']);
+
         View::composer('components.navbar', function ($view): void {
             $user = auth()->user();
 

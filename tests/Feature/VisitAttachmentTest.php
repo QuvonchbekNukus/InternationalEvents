@@ -5,12 +5,12 @@ namespace Tests\Feature;
 use App\Models\Country;
 use App\Models\Document;
 use App\Models\PartnerOrganization;
+use App\Models\Permission;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

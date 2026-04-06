@@ -61,13 +61,30 @@ class DateReminderNotificationService
                     continue;
                 }
 
-                $name = $contact->display_name;
-                $dateLabel = $tomorrow->locale(app()->getLocale())->translatedFormat('d F');
+                $titleKey = 'ui.notifications.in_app.birthday_title';
+                $messageKey = 'ui.notifications.in_app.birthday_message';
+
+                $previous = app()->getLocale();
+                try {
+                    app()->setLocale('uz');
+                    $nameUz = $contact->display_name;
+                    $dateUz = $tomorrow->copy()->locale('uz')->translatedFormat('d F');
+                } finally {
+                    app()->setLocale($previous);
+                }
 
                 Notification::create([
                     'user_id' => $user->id,
-                    'title' => "Ertaga hamkor kontaktning tug'ilgan kuni",
-                    'message' => "\"{$name}\" ning tug'ilgan kuni erta ({$dateLabel}).",
+                    'title' => trans($titleKey, [], 'uz'),
+                    'message' => trans($messageKey, [
+                        'subject' => $nameUz,
+                        'date' => $dateUz,
+                    ], 'uz'),
+                    'title_key' => $titleKey,
+                    'message_key' => $messageKey,
+                    'message_params' => [
+                        'date_raw' => $tomorrow->toDateString(),
+                    ],
                     'type' => self::PARTNER_CONTACT_BIRTHDAY_TYPE,
                     'related_type' => PartnerContact::class,
                     'related_id' => $contact->id,
@@ -139,8 +156,16 @@ class DateReminderNotificationService
             return 0;
         }
 
-        $title = "Tadbir boshlanish kuni";
-        $message = "\"{$event->display_title}\" tadbri bugun boshlanadi.";
+        $titleKey = 'ui.notifications.in_app.event_start_title';
+        $messageKey = 'ui.notifications.in_app.event_start_message';
+
+        $previous = app()->getLocale();
+        try {
+            app()->setLocale('uz');
+            $subjectUz = $event->display_title;
+        } finally {
+            app()->setLocale($previous);
+        }
 
         $created = 0;
 
@@ -166,8 +191,11 @@ class DateReminderNotificationService
 
             Notification::create([
                 'user_id' => $user->id,
-                'title' => $title,
-                'message' => $message,
+                'title' => trans($titleKey, [], 'uz'),
+                'message' => trans($messageKey, ['subject' => $subjectUz], 'uz'),
+                'title_key' => $titleKey,
+                'message_key' => $messageKey,
+                'message_params' => [],
                 'type' => self::EVENT_START_TYPE,
                 'related_type' => Event::class,
                 'related_id' => $event->getKey(),
@@ -238,8 +266,16 @@ class DateReminderNotificationService
             return 0;
         }
 
-        $title = "Tashrif boshlanish kuni";
-        $message = "\"{$visit->display_title}\" tashrifi bugun boshlanadi.";
+        $titleKey = 'ui.notifications.in_app.visit_start_title';
+        $messageKey = 'ui.notifications.in_app.visit_start_message';
+
+        $previous = app()->getLocale();
+        try {
+            app()->setLocale('uz');
+            $subjectUz = $visit->display_title;
+        } finally {
+            app()->setLocale($previous);
+        }
 
         $created = 0;
 
@@ -265,8 +301,11 @@ class DateReminderNotificationService
 
             Notification::create([
                 'user_id' => $user->id,
-                'title' => $title,
-                'message' => $message,
+                'title' => trans($titleKey, [], 'uz'),
+                'message' => trans($messageKey, ['subject' => $subjectUz], 'uz'),
+                'title_key' => $titleKey,
+                'message_key' => $messageKey,
+                'message_params' => [],
                 'type' => self::VISIT_START_TYPE,
                 'related_type' => Visit::class,
                 'related_id' => $visit->getKey(),

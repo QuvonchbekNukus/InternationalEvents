@@ -12,13 +12,13 @@ use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Services\DateReminderNotificationService;
 use App\Services\UserNotificationService;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -117,8 +117,8 @@ class EventController extends Controller implements HasMiddleware
             'events' => $events,
             'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'eventTypes' => EventType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'formats' => Event::FORMAT_LABELS,
-            'statuses' => Event::STATUS_LABELS,
+            'formats' => LocaleLabels::map(Event::FORMAT_TRANSLATION_KEY, Event::FORMATS),
+            'statuses' => LocaleLabels::map(Event::STATUS_TRANSLATION_KEY, Event::STATUSES),
             'filters' => [
                 'search' => $search,
                 'country_id' => $selectedCountry,
@@ -161,7 +161,7 @@ class EventController extends Controller implements HasMiddleware
             null,
             $event->responsible_user_id,
             $request->user(),
-            'tadbir',
+            'event',
             true
         );
 
@@ -198,8 +198,8 @@ class EventController extends Controller implements HasMiddleware
 
         return view('events.show', [
             'event' => $event,
-            'formats' => Event::FORMAT_LABELS,
-            'statuses' => Event::STATUS_LABELS,
+            'formats' => LocaleLabels::map(Event::FORMAT_TRANSLATION_KEY, Event::FORMATS),
+            'statuses' => LocaleLabels::map(Event::STATUS_TRANSLATION_KEY, Event::STATUSES),
         ]);
     }
 
@@ -253,7 +253,7 @@ class EventController extends Controller implements HasMiddleware
             $previousResponsibleUserId,
             $event->responsible_user_id,
             $request->user(),
-            'tadbir'
+            'event'
         );
 
         $dateReminderNotificationService->ensureEventStartReminderFor($event->fresh());
@@ -301,7 +301,7 @@ class EventController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title_ru' => ['required', 'string', 'max:255'],
             'title_uz' => ['required', 'string', 'max:255'],
-'event_type_id' => ['nullable', 'integer', 'exists:event_types,id'],
+            'event_type_id' => ['nullable', 'integer', 'exists:event_types,id'],
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
             'agreement_id' => ['nullable', 'integer', 'exists:agreements,id'],
@@ -316,7 +316,7 @@ class EventController extends Controller implements HasMiddleware
             'description' => ['nullable', 'string'],
             'result_summary_ru' => ['nullable', 'string'],
             'result_summary_uz' => ['nullable', 'string'],
-'event_files' => ['nullable', 'array'],
+            'event_files' => ['nullable', 'array'],
             'event_files.*' => ['file', 'max:51200'],
         ]);
 
@@ -329,7 +329,7 @@ class EventController extends Controller implements HasMiddleware
 
             if ((int) $organizationCountryId !== (int) $validated['country_id']) {
                 throw ValidationException::withMessages([
-                    'partner_organization_id' => "Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.",
+                    'partner_organization_id' => 'Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.',
                 ]);
             }
         }
@@ -341,7 +341,7 @@ class EventController extends Controller implements HasMiddleware
 
             if ((int) $agreementCountryId !== (int) $validated['country_id']) {
                 throw ValidationException::withMessages([
-                    'agreement_id' => "Tanlangan kelishuv tanlangan davlatga tegishli emas.",
+                    'agreement_id' => 'Tanlangan kelishuv tanlangan davlatga tegishli emas.',
                 ]);
             }
         }
@@ -367,8 +367,8 @@ class EventController extends Controller implements HasMiddleware
             'agreements' => Agreement::query()->orderBy('title_uz')->get(['id', 'country_id', 'title_uz', 'title_ru', 'short_title_uz', 'short_title_ru']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'formats' => Event::FORMAT_LABELS,
-            'statuses' => Event::STATUS_LABELS,
+            'formats' => LocaleLabels::map(Event::FORMAT_TRANSLATION_KEY, Event::FORMATS),
+            'statuses' => LocaleLabels::map(Event::STATUS_TRANSLATION_KEY, Event::STATUSES),
         ];
     }
 
@@ -376,6 +376,7 @@ class EventController extends Controller implements HasMiddleware
     {
         if (! $request->hasFile('event_files')) {
             $this->syncEventDocumentMetadata($event);
+
             return;
         }
 
@@ -424,7 +425,7 @@ class EventController extends Controller implements HasMiddleware
         return [
             'title_ru' => null,
             'title_uz' => null,
-'document_number' => null,
+            'document_number' => null,
             'document_type_id' => null,
             'country_id' => $event->country_id,
             'partner_organization_id' => $event->partner_organization_id,

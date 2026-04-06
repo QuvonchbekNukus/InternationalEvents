@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -50,7 +51,7 @@ class CountryController extends Controller implements HasMiddleware
                 'search' => $search,
                 'status' => $selectedStatus,
             ],
-            'statuses' => Country::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
         ]);
     }
 
@@ -60,7 +61,7 @@ class CountryController extends Controller implements HasMiddleware
             'country' => new Country([
                 'cooperation_status' => 'faol',
             ]),
-            'statuses' => Country::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
         ]);
     }
 
@@ -88,7 +89,7 @@ class CountryController extends Controller implements HasMiddleware
 
         return view('countries.show', [
             'country' => $country,
-            'statuses' => Country::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
             'partnerOrganizations' => $partnerOrganizations,
             'agreements' => $this->visibleAgreements($request, $country),
             'visits' => $this->visibleVisits($request, $country),
@@ -117,7 +118,7 @@ class CountryController extends Controller implements HasMiddleware
     {
         return view('countries.edit', [
             'country' => $country,
-            'statuses' => Country::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
         ]);
     }
 
@@ -164,11 +165,11 @@ class CountryController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['nullable', 'string', 'max:255'],
-'iso2' => ['nullable', 'string', 'size:2', Rule::unique('countries', 'iso2')->ignore($country?->id)],
+            'iso2' => ['nullable', 'string', 'size:2', Rule::unique('countries', 'iso2')->ignore($country?->id)],
             'iso3' => ['nullable', 'string', 'size:3', Rule::unique('countries', 'iso3')->ignore($country?->id)],
             'region_ru' => ['nullable', 'string', 'max:255'],
             'region_uz' => ['nullable', 'string', 'max:255'],
-'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'cooperation_status' => ['required', 'string', Rule::in(Country::STATUSES)],
             'boundary_geojson_path' => ['nullable', 'string', 'max:255'],

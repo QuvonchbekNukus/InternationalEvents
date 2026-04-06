@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Agreement;
 use App\Models\Country;
 use App\Models\Document;
-use App\Models\Event;
 use App\Models\OrganizationType;
 use App\Models\PartnerOrganization;
-use App\Models\Visit;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -72,7 +70,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'partnerOrganizations' => $partnerOrganizations,
             'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'statuses' => PartnerOrganization::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(PartnerOrganization::STATUS_TRANSLATION_KEY, PartnerOrganization::STATUSES),
             'filters' => [
                 'search' => $search,
                 'country_id' => $selectedCountry,
@@ -123,7 +121,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return view('partner-organizations.show', [
             'partnerOrganization' => $partnerOrganization,
-            'statuses' => PartnerOrganization::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(PartnerOrganization::STATUS_TRANSLATION_KEY, PartnerOrganization::STATUSES),
             'partnerContacts' => $partnerContacts,
             'agreements' => $this->visibleAgreements($request, $partnerOrganization),
             'visits' => $this->visibleVisits($request, $partnerOrganization),
@@ -223,7 +221,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'country_id' => ['required', 'integer', 'exists:countries,id'],
             'name_ru' => ['required', 'string', 'max:255'],
             'name_uz' => ['required', 'string', 'max:255'],
-'short_name' => ['nullable', 'string', 'max:100'],
+            'short_name' => ['nullable', 'string', 'max:100'],
             'organization_type_id' => ['nullable', 'integer', 'exists:organization_types,id'],
             'address' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -247,7 +245,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
         return [
             'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'organizationTypes' => OrganizationType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'statuses' => PartnerOrganization::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(PartnerOrganization::STATUS_TRANSLATION_KEY, PartnerOrganization::STATUSES),
         ];
     }
 
@@ -439,7 +437,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'agreement_id' => null,
             'visit_id' => null,
             'event_id' => null,
-            'description' => "Hamkor tashkilotning info fayli",
+            'description' => 'Hamkor tashkilotning info fayli',
         ];
     }
 

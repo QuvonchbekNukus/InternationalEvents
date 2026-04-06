@@ -20,6 +20,8 @@ class Country extends Model
         'tugatilgan',
     ];
 
+    public const STATUS_TRANSLATION_KEY = 'ui.statuses.country';
+
     public const STATUS_LABELS = [
         'faol' => 'Faol',
         'rejada' => 'Rejada',

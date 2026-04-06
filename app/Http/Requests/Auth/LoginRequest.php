@@ -54,6 +54,15 @@ class LoginRequest extends FormRequest
         if (! Auth::attempt($this->only('phone', 'password'), $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
+            activity('system')
+                ->event('login_failed')
+                ->withProperties(array_filter([
+                    'phone_masked' => $this->maskedPhone((string) $this->input('phone')),
+                    'ip_address' => $this->ip(),
+                    'user_agent' => Str::limit((string) $this->userAgent(), 255, ''),
+                ], fn (mixed $v): bool => $v !== null && $v !== ''))
+                ->log(__('ui.activity_log.events.login_failed'));
+
             throw ValidationException::withMessages([
                 'phone' => trans('auth.failed'),
             ]);
@@ -91,5 +100,16 @@ class LoginRequest extends FormRequest
     public function throttleKey(): string
     {
         return Str::transliterate(Str::lower($this->string('phone')).'|'.$this->ip());
+    }
+
+    private function maskedPhone(string $digitsOnly): string
+    {
+        $digits = preg_replace('/\D+/', '', $digitsOnly) ?? '';
+
+        if (strlen($digits) < 6) {
+            return '***';
+        }
+
+        return substr($digits, 0, 2).'***'.substr($digits, -2);
     }
 }

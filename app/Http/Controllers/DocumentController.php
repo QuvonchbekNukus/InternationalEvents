@@ -9,6 +9,7 @@ use App\Models\DocumentType;
 use App\Models\Event;
 use App\Models\PartnerOrganization;
 use App\Models\Visit;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -107,7 +108,7 @@ class DocumentController extends Controller implements HasMiddleware
         return view('documents.index', [
             'documents' => $documents,
             'documentTypes' => DocumentType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'statuses' => Document::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Document::STATUS_TRANSLATION_KEY, Document::STATUSES),
             'filters' => [
                 'search' => $search,
                 'document_type_id' => $selectedDocumentType,
@@ -248,7 +249,7 @@ class DocumentController extends Controller implements HasMiddleware
         $validated = $request->validate([
             'title_ru' => ['nullable', 'string', 'max:255'],
             'title_uz' => ['nullable', 'string', 'max:255'],
-'document_number' => ['nullable', 'string', 'max:255'],
+            'document_number' => ['nullable', 'string', 'max:255'],
             'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
             'country_id' => ['nullable', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
@@ -300,7 +301,7 @@ class DocumentController extends Controller implements HasMiddleware
             'agreements' => Agreement::query()->orderByDesc('created_at')->get(['id', 'country_id', 'title_uz', 'title_ru', 'short_title_uz', 'short_title_ru']),
             'visits' => Visit::query()->orderByDesc('start_date')->get(['id', 'country_id', 'title_uz', 'title_ru', 'start_date']),
             'events' => Event::query()->orderByDesc('start_datetime')->get(['id', 'country_id', 'title_uz', 'title_ru', 'start_datetime']),
-            'statuses' => Document::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Document::STATUS_TRANSLATION_KEY, Document::STATUSES),
         ];
     }
 

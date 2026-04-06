@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\DispatchDateRemindersOnRequest;
+use App\Http\Middleware\LogAuthenticatedPageVisit;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetLocale::class,
             DispatchDateRemindersOnRequest::class,
+            LogAuthenticatedPageVisit::class,
         ]);
 
         $middleware->alias([

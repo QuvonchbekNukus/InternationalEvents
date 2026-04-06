@@ -38,11 +38,13 @@ trait LogsModelActivity
 
     protected function activityDescription(string $eventName): string
     {
+        $type = $this->activitySubjectTypeLabel();
+
         return match ($eventName) {
-            'created' => "{$this->activitySubjectTypeLabel()} yaratildi",
-            'updated' => "{$this->activitySubjectTypeLabel()} tahrirlandi",
-            'deleted' => "{$this->activitySubjectTypeLabel()} o'chirildi",
-            default => "{$this->activitySubjectTypeLabel()} amali bajarildi",
+            'created' => __('ui.audit.created', ['type' => $type]),
+            'updated' => __('ui.audit.updated', ['type' => $type]),
+            'deleted' => __('ui.audit.deleted', ['type' => $type]),
+            default => __('ui.audit.default', ['type' => $type]),
         };
     }
 
@@ -53,25 +55,13 @@ trait LogsModelActivity
 
     protected function activitySubjectTypeLabel(): string
     {
-        return match (class_basename($this)) {
-            'Agreement' => 'Kelishuv',
-            'AgreementDirection' => "Kelishuv yo'nalishi",
-            'AgreementType' => 'Kelishuv turi',
-            'Country' => 'Davlat',
-            'Department' => "Bo'lim",
-            'Document' => 'Hujjat',
-            'DocumentType' => 'Hujjat turi',
-            'Event' => 'Tadbir',
-            'EventType' => 'Tadbir turi',
-            'OrganizationType' => 'Tashkilot turi',
-            'PartnerContact' => 'Hamkor kontakt',
-            'PartnerOrganization' => 'Hamkor tashkilot',
-            'Rank' => 'Unvon',
-            'User' => 'Foydalanuvchi',
-            'Visit' => 'Tashrif',
-            'VisitType' => 'Tashrif turi',
-            default => Str::headline(class_basename($this)),
-        };
+        $labels = trans('ui.activity_log.subject_types');
+
+        if (is_array($labels) && isset($labels[static::class])) {
+            return (string) $labels[static::class];
+        }
+
+        return Str::headline(class_basename($this));
     }
 
     protected function resolveActivityModelLabel(?Model $model): ?string

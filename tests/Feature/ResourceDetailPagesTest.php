@@ -8,10 +8,10 @@ use App\Models\Document;
 use App\Models\Event;
 use App\Models\PartnerContact;
 use App\Models\PartnerOrganization;
+use App\Models\Permission;
 use App\Models\User;
 use App\Models\Visit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

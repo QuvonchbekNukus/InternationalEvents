@@ -208,7 +208,7 @@
                                 <span>
                                     {{ $partnerOrganization->organizationType?->display_name ?: "Turi ko'rsatilmagan" }}
                                     {{ ' | ' }}
-                                    {{ \App\Models\PartnerOrganization::STATUS_LABELS[$partnerOrganization->status] ?? $partnerOrganization->status }}
+                                    {{ __(\App\Models\PartnerOrganization::STATUS_TRANSLATION_KEY.'.'.$partnerOrganization->status) }}
                                 </span>
                                 <span>
                                     {{ $partnerOrganization->city ?: "Shahar ko'rsatilmagan" }}
@@ -252,7 +252,7 @@
                                     {{ ' | ' }}
                                     {{ $agreement->signed_date?->format('d.m.Y') ?: "Imzolangan sana yo'q" }}
                                     {{ ' | ' }}
-                                    {{ \App\Models\Agreement::STATUS_LABELS[$agreement->status] ?? $agreement->status }}
+                                    {{ __(\App\Models\Agreement::STATUS_TRANSLATION_KEY.'.'.$agreement->status) }}
                                 </span>
                             </article>
                         @endforeach
@@ -292,7 +292,7 @@
                                     {{ ' | ' }}
                                     {{ $event->start_datetime?->format('d.m.Y H:i') ?: "Boshlanish vaqti yo'q" }}
                                     {{ ' | ' }}
-                                    {{ \App\Models\Event::STATUS_LABELS[$event->status] ?? $event->status }}
+                                    {{ __(\App\Models\Event::STATUS_TRANSLATION_KEY.'.'.$event->status) }}
                                 </span>
                             </article>
                         @endforeach
@@ -329,9 +329,9 @@
                                 <span>
                                     {{ $visit->start_date?->format('d.m.Y') ?: "Boshlanish sanasi yo'q" }}
                                     {{ ' | ' }}
-                                    {{ \App\Models\Visit::DIRECTION_LABELS[$visit->direction] ?? "Yo'nalish ko'rsatilmagan" }}
+                                    {{ $visit->direction ? __(\App\Models\Visit::DIRECTION_TRANSLATION_KEY.'.'.$visit->direction) : __('ui.common.values.unknown') }}
                                     {{ ' | ' }}
-                                    {{ \App\Models\Visit::STATUS_LABELS[$visit->status] ?? $visit->status }}
+                                    {{ __(\App\Models\Visit::STATUS_TRANSLATION_KEY.'.'.$visit->status) }}
                                 </span>
                             </article>
                         @endforeach

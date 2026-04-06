@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\DeletesOwnedDocuments;
-use App\Models\Concerns\ResolvesLocalizedAttributes;
 use App\Models\Concerns\LogsModelActivity;
+use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,12 +27,16 @@ class Event extends Model
         'gibrid' => 'Gibrid',
     ];
 
+    public const FORMAT_TRANSLATION_KEY = 'ui.formats.event';
+
     public const STATUSES = [
         'rejada',
         'hozirda',
         'tugatilgan',
         'bekorlangan',
     ];
+
+    public const STATUS_TRANSLATION_KEY = 'ui.statuses.event';
 
     public const STATUS_LABELS = [
         'rejada' => 'Rejada',

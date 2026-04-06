@@ -5,10 +5,10 @@ namespace Tests\Feature;
 use App\Models\Agreement;
 use App\Models\Country;
 use App\Models\Notification;
+use App\Models\Permission;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Department;
 use App\Models\Rank;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,6 @@ use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller implements HasMiddleware
 {
@@ -85,7 +85,7 @@ class UserController extends Controller implements HasMiddleware
     public function create(): View
     {
         return view('users.create', [
-            'user' => new User(),
+            'user' => new User,
             ...$this->formOptions(),
         ]);
     }
@@ -188,7 +188,7 @@ class UserController extends Controller implements HasMiddleware
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:6', 'max:255'],
             'position_uz' => ['nullable', 'string', 'max:255'],
             'position_ru' => ['nullable', 'string', 'max:255'],
-'department_id' => ['nullable', 'integer', 'exists:departments,id'],
+            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
             'rank_id' => ['required', 'integer', 'exists:ranks,id'],
             'role' => ['required', 'string', Rule::exists('roles', 'name')],
             'is_active' => ['sometimes', 'boolean'],
@@ -224,7 +224,7 @@ class UserController extends Controller implements HasMiddleware
             'password' => ['nullable', 'string', 'min:6', 'max:255'],
             'position_uz' => ['nullable', 'string', 'max:255'],
             'position_ru' => ['nullable', 'string', 'max:255'],
-]);
+        ]);
 
         if (($validated['password'] ?? '') === '') {
             unset($validated['password']);

@@ -11,13 +11,13 @@ use App\Models\Document;
 use App\Models\PartnerOrganization;
 use App\Models\User;
 use App\Services\UserNotificationService;
+use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -113,7 +113,7 @@ class AgreementController extends Controller implements HasMiddleware
             'countries' => Country::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'agreementTypes' => AgreementType::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'statuses' => Agreement::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Agreement::STATUS_TRANSLATION_KEY, Agreement::STATUSES),
             'filters' => [
                 'search' => $search,
                 'country_id' => $selectedCountry,
@@ -152,7 +152,7 @@ class AgreementController extends Controller implements HasMiddleware
             null,
             $agreement->responsible_user_id,
             $request->user(),
-            'kelishuv',
+            'agreement',
             true
         );
 
@@ -187,7 +187,7 @@ class AgreementController extends Controller implements HasMiddleware
 
         return view('agreements.show', [
             'agreement' => $agreement,
-            'statuses' => Agreement::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Agreement::STATUS_TRANSLATION_KEY, Agreement::STATUSES),
         ]);
     }
 
@@ -254,7 +254,7 @@ class AgreementController extends Controller implements HasMiddleware
             $previousResponsibleUserId,
             $agreement->responsible_user_id,
             $request->user(),
-            'kelishuv'
+            'agreement'
         );
 
         return redirect()
@@ -306,9 +306,9 @@ class AgreementController extends Controller implements HasMiddleware
             ],
             'title_ru' => ['required', 'string', 'max:255'],
             'title_uz' => ['required', 'string', 'max:255'],
-'short_title_ru' => ['nullable', 'string', 'max:255'],
+            'short_title_ru' => ['nullable', 'string', 'max:255'],
             'short_title_uz' => ['nullable', 'string', 'max:255'],
-'country_id' => ['required', 'integer', 'exists:countries,id'],
+            'country_id' => ['required', 'integer', 'exists:countries,id'],
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
             'agreement_type_id' => ['nullable', 'integer', 'exists:agreement_types,id'],
             'agreement_direction_id' => ['nullable', 'integer', 'exists:agreement_directions,id'],
@@ -332,7 +332,7 @@ class AgreementController extends Controller implements HasMiddleware
 
             if ((int) $organizationCountryId !== (int) $validated['country_id']) {
                 throw ValidationException::withMessages([
-                    'partner_organization_id' => "Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.",
+                    'partner_organization_id' => 'Tanlangan hamkor tashkilot tanlangan davlatga tegishli emas.',
                 ]);
             }
         }
@@ -358,7 +358,7 @@ class AgreementController extends Controller implements HasMiddleware
             'agreementDirections' => AgreementDirection::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
             'responsibleUsers' => User::query()->orderBy('last_name')->orderBy('first_name')->get(['id', 'first_name', 'middle_name', 'last_name', 'department_id']),
             'responsibleDepartments' => Department::query()->orderBy('name_uz')->get(['id', 'name_uz', 'name_ru']),
-            'statuses' => Agreement::STATUS_LABELS,
+            'statuses' => LocaleLabels::map(Agreement::STATUS_TRANSLATION_KEY, Agreement::STATUSES),
         ];
     }
 
@@ -366,6 +366,7 @@ class AgreementController extends Controller implements HasMiddleware
     {
         if (! $request->hasFile('agreement_files')) {
             $this->syncAgreementDocumentMetadata($agreement);
+
             return;
         }
 
@@ -423,7 +424,7 @@ class AgreementController extends Controller implements HasMiddleware
         return [
             'title_ru' => null,
             'title_uz' => null,
-'document_number' => null,
+            'document_number' => null,
             'document_type_id' => null,
             'country_id' => $agreement->country_id,
             'partner_organization_id' => $agreement->partner_organization_id,
