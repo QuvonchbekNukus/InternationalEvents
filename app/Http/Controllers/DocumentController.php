@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\Event;
 use App\Models\PartnerOrganization;
+use App\Services\UploadedFileProcessor;
 use App\Models\Visit;
 use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
@@ -319,14 +320,10 @@ class DocumentController extends Controller implements HasMiddleware
      */
     private function uploadedFilePayload(UploadedFile $file): array
     {
-        $filePath = $file->store(now()->format('Y/m'), self::STORAGE_DISK);
-
-        return [
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $filePath,
-            'file_ext' => $file->getClientOriginalExtension() ?: null,
-            'file_size' => $file->getSize(),
-            'mime_type' => $file->getClientMimeType(),
-        ];
+        return app(UploadedFileProcessor::class)->store(
+            $file,
+            self::STORAGE_DISK,
+            now()->format('Y/m'),
+        );
     }
 }

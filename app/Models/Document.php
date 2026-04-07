@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\OptimizeDocumentImage;
 use App\Models\Concerns\LogsModelActivity;
 use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -81,6 +82,20 @@ class Document extends Model
 
     protected static function booted(): void
     {
+        static::saved(function (Document $document): void {
+            if (! $document->shouldScheduleImageOptimization()) {
+                return;
+            }
+
+            if (config('uploads.images_optimize_after_response', true)) {
+                OptimizeDocumentImage::dispatchAfterResponse($document->id);
+
+                return;
+            }
+
+            OptimizeDocumentImage::dispatch($document->id);
+        });
+
         static::deleted(function (Document $document): void {
             $filePath = $document->getOriginal('file_path') ?: $document->file_path;
 
@@ -172,5 +187,37 @@ class Document extends Model
         }
 
         return number_format($this->file_size / (1024 * 1024), 1).' MB';
+    }
+
+    private function shouldScheduleImageOptimization(): bool
+    {
+        if (app()->runningUnitTests()) {
+            return false;
+        }
+
+        if (! config('uploads.images_optimize_async', true)) {
+            return false;
+        }
+
+        if (! $this->file_path) {
+            return false;
+        }
+
+        if (! $this->wasRecentlyCreated && ! $this->wasChanged(['file_path', 'file_ext', 'mime_type'])) {
+            return false;
+        }
+
+        $mime = strtolower((string) $this->mime_type);
+        $ext = strtolower((string) $this->file_ext);
+
+        if ($mime === 'image/webp' || $ext === 'webp') {
+            return false;
+        }
+
+        if (str_starts_with($mime, 'image/')) {
+            return in_array($mime, ['image/jpeg', 'image/png'], true);
+        }
+
+        return in_array($ext, ['jpg', 'jpeg', 'png'], true);
     }
 }

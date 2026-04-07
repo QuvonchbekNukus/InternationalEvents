@@ -141,6 +141,8 @@ class VisitAttachmentTest extends TestCase
 
         $newDocument = $visit->documents->firstWhere('file_name', 'updated-visit-photo.png');
         $this->assertNotNull($newDocument);
+        $this->assertSame('png', $newDocument->file_ext);
+        $this->assertSame('image/png', $newDocument->mime_type);
         $this->assertSame($countryB->id, $newDocument->country_id);
         $this->assertSame($partnerOrganizationB->id, $newDocument->partner_organization_id);
         $this->assertSame($visit->id, $newDocument->visit_id);

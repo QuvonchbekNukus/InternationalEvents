@@ -60,6 +60,9 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertNotNull($partnerContact->photo);
         $this->assertNotNull($partnerContact->cv);
         $this->assertSame($partnerOrganization->id, $partnerContact->partner_organization_id);
+        $this->assertSame('photo.png', $partnerContact->photoDocument?->file_name);
+        $this->assertSame('png', $partnerContact->photoDocument?->file_ext);
+        $this->assertSame('image/png', $partnerContact->photoDocument?->mime_type);
         $this->assertSame($user->id, $partnerContact->photoDocument?->uploaded_by);
         $this->assertSame($user->id, $partnerContact->cvDocument?->uploaded_by);
         $this->assertSame($partnerOrganization->country_id, $partnerContact->photoDocument?->country_id);
@@ -157,6 +160,8 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertSame($photoDocument->id, $partnerContact->photo);
         $this->assertSame($cvDocument->id, $partnerContact->cv);
         $this->assertSame('photo-new.png', $photoDocument->file_name);
+        $this->assertSame('png', $photoDocument->file_ext);
+        $this->assertSame('image/png', $photoDocument->mime_type);
         $this->assertSame('cv-new.docx', $cvDocument->file_name);
         $this->assertSame('Yangilangan Kontakt fotosurati', $photoDocument->title_uz);
         $this->assertSame('Yangilangan Kontakt CV', $cvDocument->title_uz);
