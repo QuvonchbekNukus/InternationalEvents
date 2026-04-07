@@ -16,7 +16,7 @@
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_organizations')]) }}</p>
                 <h1 class="page-title">{{ $partnerOrganization->display_name }}</h1>
-                <p class="page-subtitle">Hamkor tashkilot bo'yicha asosiy rekvizitlar, kontaktlar va unga bog'langan jarayonlar shu sahifada ko'rsatiladi.</p>
+                <p class="page-subtitle">{{ __('ui.pages.partner_organizations.show.subtitle') }}</p>
             </div>
 
             <div class="form-actions">
@@ -38,42 +38,42 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Asosiy</p>
-                        <h2 class="section-title">Tashkilot ma'lumotlari</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.main') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.sections.organization_info') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Davlat</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.country') }}</span>
                         <strong>
                             @if ($partnerOrganization->country && auth()->user()?->can('view countries'))
                                 <a class="row-title-link" href="{{ route('countries.show', $partnerOrganization->country) }}">
                                     {{ $partnerOrganization->country->display_name }}
                                 </a>
                             @else
-                                {{ $partnerOrganization->country?->display_name ?: "Davlat biriktirilmagan" }}
+                                {{ $partnerOrganization->country?->display_name ?: __('ui.pages.partner_organizations.show.values.country_missing') }}
                             @endif
                         </strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Tashkilot turi</span>
-                        <strong>{{ $partnerOrganization->organizationType?->display_name ?: "Tur ko'rsatilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.organization_type') }}</span>
+                        <strong>{{ $partnerOrganization->organizationType?->display_name ?: __('ui.pages.partner_organizations.show.values.type_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Qisqa nom</span>
-                        <strong>{{ $partnerOrganization->short_name ?: "Qisqa nom kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.short_name') }}</span>
+                        <strong>{{ $partnerOrganization->short_name ?: __('ui.pages.partner_organizations.show.values.short_name_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Info fayli</span>
-                        <strong>{{ $partnerOrganization->organizationInfoDocument?->file_name ?: "Biriktirilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.info_file') }}</span>
+                        <strong>{{ $partnerOrganization->organizationInfoDocument?->file_name ?: __('ui.pages.partner_organizations.show.values.unassigned') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Holat</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.status') }}</span>
                         <span class="status-pill {{ $statusClass }}">
                             {{ $statuses[$partnerOrganization->status] ?? $partnerOrganization->status }}
                         </span>
@@ -84,56 +84,56 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Aloqa</p>
-                        <h2 class="section-title">Joylashuv va izoh</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.contact') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.sections.location_notes') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Shahar</span>
-                        <strong>{{ $partnerOrganization->city ?: "Shahar ko'rsatilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.city') }}</span>
+                        <strong>{{ $partnerOrganization->city ?: __('ui.pages.partner_organizations.show.values.city_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Manzil</span>
-                        <strong>{{ $partnerOrganization->address ?: "Manzil kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.address') }}</span>
+                        <strong>{{ $partnerOrganization->address ?: __('ui.pages.partner_organizations.show.values.address_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Veb-sayt</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.website') }}</span>
                         <strong>
                             @if ($partnerOrganization->website_url)
                                 <a class="row-title-link" href="{{ $partnerOrganization->website_url }}" target="_blank" rel="noreferrer">
                                     {{ $partnerOrganization->website }}
                                 </a>
                             @else
-                                Sayt ko'rsatilmagan
+                                {{ __('ui.pages.partner_organizations.show.values.website_missing') }}
                             @endif
                         </strong>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">
-                        <span class="detail-list__label">Izoh</span>
-                        <p class="detail-note">{{ $partnerOrganization->notes ?: "Qo'shimcha izoh kiritilmagan." }}</p>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.notes') }}</span>
+                        <p class="detail-note">{{ $partnerOrganization->notes ?: __('ui.pages.partner_organizations.show.values.notes_missing') }}</p>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">
-                        <span class="detail-list__label">Info fayli amallari</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_organizations.show.labels.info_file_actions') }}</span>
                         @if ($partnerOrganization->organizationInfoDocument?->file_url)
                             <strong>{{ $partnerOrganization->organizationInfoDocument->display_title }}</strong>
                             <div class="detail-actions-inline">
                                 <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" target="_blank" rel="noopener">
                                     <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                    <span>Ochish</span>
+                                    <span>{{ __('ui.common.actions.open') }}</span>
                                 </a>
                                 <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
                                     <i class="material-icons" aria-hidden="true">file_download</i>
-                                    <span>Faylni olish</span>
+                                    <span>{{ __('ui.common.actions.download_file') }}</span>
                                 </a>
                             </div>
                         @else
-                            <p class="detail-empty">Tashkilot uchun alohida info fayli biriktirilmagan.</p>
+                            <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.values.info_file_missing') }}</p>
                         @endif
                     </article>
                 </div>
@@ -142,15 +142,15 @@
             <section class="content-card detail-card detail-card--full">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Hamkorlik</p>
-                        <h2 class="section-title">Hamkorlik tarixi</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.partnership') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.sections.partnership_history') }}</h2>
                     </div>
                 </div>
 
                 @if ($partnerOrganization->partnership_history)
                     <div class="detail-note detail-note--preserve-lines">{{ $partnerOrganization->partnership_history }}</div>
                 @else
-                    <p class="detail-empty">Hamkorlik tarixi hali kiritilmagan.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.values.partnership_history_missing') }}</p>
                 @endif
             </section>
         </div>
@@ -164,8 +164,8 @@
                         </span>
                     </div>
                     <strong class="stat-value">{{ $partnerContacts->count() }}</strong>
-                    <h2 class="stat-title">Kontaktlar</h2>
-                    <p class="stat-description">Tashkilotga biriktirilgan kontaktlar soni.</p>
+                    <h2 class="stat-title">{{ __('ui.pages.partner_organizations.show.stats.contacts_title') }}</h2>
+                    <p class="stat-description">{{ __('ui.pages.partner_organizations.show.stats.contacts_description') }}</p>
                 </article>
             @endif
 
@@ -177,8 +177,8 @@
                         </span>
                     </div>
                     <strong class="stat-value">{{ $agreements->count() }}</strong>
-                    <h2 class="stat-title">Kelishuvlar</h2>
-                    <p class="stat-description">Tashkilot bilan bog'langan kelishuvlar.</p>
+                    <h2 class="stat-title">{{ __('ui.pages.partner_organizations.show.stats.agreements_title') }}</h2>
+                    <p class="stat-description">{{ __('ui.pages.partner_organizations.show.stats.agreements_description') }}</p>
                 </article>
             @endif
 
@@ -190,8 +190,8 @@
                         </span>
                     </div>
                     <strong class="stat-value">{{ $events->count() }}</strong>
-                    <h2 class="stat-title">Tadbirlar</h2>
-                    <p class="stat-description">Tashkilot ishtirok etgan tadbirlar soni.</p>
+                    <h2 class="stat-title">{{ __('ui.pages.partner_organizations.show.stats.events_title') }}</h2>
+                    <p class="stat-description">{{ __('ui.pages.partner_organizations.show.stats.events_description') }}</p>
                 </article>
             @endif
 
@@ -203,8 +203,8 @@
                         </span>
                     </div>
                     <strong class="stat-value">{{ $visits->count() }}</strong>
-                    <h2 class="stat-title">Tashriflar</h2>
-                    <p class="stat-description">Tashkilot bilan bog'liq tashriflar.</p>
+                    <h2 class="stat-title">{{ __('ui.pages.partner_organizations.show.stats.visits_title') }}</h2>
+                    <p class="stat-description">{{ __('ui.pages.partner_organizations.show.stats.visits_description') }}</p>
                 </article>
             @endif
 
@@ -216,8 +216,8 @@
                         </span>
                     </div>
                     <strong class="stat-value">{{ $documents->count() }}</strong>
-                    <h2 class="stat-title">Hujjatlar</h2>
-                    <p class="stat-description">Tashkilot bilan bog'langan fayllar va ilovalar.</p>
+                    <h2 class="stat-title">{{ __('ui.pages.partner_organizations.show.stats.documents_title') }}</h2>
+                    <p class="stat-description">{{ __('ui.pages.partner_organizations.show.stats.documents_description') }}</p>
                 </article>
             @endif
         </div>
@@ -226,8 +226,8 @@
             <section class="content-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanishlar</p>
-                        <h2 class="section-title">Kontaktlar</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.related') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.related.contacts_title') }}</h2>
                     </div>
                 </div>
 
@@ -241,31 +241,31 @@
                                     </a>
                                 </strong>
                                 <span>
-                                    {{ $partnerContact->display_position ?: "Lavozim ko'rsatilmagan" }}
+                                    {{ $partnerContact->display_position ?: __('ui.pages.partner_organizations.show.values.position_missing') }}
                                     {{ ' | ' }}
-                                    {{ $partnerContact->birthday?->format('d.m.Y') ?: "Tug'ilgan sana yo'q" }}
+                                    {{ $partnerContact->birthday?->format('d.m.Y') ?: __('ui.pages.partner_organizations.show.values.birthday_missing') }}
                                 </span>
                                 <span>
-                                    {{ $partnerContact->email ?: "Email yo'q" }}
+                                    {{ $partnerContact->email ?: __('ui.pages.partner_organizations.show.values.email_missing') }}
                                     {{ ' | ' }}
-                                    {{ $partnerContact->phone ?: "Telefon yo'q" }}
+                                    {{ $partnerContact->phone ?: __('ui.pages.partner_organizations.show.values.phone_missing') }}
                                 </span>
                                 <div class="detail-actions-inline">
                                     @if ($partnerContact->is_primary)
-                                        <span class="status-pill is-active">Asosiy kontakt</span>
+                                        <span class="status-pill is-active">{{ __('ui.pages.partner_organizations.show.values.primary_contact') }}</span>
                                     @endif
 
                                     @if ($partnerContact->photoDocument?->file_url)
                                         <a class="action-pill" href="{{ $partnerContact->photoDocument->file_url }}" target="_blank" rel="noopener">
                                             <i class="material-icons" aria-hidden="true">image</i>
-                                            <span>Foto</span>
+                                            <span>{{ __('ui.pages.partner_organizations.show.values.photo') }}</span>
                                         </a>
                                     @endif
 
                                     @if ($partnerContact->cvDocument?->file_url)
                                         <a class="action-pill" href="{{ $partnerContact->cvDocument->file_url }}" target="_blank" rel="noopener">
                                             <i class="material-icons" aria-hidden="true">description</i>
-                                            <span>CV</span>
+                                            <span>{{ __('ui.pages.partner_organizations.show.values.cv') }}</span>
                                         </a>
                                     @endif
                                 </div>
@@ -273,7 +273,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Bu tashkilotga hali kontakt biriktirilmagan.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.related.contacts_empty') }}</p>
                 @endif
             </section>
         @endif
@@ -282,8 +282,8 @@
             <section class="content-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanishlar</p>
-                        <h2 class="section-title">Kelishuvlar</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.related') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.related.agreements_title') }}</h2>
                     </div>
                 </div>
 
@@ -297,12 +297,12 @@
                                     </a>
                                 </strong>
                                 <span>
-                                    {{ $agreement->agreementType?->display_name ?: "Tur ko'rsatilmagan" }}
+                                    {{ $agreement->agreementType?->display_name ?: __('ui.pages.partner_organizations.show.values.type_missing') }}
                                     {{ ' | ' }}
-                                    {{ $agreement->agreementDirection?->display_name ?: "Yo'nalish ko'rsatilmagan" }}
+                                    {{ $agreement->agreementDirection?->display_name ?: __('ui.pages.partner_organizations.show.values.direction_missing') }}
                                 </span>
                                 <span>
-                                    {{ $agreement->signed_date?->format('d.m.Y') ?: "Imzolangan sana yo'q" }}
+                                    {{ $agreement->signed_date?->format('d.m.Y') ?: __('ui.pages.partner_organizations.show.values.signed_date_missing') }}
                                     {{ ' | ' }}
                                     {{ __(\App\Models\Agreement::STATUS_TRANSLATION_KEY.'.'.$agreement->status) }}
                                 </span>
@@ -310,7 +310,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Bu tashkilot bo'yicha ko'rinadigan kelishuv topilmadi.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.related.agreements_empty') }}</p>
                 @endif
             </section>
         @endif
@@ -319,8 +319,8 @@
             <section class="content-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanishlar</p>
-                        <h2 class="section-title">Tadbirlar</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.related') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.related.events_title') }}</h2>
                     </div>
                 </div>
 
@@ -334,12 +334,12 @@
                                     </a>
                                 </strong>
                                 <span>
-                                    {{ $event->eventType?->display_name ?: "Tur ko'rsatilmagan" }}
+                                    {{ $event->eventType?->display_name ?: __('ui.pages.partner_organizations.show.values.type_missing') }}
                                     {{ ' | ' }}
                                     {{ __(\App\Models\Event::FORMAT_TRANSLATION_KEY.'.'.$event->format) }}
                                 </span>
                                 <span>
-                                    {{ $event->start_datetime?->format('d.m.Y H:i') ?: "Boshlanish vaqti yo'q" }}
+                                    {{ $event->start_datetime?->format('d.m.Y H:i') ?: __('ui.pages.partner_organizations.show.values.start_datetime_missing') }}
                                     {{ ' | ' }}
                                     {{ __(\App\Models\Event::STATUS_TRANSLATION_KEY.'.'.$event->status) }}
                                 </span>
@@ -347,7 +347,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Bu tashkilot bilan bog'langan tadbir topilmadi.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.related.events_empty') }}</p>
                 @endif
             </section>
         @endif
@@ -356,8 +356,8 @@
             <section class="content-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanishlar</p>
-                        <h2 class="section-title">Tashriflar</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.related') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.related.visits_title') }}</h2>
                     </div>
                 </div>
 
@@ -371,12 +371,12 @@
                                     </a>
                                 </strong>
                                 <span>
-                                    {{ $visit->visitType?->display_name ?: "Tur ko'rsatilmagan" }}
+                                    {{ $visit->visitType?->display_name ?: __('ui.pages.partner_organizations.show.values.type_missing') }}
                                     {{ ' | ' }}
                                     {{ $visit->direction ? __(\App\Models\Visit::DIRECTION_TRANSLATION_KEY.'.'.$visit->direction) : __('ui.common.values.unknown') }}
                                 </span>
                                 <span>
-                                    {{ $visit->start_date?->format('d.m.Y') ?: "Boshlanish sanasi yo'q" }}
+                                    {{ $visit->start_date?->format('d.m.Y') ?: __('ui.pages.partner_organizations.show.values.start_date_missing') }}
                                     {{ ' | ' }}
                                     {{ __(\App\Models\Visit::STATUS_TRANSLATION_KEY.'.'.$visit->status) }}
                                 </span>
@@ -384,7 +384,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Bu tashkilot bilan bog'langan tashrif topilmadi.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.related.visits_empty') }}</p>
                 @endif
             </section>
         @endif
@@ -393,8 +393,8 @@
             <section class="content-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanishlar</p>
-                        <h2 class="section-title">Hujjatlar</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_organizations.show.eyebrows.related') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_organizations.show.related.documents_title') }}</h2>
                     </div>
                 </div>
 
@@ -404,36 +404,36 @@
                             <article class="stack-list__item">
                                 <strong>{{ $document->display_title }}</strong>
                                 <span>
-                                    {{ $document->documentType?->display_name ?: "Tur ko'rsatilmagan" }}
+                                    {{ $document->documentType?->display_name ?: __('ui.pages.partner_organizations.show.values.type_missing') }}
                                     {{ ' | ' }}
-                                    {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                    {{ strtoupper($document->file_ext ?: __('ui.pages.partner_organizations.show.values.file')) }}
                                     @if ($document->file_size_human)
                                         {{ ' | '.$document->file_size_human }}
                                     @endif
                                 </span>
                                 <span>
-                                    {{ $document->uploader?->full_name ?: "Yuklovchi ko'rsatilmagan" }}
+                                    {{ $document->uploader?->full_name ?: __('ui.pages.partner_organizations.show.values.uploader_missing') }}
                                     @if ($document->agreement)
-                                        {{ ' | Kelishuv: '.$document->agreement->display_title }}
+                                        {{ ' | '.__('ui.pages.partner_organizations.show.values.related_agreement').': '.$document->agreement->display_title }}
                                     @endif
                                     @if ($document->visit)
-                                        {{ ' | Tashrif: '.$document->visit->display_title }}
+                                        {{ ' | '.__('ui.pages.partner_organizations.show.values.related_visit').': '.$document->visit->display_title }}
                                     @endif
                                     @if ($document->event)
-                                        {{ ' | Tadbir: '.$document->event->display_title }}
+                                        {{ ' | '.__('ui.pages.partner_organizations.show.values.related_event').': '.$document->event->display_title }}
                                     @endif
                                 </span>
                                 <div class="detail-actions-inline">
                                     <a class="action-pill" href="{{ route('documents.download', $document) }}">
                                         <i class="material-icons" aria-hidden="true">file_download</i>
-                                        <span>Faylni olish</span>
+                                        <span>{{ __('ui.common.actions.download_file') }}</span>
                                     </a>
                                 </div>
                             </article>
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Bu tashkilot bilan bog'langan ko'rinadigan hujjat topilmadi.</p>
+                    <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.related.documents_empty') }}</p>
                 @endif
             </section>
         @endif

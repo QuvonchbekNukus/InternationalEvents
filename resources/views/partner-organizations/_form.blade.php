@@ -7,9 +7,9 @@
 
     <div class="form-grid">
         <label class="field">
-            <span class="field-label">Davlat</span>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.country') }}</span>
             <select name="country_id" required>
-                <option value="">Davlatni tanlang</option>
+                <option value="">{{ __('ui.pages.partner_organizations.form.placeholders.select_country') }}</option>
                 @foreach ($countries as $country)
                     <option value="{{ $country->id }}" @selected((string) old('country_id', $partnerOrganization->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
@@ -20,9 +20,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Tashkilot turi</span>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.organization_type') }}</span>
             <select name="organization_type_id">
-                <option value="">Biriktirilmagan</option>
+                <option value="">{{ __('ui.pages.partner_organizations.form.values.unassigned') }}</option>
                 @foreach ($organizationTypes as $organizationType)
                     <option value="{{ $organizationType->id }}" @selected((string) old('organization_type_id', $partnerOrganization->organization_type_id) === (string) $organizationType->id)>{{ $organizationType->display_name }}</option>
                 @endforeach
@@ -33,31 +33,31 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (UZ)</span>
-            <input type="text" name="name_uz" value="{{ old('name_uz', $partnerOrganization->name_uz) }}" placeholder="Ichki ishlar vazirligi" required>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.name_uz') }}</span>
+            <input type="text" name="name_uz" value="{{ old('name_uz', $partnerOrganization->name_uz) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.name_uz') }}" required>
             @error('name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (RU)</span>
-            <input type="text" name="name_ru" value="{{ old('name_ru', $partnerOrganization->name_ru) }}" placeholder="Министерство внутренних дел" required>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.name_ru') }}</span>
+            <input type="text" name="name_ru" value="{{ old('name_ru', $partnerOrganization->name_ru) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.name_ru') }}" required>
             @error('name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Qisqa nom</span>
-            <input type="text" name="short_name" value="{{ old('short_name', $partnerOrganization->short_name) }}" placeholder="IIV">
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.short_name') }}</span>
+            <input type="text" name="short_name" value="{{ old('short_name', $partnerOrganization->short_name) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.short_name') }}">
             @error('short_name')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Holat</span>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.status') }}</span>
             <select name="status" required>
                 @foreach ($statuses as $statusValue => $statusLabel)
                     <option value="{{ $statusValue }}" @selected(old('status', $partnerOrganization->status) === $statusValue)>{{ $statusLabel }}</option>
@@ -69,32 +69,32 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Shahar</span>
-            <input type="text" name="city" value="{{ old('city', $partnerOrganization->city) }}" placeholder="Toshkent">
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.city') }}</span>
+            <input type="text" name="city" value="{{ old('city', $partnerOrganization->city) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.city') }}">
             @error('city')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Website</span>
-            <input type="text" name="website" value="{{ old('website', $partnerOrganization->website) }}" placeholder="example.org">
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.website') }}</span>
+            <input type="text" name="website" value="{{ old('website', $partnerOrganization->website) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.website') }}">
             @error('website')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Tashkilot info fayli</span>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.organization_info_file') }}</span>
             <input
                 type="file"
                 name="organization_info_file"
                 accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             >
-            <span class="field-help">Faqat PDF yoki Word hujjati. Maksimal hajm 50 MB.</span>
+            <span class="field-help">{{ __('ui.pages.partner_organizations.form.file.help') }}</span>
             @if ($partnerOrganization->organizationInfoDocument?->file_url)
                 <span class="field-help">
-                    Joriy fayl:
+                    {{ __('ui.pages.partner_organizations.form.file.current') }}:
                     <a href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
                         {{ $partnerOrganization->organizationInfoDocument->file_name }}
                     </a>
@@ -102,20 +102,21 @@
                 <div class="detail-actions-inline">
                     <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" target="_blank" rel="noopener">
                         <i class="material-icons" aria-hidden="true">open_in_new</i>
-                        <span>Ochish</span>
+                        <span>{{ __('ui.common.actions.open') }}</span>
                     </a>
                     <a class="action-pill" href="{{ $partnerOrganization->organizationInfoDocument->file_url }}" download="{{ $partnerOrganization->organizationInfoDocument->file_name }}">
                         <i class="material-icons" aria-hidden="true">file_download</i>
-                        <span>Faylni olish</span>
+                        <span>{{ __('ui.common.actions.download_file') }}</span>
                     </a>
                     <button
                         class="action-pill action-pill--danger"
                         type="submit"
                         form="partner-organization-info-delete-{{ $partnerOrganization->id }}"
-                        onclick="return confirm('Ushbu tashkilot info faylini o\\'chirishni tasdiqlaysizmi?')"
+                        data-confirm-message="{{ __('ui.pages.partner_organizations.form.file.confirm_delete') }}"
+                        onclick="return confirm(this.dataset.confirmMessage)"
                     >
                         <i class="material-icons" aria-hidden="true">delete</i>
-                        <span>Faylni o'chirish</span>
+                        <span>{{ __('ui.common.actions.delete_file') }}</span>
                     </button>
                 </div>
             @endif
@@ -125,32 +126,32 @@
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Manzil</span>
-            <input type="text" name="address" value="{{ old('address', $partnerOrganization->address) }}" placeholder="Amir Temur ko'chasi, 10-uy">
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.address') }}</span>
+            <input type="text" name="address" value="{{ old('address', $partnerOrganization->address) }}" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.address') }}">
             @error('address')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <div class="field field--span-2 partnership-history-field" data-partnership-history-field>
-            <label class="field-label" for="partnership_history">Hamkorlik tarixi</label>
+            <label class="field-label" for="partnership_history">{{ __('ui.pages.partner_organizations.form.labels.partnership_history') }}</label>
             <textarea
                 id="partnership_history"
                 name="partnership_history"
-                placeholder="Hamkorlikning bosqichlari, uchrashuvlar, natijalar va muhim tarixiy ma'lumotlarni kiriting"
+                placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.partnership_history') }}"
                 data-partnership-history-editor
             >{{ old('partnership_history', $partnerOrganization->partnership_history) }}</textarea>
             <div class="partnership-history-tools">
                 <button class="action-pill" type="button" data-partnership-history-download disabled>
                     <i class="material-icons" aria-hidden="true">description</i>
-                    <span>Download as Word</span>
+                    <span>{{ __('ui.pages.partner_organizations.form.history.download_word') }}</span>
                 </button>
                 <span
                     class="field-help partnership-history-status"
                     data-partnership-history-status
-                    data-default-message="Editor orqali matnni yozing. Saqlash va Word export plain text ko'rinishida bajariladi."
+                    data-default-message="{{ __('ui.pages.partner_organizations.form.history.default_message') }}"
                 >
-                    Editor yuklanmoqda...
+                    {{ __('ui.pages.partner_organizations.form.history.loading') }}
                 </span>
             </div>
             @error('partnership_history')
@@ -159,8 +160,8 @@
         </div>
 
         <label class="field field--span-2">
-            <span class="field-label">Izoh</span>
-            <textarea name="notes" placeholder="Hamkorlik bo'yicha qisqa izoh">{{ old('notes', $partnerOrganization->notes) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.partner_organizations.form.labels.notes') }}</span>
+            <textarea name="notes" placeholder="{{ __('ui.pages.partner_organizations.form.placeholders.notes') }}">{{ old('notes', $partnerOrganization->notes) }}</textarea>
             @error('notes')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -228,7 +229,7 @@
 
                 if (!window.tinymce || !window.docx) {
                     editorFields.forEach((field) => {
-                        setStatus(field, "TinyMCE yoki docx kutubxonasi yuklanmadi. Oddiy textarea ishlashda davom etadi.", true);
+                        setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.libs_missing') }}", true);
                     });
 
                     return;
@@ -271,7 +272,7 @@
                         content_style: 'body { font-family: Georgia, serif; font-size: 14px; line-height: 1.7; } a { color: #60a5fa; }',
                     }).then(([editor]) => {
                         if (!editor) {
-                            setStatus(field, "Editor ishga tushmadi. Oddiy textarea orqali davom etishingiz mumkin.", true);
+                            setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.editor_init_failed') }}", true);
                             return;
                         }
 
@@ -282,7 +283,7 @@
                             const plainText = extractPlainText(editor);
 
                             if (!plainText) {
-                                setStatus(field, "Avval hamkorlik tarixi matnini kiriting, keyin Word faylni yuklab oling.", true);
+                                setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.enter_text_first') }}", true);
                                 return;
                             }
 
@@ -296,7 +297,7 @@
                                 }));
 
                             downloadButton.disabled = true;
-                            setStatus(field, 'Word fayl tayyorlanmoqda...');
+                            setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.word_generating') }}");
 
                             try {
                                 const documentFile = new Document({
@@ -318,17 +319,17 @@
                                 link.remove();
                                 URL.revokeObjectURL(url);
 
-                                setStatus(field, 'Word fayl muvaffaqiyatli yuklab olindi.');
+                                setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.word_downloaded') }}");
                             } catch (error) {
                                 console.error(error);
-                                setStatus(field, 'Word faylni yaratishda xatolik yuz berdi.', true);
+                                setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.word_error') }}", true);
                             } finally {
                                 downloadButton.disabled = false;
                             }
                         });
                     }).catch((error) => {
                         console.error(error);
-                        setStatus(field, "Editorni yuklashda xatolik yuz berdi. Oddiy textarea orqali davom etishingiz mumkin.", true);
+                        setStatus(field, "{{ __('ui.pages.partner_organizations.form.history.messages.editor_load_error') }}", true);
                     });
                 });
             });

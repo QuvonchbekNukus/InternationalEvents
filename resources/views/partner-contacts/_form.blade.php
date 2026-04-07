@@ -11,9 +11,9 @@
 
     <div class="form-grid">
         <label class="field field--span-2">
-            <span class="field-label">Hamkor tashkilot</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.partner_organization') }}</span>
             <select name="partner_organization_id" required>
-                <option value="">Hamkor tashkilotni tanlang</option>
+                <option value="">{{ __('ui.pages.partner_contacts.form.placeholders.select_partner_organization') }}</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
                     <option value="{{ $partnerOrganization->id }}" @selected((string) old('partner_organization_id', $partnerContact->partner_organization_id) === (string) $partnerOrganization->id)>
                         {{ $partnerOrganization->display_name }}{{ $partnerOrganization->country?->iso2 ? ' ('.$partnerOrganization->country->iso2.')' : '' }}
@@ -26,23 +26,23 @@
         </label>
 
         <label class="field">
-            <span class="field-label">F.I.Sh (UZ)</span>
-            <input type="text" name="full_name_uz" value="{{ old('full_name_uz', $partnerContact->full_name_uz) }}" placeholder="Aliyev Alisher Anvarovich" required>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.full_name_uz') }}</span>
+            <input type="text" name="full_name_uz" value="{{ old('full_name_uz', $partnerContact->full_name_uz) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.full_name_uz') }}" required>
             @error('full_name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">F.I.Sh (RU)</span>
-            <input type="text" name="full_name_ru" value="{{ old('full_name_ru', $partnerContact->full_name_ru) }}" placeholder="Алиев Алишер Анварович" required>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.full_name_ru') }}</span>
+            <input type="text" name="full_name_ru" value="{{ old('full_name_ru', $partnerContact->full_name_ru) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.full_name_ru') }}" required>
             @error('full_name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Tug'ilgan sana</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.birthday') }}</span>
             <input type="date" name="birthday" value="{{ old('birthday', $partnerContact->birthday?->format('Y-m-d')) }}">
             @error('birthday')
                 <span class="field-error">{{ $message }}</span>
@@ -50,46 +50,46 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Lavozimi (UZ)</span>
-            <input type="text" name="position_uz" value="{{ old('position_uz', $partnerContact->position_uz) }}" placeholder="Bosh mutaxassis">
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.position_uz') }}</span>
+            <input type="text" name="position_uz" value="{{ old('position_uz', $partnerContact->position_uz) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.position_uz') }}">
             @error('position_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Lavozimi (RU)</span>
-            <input type="text" name="position_ru" value="{{ old('position_ru', $partnerContact->position_ru) }}" placeholder="Главный специалист">
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.position_ru') }}</span>
+            <input type="text" name="position_ru" value="{{ old('position_ru', $partnerContact->position_ru) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.position_ru') }}">
             @error('position_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Email</span>
-            <input type="email" name="email" value="{{ old('email', $partnerContact->email) }}" placeholder="contact@example.org">
-            <span class="field-help">Email bazada shifrlangan holda saqlanadi.</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.email') }}</span>
+            <input type="email" name="email" value="{{ old('email', $partnerContact->email) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.email') }}">
+            <span class="field-help">{{ __('ui.pages.partner_contacts.form.help.email_encrypted') }}</span>
             @error('email')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Telefon</span>
-            <input type="text" name="phone" value="{{ old('phone', $partnerContact->phone) }}" placeholder="+998901234567">
-            <span class="field-help">Telefon bazada shifrlangan holda saqlanadi.</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.phone') }}</span>
+            <input type="text" name="phone" value="{{ old('phone', $partnerContact->phone) }}" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.phone') }}">
+            <span class="field-help">{{ __('ui.pages.partner_contacts.form.help.phone_encrypted') }}</span>
             @error('phone')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Foto</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.photo') }}</span>
             <input type="file" name="photo_file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
-            <span class="field-help">Rasm fayli. Maksimal hajm 5 MB.</span>
+            <span class="field-help">{{ __('ui.pages.partner_contacts.form.help.photo_file') }}</span>
             @if ($partnerContact->photoDocument?->file_url)
                 <span class="field-help">
-                    Joriy fayl:
+                    {{ __('ui.pages.partner_contacts.form.help.current_file') }}:
                     <a href="{{ $partnerContact->photoDocument->file_url }}" download="{{ $partnerContact->photoDocument->file_name }}">
                         {{ $partnerContact->photoDocument->file_name }}
                     </a>
@@ -97,20 +97,21 @@
                 <div class="detail-actions-inline">
                     <a class="action-pill" href="{{ route('partner-contacts.attachments.preview', ['partnerContact' => $partnerContact, 'type' => 'photo']) }}" target="_blank" rel="noopener">
                         <i class="material-icons" aria-hidden="true">open_in_new</i>
-                        <span>Ochish</span>
+                        <span>{{ __('ui.common.actions.open') }}</span>
                     </a>
                     <a class="action-pill" href="{{ route('partner-contacts.attachments.download', ['partnerContact' => $partnerContact, 'type' => 'photo']) }}">
                         <i class="material-icons" aria-hidden="true">file_download</i>
-                        <span>Faylni olish</span>
+                        <span>{{ __('ui.common.actions.download_file') }}</span>
                     </a>
                     <button
                         class="action-pill action-pill--danger"
                         type="submit"
                         form="partner-contact-attachment-delete-{{ $partnerContact->id }}-photo"
-                        onclick="return confirm('Joriy fotoni o\\'chirishni tasdiqlaysizmi?')"
+                        data-confirm-message="{{ __('ui.pages.partner_contacts.form.confirm.delete_photo') }}"
+                        onclick="return confirm(this.dataset.confirmMessage)"
                     >
                         <i class="material-icons" aria-hidden="true">delete</i>
-                        <span>Fotoni o'chirish</span>
+                        <span>{{ __('ui.pages.partner_contacts.form.actions.delete_photo') }}</span>
                     </button>
                 </div>
             @endif
@@ -120,12 +121,12 @@
         </label>
 
         <label class="field">
-            <span class="field-label">CV</span>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.cv') }}</span>
             <input type="file" name="cv_file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
-            <span class="field-help">PDF yoki Word hujjati. Maksimal hajm 50 MB.</span>
+            <span class="field-help">{{ __('ui.pages.partner_contacts.form.help.cv_file') }}</span>
             @if ($partnerContact->cvDocument?->file_url)
                 <span class="field-help">
-                    Joriy fayl:
+                    {{ __('ui.pages.partner_contacts.form.help.current_file') }}:
                     <a href="{{ $partnerContact->cvDocument->file_url }}" download="{{ $partnerContact->cvDocument->file_name }}">
                         {{ $partnerContact->cvDocument->file_name }}
                     </a>
@@ -133,20 +134,21 @@
                 <div class="detail-actions-inline">
                     <a class="action-pill" href="{{ route('partner-contacts.attachments.preview', ['partnerContact' => $partnerContact, 'type' => 'cv']) }}" target="_blank" rel="noopener">
                         <i class="material-icons" aria-hidden="true">open_in_new</i>
-                        <span>Ochish</span>
+                        <span>{{ __('ui.common.actions.open') }}</span>
                     </a>
                     <a class="action-pill" href="{{ route('partner-contacts.attachments.download', ['partnerContact' => $partnerContact, 'type' => 'cv']) }}">
                         <i class="material-icons" aria-hidden="true">file_download</i>
-                        <span>Faylni olish</span>
+                        <span>{{ __('ui.common.actions.download_file') }}</span>
                     </a>
                     <button
                         class="action-pill action-pill--danger"
                         type="submit"
                         form="partner-contact-attachment-delete-{{ $partnerContact->id }}-cv"
-                        onclick="return confirm('Joriy CV faylini o\\'chirishni tasdiqlaysizmi?')"
+                        data-confirm-message="{{ __('ui.pages.partner_contacts.form.confirm.delete_cv') }}"
+                        onclick="return confirm(this.dataset.confirmMessage)"
                     >
                         <i class="material-icons" aria-hidden="true">delete</i>
-                        <span>CV ni o'chirish</span>
+                        <span>{{ __('ui.pages.partner_contacts.form.actions.delete_cv') }}</span>
                     </button>
                 </div>
             @endif
@@ -156,8 +158,8 @@
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Izoh</span>
-            <textarea name="description" placeholder="Kontakt bo'yicha qisqa izoh">{{ old('description', $partnerContact->description) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.partner_contacts.form.labels.description') }}</span>
+            <textarea name="description" placeholder="{{ __('ui.pages.partner_contacts.form.placeholders.description') }}">{{ old('description', $partnerContact->description) }}</textarea>
             @error('description')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -166,7 +168,7 @@
         <label class="checkbox-field field--span-2">
             <input type="hidden" name="is_primary" value="0">
             <input type="checkbox" name="is_primary" value="1" @checked($isPrimary)>
-            <span>Ushbu kontakt tashkilotning asosiy kontakti bo'lsin</span>
+            <span>{{ __('ui.pages.partner_contacts.form.labels.is_primary') }}</span>
         </label>
     </div>
 

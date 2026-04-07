@@ -7,16 +7,16 @@
 
     <div class="form-grid">
         <label class="field">
-            <span class="field-label">Nomi (UZ)</span>
-            <input type="text" name="name_uz" value="{{ old('name_uz', $visitType->name_uz) }}" placeholder="Rasmiy tashrif" required>
+            <span class="field-label">{{ __('ui.pages.visit_types.form.labels.name_uz') }}</span>
+            <input type="text" name="name_uz" value="{{ old('name_uz', $visitType->name_uz) }}" placeholder="{{ __('ui.pages.visit_types.form.placeholders.name_uz') }}" required>
             @error('name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (RU)</span>
-            <input type="text" name="name_ru" value="{{ old('name_ru', $visitType->name_ru) }}" placeholder="Официальный визит" required>
+            <span class="field-label">{{ __('ui.pages.visit_types.form.labels.name_ru') }}</span>
+            <input type="text" name="name_ru" value="{{ old('name_ru', $visitType->name_ru) }}" placeholder="{{ __('ui.pages.visit_types.form.placeholders.name_ru') }}" required>
             @error('name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror

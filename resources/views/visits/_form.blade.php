@@ -7,25 +7,25 @@
 
     <div class="form-grid">
         <label class="field field--span-2">
-            <span class="field-label">Sarlavha (UZ)</span>
-            <input type="text" name="title_uz" value="{{ old('title_uz', $visit->title_uz) }}" placeholder="Delegatsiyaning rasmiy tashrifi" required>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.title_uz') }}</span>
+            <input type="text" name="title_uz" value="{{ old('title_uz', $visit->title_uz) }}" placeholder="{{ __('ui.pages.visits.form.placeholders.title_uz') }}" required>
             @error('title_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Sarlavha (RU)</span>
-            <input type="text" name="title_ru" value="{{ old('title_ru', $visit->title_ru) }}" placeholder="Официальный визит делегации" required>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.title_ru') }}</span>
+            <input type="text" name="title_ru" value="{{ old('title_ru', $visit->title_ru) }}" placeholder="{{ __('ui.pages.visits.form.placeholders.title_ru') }}" required>
             @error('title_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Tashrif turi</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.visit_type') }}</span>
             <select name="visit_type_id">
-                <option value="">Biriktirilmagan</option>
+                <option value="">{{ __('ui.common.values.unassigned') }}</option>
                 @foreach ($visitTypes as $visitType)
                     <option value="{{ $visitType->id }}" @selected((string) old('visit_type_id', $visit->visit_type_id) === (string) $visitType->id)>{{ $visitType->display_name }}</option>
                 @endforeach
@@ -36,9 +36,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Davlat</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.country') }}</span>
             <select name="country_id" required data-visit-country-select>
-                <option value="">Davlatni tanlang</option>
+                <option value="">{{ __('ui.pages.visits.form.placeholders.select_country') }}</option>
                 @foreach ($countries as $country)
                     <option value="{{ $country->id }}" @selected((string) old('country_id', $visit->country_id) === (string) $country->id)>{{ $country->display_name }}</option>
                 @endforeach
@@ -49,9 +49,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Hamkor tashkilot</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.partner_organization') }}</span>
             <select name="partner_organization_id" data-visit-organization-select>
-                <option value="">Biriktirilmagan</option>
+                <option value="">{{ __('ui.common.values.unassigned') }}</option>
                 @foreach ($partnerOrganizations as $partnerOrganization)
                     <option
                         value="{{ $partnerOrganization->id }}"
@@ -68,9 +68,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Yo'nalish</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.direction') }}</span>
             <select name="direction">
-                <option value="">Tanlanmagan</option>
+                <option value="">{{ __('ui.pages.visits.form.values.direction_unselected') }}</option>
                 @foreach ($directions as $directionValue => $directionLabel)
                     <option value="{{ $directionValue }}" @selected(old('direction', $visit->direction) === $directionValue)>{{ $directionLabel }}</option>
                 @endforeach
@@ -81,7 +81,7 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Holat</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.status') }}</span>
             <select name="status" required>
                 @foreach ($statuses as $statusValue => $statusLabel)
                     <option value="{{ $statusValue }}" @selected(old('status', $visit->status) === $statusValue)>{{ $statusLabel }}</option>
@@ -93,7 +93,7 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Boshlanish sanasi</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.start_date') }}</span>
             <input type="date" name="start_date" value="{{ old('start_date', $visit->start_date?->format('Y-m-d')) }}" required>
             @error('start_date')
                 <span class="field-error">{{ $message }}</span>
@@ -101,7 +101,7 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Tugash sanasi</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.end_date') }}</span>
             <input type="date" name="end_date" value="{{ old('end_date', $visit->end_date?->format('Y-m-d')) }}">
             @error('end_date')
                 <span class="field-error">{{ $message }}</span>
@@ -109,9 +109,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Javobgar foydalanuvchi</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.responsible_user') }}</span>
             <select name="responsible_user_id">
-                <option value="">Biriktirilmagan</option>
+                <option value="">{{ __('ui.common.values.unassigned') }}</option>
                 @foreach ($responsibleUsers as $responsibleUser)
                     <option value="{{ $responsibleUser->id }}" @selected((string) old('responsible_user_id', $visit->responsible_user_id) === (string) $responsibleUser->id)>{{ $responsibleUser->full_name }}</option>
                 @endforeach
@@ -122,9 +122,9 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Javobgar bo'lim</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.responsible_department') }}</span>
             <select name="responsible_department_id">
-                <option value="">Biriktirilmagan</option>
+                <option value="">{{ __('ui.common.values.unassigned') }}</option>
                 @foreach ($responsibleDepartments as $responsibleDepartment)
                     <option value="{{ $responsibleDepartment->id }}" @selected((string) old('responsible_department_id', $visit->responsible_department_id) === (string) $responsibleDepartment->id)>{{ $responsibleDepartment->display_name }}</option>
                 @endforeach
@@ -135,16 +135,16 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Shahar</span>
-            <input type="text" name="city" value="{{ old('city', $visit->city) }}" placeholder="Toshkent">
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.city') }}</span>
+            <input type="text" name="city" value="{{ old('city', $visit->city) }}" placeholder="{{ __('ui.pages.visits.form.placeholders.city') }}">
             @error('city')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Manzil</span>
-            <input type="text" name="address" value="{{ old('address', $visit->address) }}" placeholder="Amir Temur ko'chasi, 10-uy">
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.address') }}</span>
+            <input type="text" name="address" value="{{ old('address', $visit->address) }}" placeholder="{{ __('ui.pages.visits.form.placeholders.address') }}">
             @error('address')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -167,54 +167,54 @@
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Tashrif maqsadi (UZ)</span>
-            <textarea name="purpose_uz" placeholder="Tashrifdan ko'zlangan asosiy maqsad">{{ old('purpose_uz', $visit->purpose_uz) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.purpose_uz') }}</span>
+            <textarea name="purpose_uz" placeholder="{{ __('ui.pages.visits.form.placeholders.purpose_uz') }}">{{ old('purpose_uz', $visit->purpose_uz) }}</textarea>
             @error('purpose_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Tashrif maqsadi (RU)</span>
-            <textarea name="purpose_ru" placeholder="Цель визита">{{ old('purpose_ru', $visit->purpose_ru) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.purpose_ru') }}</span>
+            <textarea name="purpose_ru" placeholder="{{ __('ui.pages.visits.form.placeholders.purpose_ru') }}">{{ old('purpose_ru', $visit->purpose_ru) }}</textarea>
             @error('purpose_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Natija (UZ)</span>
-            <textarea name="result_summary_uz" placeholder="Tashrif yakunidagi asosiy natijalar">{{ old('result_summary_uz', $visit->result_summary_uz) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.result_summary_uz') }}</span>
+            <textarea name="result_summary_uz" placeholder="{{ __('ui.pages.visits.form.placeholders.result_summary_uz') }}">{{ old('result_summary_uz', $visit->result_summary_uz) }}</textarea>
             @error('result_summary_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Natija (RU)</span>
-            <textarea name="result_summary_ru" placeholder="Итоги визита">{{ old('result_summary_ru', $visit->result_summary_ru) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.result_summary_ru') }}</span>
+            <textarea name="result_summary_ru" placeholder="{{ __('ui.pages.visits.form.placeholders.result_summary_ru') }}">{{ old('result_summary_ru', $visit->result_summary_ru) }}</textarea>
             @error('result_summary_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Qo'shimcha ma'lumot</span>
-            <textarea name="description" placeholder="Protokol, logistika yoki boshqa izohlar">{{ old('description', $visit->description) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.description') }}</span>
+            <textarea name="description" placeholder="{{ __('ui.pages.visits.form.placeholders.description') }}">{{ old('description', $visit->description) }}</textarea>
             @error('description')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Biriktiriladigan fayllar</span>
+            <span class="field-label">{{ __('ui.pages.visits.form.labels.files') }}</span>
             <input
                 type="file"
                 name="visit_files[]"
                 accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.svg,.pdf,.doc,.docx,image/jpeg,image/png,image/gif,image/webp,image/bmp,image/svg+xml,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 multiple
             >
-            <span class="field-help">Tashrifga oid rasm, PDF yoki Word fayllarini bir nechta tanlashingiz mumkin. Maksimal hajm har bir fayl uchun 50 MB. Tahrirlashda yangi fayl tanlansa, mavjud biriktirmalar almashtiriladi, kerak bo'lsa pastdan alohida o'chirish ham mumkin.</span>
+            <span class="field-help">{{ __('ui.pages.visits.form.files.help') }}</span>
             @error('visit_files')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -228,11 +228,11 @@
                     $otherDocuments = $documents->reject(fn ($document) => $document->is_image && $document->file_url);
                 @endphp
 
-                <span class="field-help">Mavjud biriktirmalar:</span>
+                <span class="field-help">{{ __('ui.pages.visits.form.files.existing') }}</span>
 
                 @if ($imageDocuments->isNotEmpty())
                     <div class="attachment-section">
-                        <p class="attachment-section__label">Rasmlar</p>
+                        <p class="attachment-section__label">{{ __('ui.pages.visits.form.files.images_section') }}</p>
 
                         <div class="stack-list">
                             @foreach ($imageDocuments as $document)
@@ -251,7 +251,7 @@
                                         <div class="detail-media__body">
                                             <strong>{{ $document->file_name }}</strong>
                                             <span>
-                                                {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                                {{ strtoupper($document->file_ext ?: __('ui.pages.visits.form.files.file_fallback')) }}
                                                 @if ($document->file_size_human)
                                                     {{ ' | '.$document->file_size_human }}
                                                 @endif
@@ -260,20 +260,21 @@
                                             <div class="detail-actions-inline">
                                                 <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
                                                     <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                                    <span>Ochish</span>
+                                                    <span>{{ __('ui.common.actions.open') }}</span>
                                                 </a>
                                                 <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
                                                     <i class="material-icons" aria-hidden="true">file_download</i>
-                                                    <span>Faylni olish</span>
+                                                    <span>{{ __('ui.common.actions.download_file') }}</span>
                                                 </a>
                                                 <button
                                                     class="action-pill action-pill--danger"
                                                     type="submit"
                                                     form="{{ $deleteFormId }}"
-                                                    onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                                    data-confirm-message="{{ __('ui.pages.visits.form.files.confirm_delete') }}"
+                                                    onclick="return confirm(this.dataset.confirmMessage)"
                                                 >
                                                     <i class="material-icons" aria-hidden="true">delete</i>
-                                                    <span>Faylni o'chirish</span>
+                                                    <span>{{ __('ui.common.actions.delete_file') }}</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -286,7 +287,7 @@
 
                 @if ($otherDocuments->isNotEmpty())
                     <div class="attachment-section">
-                        <p class="attachment-section__label">Fayllar</p>
+                        <p class="attachment-section__label">{{ __('ui.pages.visits.form.files.files_section') }}</p>
 
                         <div class="stack-list">
                             @foreach ($otherDocuments as $document)
@@ -294,7 +295,7 @@
                                     @php($deleteFormId = "visit-attachment-delete-{$visit->id}-{$document->id}")
                                     <strong>{{ $document->file_name }}</strong>
                                     <span>
-                                        {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                        {{ strtoupper($document->file_ext ?: __('ui.pages.visits.form.files.file_fallback')) }}
                                         @if ($document->file_size_human)
                                             {{ ' | '.$document->file_size_human }}
                                         @endif
@@ -303,20 +304,21 @@
                                         <div class="detail-actions-inline">
                                             <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
                                                 <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                                <span>Ochish</span>
+                                                <span>{{ __('ui.common.actions.open') }}</span>
                                             </a>
                                             <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
                                                 <i class="material-icons" aria-hidden="true">file_download</i>
-                                                <span>Faylni olish</span>
+                                                <span>{{ __('ui.common.actions.download_file') }}</span>
                                             </a>
                                             <button
                                                 class="action-pill action-pill--danger"
                                                 type="submit"
                                                 form="{{ $deleteFormId }}"
-                                                onclick="return confirm('Ushbu biriktirilgan faylni o\\'chirishni tasdiqlaysizmi?')"
+                                                data-confirm-message="{{ __('ui.pages.visits.form.files.confirm_delete') }}"
+                                                onclick="return confirm(this.dataset.confirmMessage)"
                                             >
                                                 <i class="material-icons" aria-hidden="true">delete</i>
-                                                <span>Faylni o'chirish</span>
+                                                <span>{{ __('ui.common.actions.delete_file') }}</span>
                                             </button>
                                         </div>
                                     @endif

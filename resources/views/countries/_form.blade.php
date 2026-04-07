@@ -7,16 +7,16 @@
 
     <div class="form-grid">
         <label class="field">
-            <span class="field-label">Nomi (RU)</span>
-            <input type="text" name="name_ru" value="{{ old('name_ru', $country->name_ru) }}" placeholder="Казахстан" required>
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.name_ru') }}</span>
+            <input type="text" name="name_ru" value="{{ old('name_ru', $country->name_ru) }}" placeholder="{{ __('ui.pages.countries.form.placeholders.name_ru') }}" required>
             @error('name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (UZ)</span>
-            <input type="text" name="name_uz" value="{{ old('name_uz', $country->name_uz) }}" placeholder="Qozog'iston">
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.name_uz') }}</span>
+            <input type="text" name="name_uz" value="{{ old('name_uz', $country->name_uz) }}" placeholder="{{ __('ui.pages.countries.form.placeholders.name_uz') }}">
             @error('name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -39,16 +39,16 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Mintaqa (RU)</span>
-            <input type="text" name="region_ru" value="{{ old('region_ru', $country->region_ru) }}" placeholder="Центральная Азия">
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.region_ru') }}</span>
+            <input type="text" name="region_ru" value="{{ old('region_ru', $country->region_ru) }}" placeholder="{{ __('ui.pages.countries.form.placeholders.region_ru') }}">
             @error('region_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Mintaqa (UZ)</span>
-            <input type="text" name="region_uz" value="{{ old('region_uz', $country->region_uz) }}" placeholder="Markaziy Osiyo">
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.region_uz') }}</span>
+            <input type="text" name="region_uz" value="{{ old('region_uz', $country->region_uz) }}" placeholder="{{ __('ui.pages.countries.form.placeholders.region_uz') }}">
             @error('region_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
@@ -71,7 +71,7 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Hamkorlik holati</span>
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.cooperation_status') }}</span>
             <select name="cooperation_status" required>
                 @foreach ($statuses as $statusValue => $statusLabel)
                     <option value="{{ $statusValue }}" @selected(old('cooperation_status', $country->cooperation_status) === $statusValue)>{{ $statusLabel }}</option>
@@ -83,8 +83,8 @@
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Izoh</span>
-            <textarea name="notes" placeholder="Hamkorlikning qisqa tavsifi">{{ old('notes', $country->notes) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.notes') }}</span>
+            <textarea name="notes" placeholder="{{ __('ui.pages.countries.form.placeholders.notes') }}">{{ old('notes', $country->notes) }}</textarea>
             @error('notes')
                 <span class="field-error">{{ $message }}</span>
             @enderror

@@ -8,7 +8,7 @@
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.partner_contacts')]) }}</p>
                 <h1 class="page-title">{{ $partnerContact->display_name }}</h1>
-                <p class="page-subtitle">Hamkor kontaktning to'liq profili, tashkilot bog'lanishi va biriktirilgan foto hamda CV fayllari shu sahifada ko'rinadi.</p>
+                <p class="page-subtitle">{{ __('ui.pages.partner_contacts.show.subtitle') }}</p>
             </div>
 
             <div class="form-actions">
@@ -30,8 +30,8 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Profil</p>
-                        <h2 class="section-title">Foto va asosiy ko'rinish</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_contacts.show.eyebrows.profile') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_contacts.show.sections.photo_profile') }}</h2>
                     </div>
                 </div>
 
@@ -52,24 +52,24 @@
 
                     <div class="detail-media__body">
                         <strong>{{ $partnerContact->display_name }}</strong>
-                        <span>{{ $partnerContact->display_position ?: "Lavozim ko'rsatilmagan" }}</span>
-                        <span>{{ $partnerContact->birthday?->format('d.m.Y') ?: "Tug'ilgan sana kiritilmagan" }}</span>
+                        <span>{{ $partnerContact->display_position ?: __('ui.pages.partner_contacts.show.values.position_missing') }}</span>
+                        <span>{{ $partnerContact->birthday?->format('d.m.Y') ?: __('ui.pages.partner_contacts.show.values.birthday_missing') }}</span>
                         <div class="detail-actions-inline">
                             <span class="status-pill {{ $partnerContact->is_primary ? 'is-active' : 'is-muted' }}">
-                                {{ $partnerContact->is_primary ? 'Asosiy kontakt' : 'Oddiy kontakt' }}
+                                {{ $partnerContact->is_primary ? __('ui.pages.partner_contacts.show.values.primary_contact') : __('ui.pages.partner_contacts.show.values.regular_contact') }}
                             </span>
 
                             @if ($partnerContact->photoDocument?->file_url)
                                 <a class="action-pill" href="{{ $partnerContact->photoDocument->file_url }}" target="_blank" rel="noopener">
                                     <i class="material-icons" aria-hidden="true">image</i>
-                                    <span>Foto</span>
+                                    <span>{{ __('ui.pages.partner_contacts.show.values.photo') }}</span>
                                 </a>
                             @endif
 
                             @if ($partnerContact->cvDocument?->file_url)
                                 <a class="action-pill" href="{{ $partnerContact->cvDocument->file_url }}" target="_blank" rel="noopener">
                                     <i class="material-icons" aria-hidden="true">description</i>
-                                    <span>CV</span>
+                                    <span>{{ __('ui.pages.partner_contacts.show.values.cv') }}</span>
                                 </a>
                             @endif
                         </div>
@@ -80,62 +80,62 @@
             <section class="content-card detail-card">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Bog'lanish</p>
-                        <h2 class="section-title">Aloqa va tashkilot</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_contacts.show.eyebrows.connection') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_contacts.show.sections.contact_organization') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Tashkilot</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.organization') }}</span>
                         <strong>
                             @if ($partnerContact->partnerOrganization && auth()->user()?->can('view partner organizations'))
                                 <a class="row-title-link" href="{{ route('partner-organizations.show', $partnerContact->partnerOrganization) }}">
                                     {{ $partnerContact->partnerOrganization->display_name }}
                                 </a>
                             @else
-                                {{ $partnerContact->partnerOrganization?->display_name ?: "Tashkilot biriktirilmagan" }}
+                                {{ $partnerContact->partnerOrganization?->display_name ?: __('ui.pages.partner_contacts.show.values.organization_missing') }}
                             @endif
                         </strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Davlat</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.country') }}</span>
                         <strong>
                             @if ($partnerContact->partnerOrganization?->country && auth()->user()?->can('view countries'))
                                 <a class="row-title-link" href="{{ route('countries.show', $partnerContact->partnerOrganization->country) }}">
                                     {{ $partnerContact->partnerOrganization->country->display_name }}
                                 </a>
                             @else
-                                {{ $partnerContact->partnerOrganization?->country?->display_name ?: "Davlat ko'rsatilmagan" }}
+                                {{ $partnerContact->partnerOrganization?->country?->display_name ?: __('ui.pages.partner_contacts.show.values.country_missing') }}
                             @endif
                         </strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Email</span>
-                        <strong>{{ $partnerContact->email ?: "Email kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.email') }}</span>
+                        <strong>{{ $partnerContact->email ?: __('ui.pages.partner_contacts.show.values.email_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Telefon</span>
-                        <strong>{{ $partnerContact->phone ?: "Telefon kiritilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.phone') }}</span>
+                        <strong>{{ $partnerContact->phone ?: __('ui.pages.partner_contacts.show.values.phone_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Tashkilot turi</span>
-                        <strong>{{ $partnerContact->partnerOrganization?->organizationType?->display_name ?: "Tur ko'rsatilmagan" }}</strong>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.organization_type') }}</span>
+                        <strong>{{ $partnerContact->partnerOrganization?->organizationType?->display_name ?: __('ui.pages.partner_contacts.show.values.type_missing') }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Tashkilot sayti</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.organization_website') }}</span>
                         <strong>
                             @if ($partnerContact->partnerOrganization?->website_url)
                                 <a class="row-title-link" href="{{ $partnerContact->partnerOrganization->website_url }}" target="_blank" rel="noreferrer">
                                     {{ $partnerContact->partnerOrganization->website }}
                                 </a>
                             @else
-                                Sayt ko'rsatilmagan
+                                {{ __('ui.pages.partner_contacts.show.values.website_missing') }}
                             @endif
                         </strong>
                     </article>
@@ -145,24 +145,24 @@
             <section class="content-card detail-card detail-card--full">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Biriktirilgan fayllar</p>
-                        <h2 class="section-title">Foto va CV tafsilotlari</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_contacts.show.eyebrows.attachments') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_contacts.show.sections.photo_cv_details') }}</h2>
                     </div>
                 </div>
 
                 <div class="stack-list">
                     <article class="stack-list__item">
-                        <strong>{{ $partnerContact->photoDocument?->display_title ?: "Foto biriktirilmagan" }}</strong>
+                        <strong>{{ $partnerContact->photoDocument?->display_title ?: __('ui.pages.partner_contacts.show.values.photo_missing') }}</strong>
                         <span>
                             @if ($partnerContact->photoDocument)
                                 {{ $partnerContact->photoDocument->file_name }}
                                 {{ ' | ' }}
-                                {{ strtoupper($partnerContact->photoDocument->file_ext ?: 'fayl') }}
+                                {{ strtoupper($partnerContact->photoDocument->file_ext ?: __('ui.pages.partner_contacts.show.values.file')) }}
                                 @if ($partnerContact->photoDocument->file_size_human)
                                     {{ ' | '.$partnerContact->photoDocument->file_size_human }}
                                 @endif
                             @else
-                                Kontakt uchun foto hujjati mavjud emas.
+                                {{ __('ui.pages.partner_contacts.show.values.photo_document_missing') }}
                             @endif
                         </span>
                         @if ($partnerContact->photoDocument)
@@ -170,11 +170,11 @@
                                 @if ($partnerContact->photoDocument->file_url)
                                     <a class="action-pill" href="{{ $partnerContact->photoDocument->file_url }}" target="_blank" rel="noopener">
                                         <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                        <span>Ochish</span>
+                                        <span>{{ __('ui.common.actions.open') }}</span>
                                     </a>
                                     <a class="action-pill" href="{{ $partnerContact->photoDocument->file_url }}" download="{{ $partnerContact->photoDocument->file_name }}">
                                         <i class="material-icons" aria-hidden="true">file_download</i>
-                                        <span>Faylni olish</span>
+                                        <span>{{ __('ui.common.actions.download_file') }}</span>
                                     </a>
                                 @endif
                             </div>
@@ -182,17 +182,17 @@
                     </article>
 
                     <article class="stack-list__item">
-                        <strong>{{ $partnerContact->cvDocument?->display_title ?: "CV biriktirilmagan" }}</strong>
+                        <strong>{{ $partnerContact->cvDocument?->display_title ?: __('ui.pages.partner_contacts.show.values.cv_missing') }}</strong>
                         <span>
                             @if ($partnerContact->cvDocument)
                                 {{ $partnerContact->cvDocument->file_name }}
                                 {{ ' | ' }}
-                                {{ strtoupper($partnerContact->cvDocument->file_ext ?: 'fayl') }}
+                                {{ strtoupper($partnerContact->cvDocument->file_ext ?: __('ui.pages.partner_contacts.show.values.file')) }}
                                 @if ($partnerContact->cvDocument->file_size_human)
                                     {{ ' | '.$partnerContact->cvDocument->file_size_human }}
                                 @endif
                             @else
-                                Kontakt uchun CV hujjati mavjud emas.
+                                {{ __('ui.pages.partner_contacts.show.values.cv_document_missing') }}
                             @endif
                         </span>
                         @if ($partnerContact->cvDocument)
@@ -200,11 +200,11 @@
                                 @if ($partnerContact->cvDocument->file_url)
                                     <a class="action-pill" href="{{ $partnerContact->cvDocument->file_url }}" target="_blank" rel="noopener">
                                         <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                        <span>Ochish</span>
+                                        <span>{{ __('ui.common.actions.open') }}</span>
                                     </a>
                                     <a class="action-pill" href="{{ $partnerContact->cvDocument->file_url }}" download="{{ $partnerContact->cvDocument->file_name }}">
                                         <i class="material-icons" aria-hidden="true">file_download</i>
-                                        <span>Faylni olish</span>
+                                        <span>{{ __('ui.common.actions.download_file') }}</span>
                                     </a>
                                 @endif
                             </div>
@@ -216,25 +216,25 @@
             <section class="content-card detail-card detail-card--full">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Qo'shimcha</p>
-                        <h2 class="section-title">Til variantlari va izoh</h2>
+                        <p class="eyebrow">{{ __('ui.pages.partner_contacts.show.eyebrows.additional') }}</p>
+                        <h2 class="section-title">{{ __('ui.pages.partner_contacts.show.sections.language_description') }}</h2>
                     </div>
                 </div>
 
                 <div class="detail-list">
                     <article class="detail-list__item">
-                        <span class="detail-list__label">F.I.Sh variantlari</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.full_name_variants') }}</span>
                         <strong>{{ $partnerContact->full_name_ru ?: '-' }}</strong>
                     </article>
 
                     <article class="detail-list__item">
-                        <span class="detail-list__label">Lavozim variantlari</span>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.position_variants') }}</span>
                         <strong>{{ $partnerContact->position_ru ?: '-' }}</strong>
                     </article>
 
                     <article class="detail-list__item detail-list__item--full">
-                        <span class="detail-list__label">Izoh</span>
-                        <p class="detail-note">{{ $partnerContact->description ?: "Qo'shimcha izoh kiritilmagan." }}</p>
+                        <span class="detail-list__label">{{ __('ui.pages.partner_contacts.show.labels.description') }}</span>
+                        <p class="detail-note">{{ $partnerContact->description ?: __('ui.common.values.no_additional_info') }}</p>
                     </article>
                 </div>
             </section>

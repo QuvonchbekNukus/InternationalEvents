@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', "Yangi bo'lim")
+@section('title', __('ui.pages.departments.create.title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.departments')]) }}</p>
-                <h1 class="page-title">Yangi bo'lim</h1>
-                <p class="page-subtitle">Yangi tarkibiy bo'limni yaratib, qisqa kodi va tavsifini kiriting.</p>
+                <h1 class="page-title">{{ __('ui.pages.departments.create.title') }}</h1>
+                <p class="page-subtitle">{{ __('ui.pages.departments.create.subtitle') }}</p>
             </div>
         </div>
 
         @include('departments._form', [
             'action' => route('departments.store'),
             'method' => 'POST',
-            'submitLabel' => 'Saqlash',
+            'submitLabel' => __('ui.common.actions.save'),
         ])
     </div>
 @endsection

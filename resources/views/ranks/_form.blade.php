@@ -7,16 +7,16 @@
 
     <div class="form-grid">
         <label class="field">
-            <span class="field-label">Nomi (UZ)</span>
-            <input type="text" name="name_uz" value="{{ old('name_uz', $rank->name_uz) }}" placeholder="Leytenant" required>
+            <span class="field-label">{{ __('ui.pages.ranks.form.labels.name_uz') }}</span>
+            <input type="text" name="name_uz" value="{{ old('name_uz', $rank->name_uz) }}" placeholder="{{ __('ui.pages.ranks.form.placeholders.name_uz') }}" required>
             @error('name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (RU)</span>
-            <input type="text" name="name_ru" value="{{ old('name_ru', $rank->name_ru) }}" placeholder="Лейтенант" required>
+            <span class="field-label">{{ __('ui.pages.ranks.form.labels.name_ru') }}</span>
+            <input type="text" name="name_ru" value="{{ old('name_ru', $rank->name_ru) }}" placeholder="{{ __('ui.pages.ranks.form.placeholders.name_ru') }}" required>
             @error('name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror

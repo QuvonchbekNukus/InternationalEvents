@@ -8,32 +8,32 @@
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.ranks')]) }}</p>
                 <h1 class="page-title">{{ __('ui.sidebar.ranks') }}</h1>
-                <p class="page-subtitle">Foydalanuvchilarga biriktiriladigan harbiy unvonlar ro'yxati.</p>
+                <p class="page-subtitle">{{ __('ui.pages.ranks.index.subtitle') }}</p>
             </div>
 
             @can('create ranks')
                 <a class="btn btn--primary is-create-action" href="{{ route('ranks.create') }}">
                     <i class="material-icons" aria-hidden="true">add</i>
-                    <span>Yangi unvon</span>
+                    <span>{{ __('ui.pages.ranks.index.create_action') }}</span>
                 </a>
             @endcan
         </div>
 
         <form class="toolbar" method="GET" action="{{ route('ranks.index') }}">
-            <label class="toolbar-search" aria-label="Unvon qidirish">
+            <label class="toolbar-search" aria-label="{{ __('ui.pages.ranks.index.search_label') }}">
                 <i class="material-icons" aria-hidden="true">search</i>
-                <input type="text" name="search" value="{{ $search }}" placeholder="Unvon nomini qidiring">
+                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('ui.pages.ranks.index.search_placeholder') }}">
             </label>
 
             <button class="btn btn--ghost" type="submit">
                 <i class="material-icons" aria-hidden="true">filter_list</i>
-                <span>Qidirish</span>
+                <span>{{ __('ui.pages.ranks.index.search_action') }}</span>
             </button>
 
             @if ($search !== '')
                 <a class="btn btn--ghost" href="{{ route('ranks.index') }}">
                     <i class="material-icons" aria-hidden="true">refresh</i>
-                    <span>Tozalash</span>
+                    <span>{{ __('ui.common.actions.clear') }}</span>
                 </a>
             @endif
         </form>
@@ -43,9 +43,9 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Unvon</th>
-                            <th>Ruscha</th>
-                            <th>Xodimlar</th>
+                            <th>{{ __('ui.pages.ranks.index.headers.rank') }}</th>
+                            <th>{{ __('ui.pages.ranks.index.headers.russian') }}</th>
+                            <th>{{ __('ui.pages.ranks.index.headers.users') }}</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -59,25 +59,30 @@
                                     <span class="row-subtitle">{{ $rank->name_ru }}</span>
                                 </td>
                                 <td>
-                                    <span class="badge">{{ $rank->users_count }} ta</span>
+                                    <span class="badge">{{ __('ui.pages.ranks.index.values.user_count', ['count' => $rank->users_count]) }}</span>
                                 </td>
                                 <td>
                                     <div class="row-actions">
                                         @can('edit ranks')
                                             <a class="action-pill" href="{{ route('ranks.edit', $rank) }}">
                                                 <i class="material-icons" aria-hidden="true">edit</i>
-                                                <span>Tahrirlash</span>
+                                                <span>{{ __('ui.common.actions.edit') }}</span>
                                             </a>
                                         @endcan
 
                                         @can('delete ranks')
-                                            <form method="POST" action="{{ route('ranks.destroy', $rank) }}" onsubmit="return confirm('Ushbu unvonni ochirishni tasdiqlaysizmi?');">
+                                            <form
+                                                method="POST"
+                                                action="{{ route('ranks.destroy', $rank) }}"
+                                                data-confirm-message="{{ __('ui.pages.ranks.index.confirm_delete') }}"
+                                                onsubmit="return confirm(this.dataset.confirmMessage);"
+                                            >
                                                 @csrf
                                                 @method('DELETE')
 
                                                 <button class="action-pill action-pill--danger" type="submit">
                                                     <i class="material-icons" aria-hidden="true">delete</i>
-                                                    <span>O'chirish</span>
+                                                    <span>{{ __('ui.common.actions.delete') }}</span>
                                                 </button>
                                             </form>
                                         @endcan
@@ -89,7 +94,7 @@
                 </table>
             @else
                 <div class="table-empty">
-                    Unvonlar hali yaratilmagan. Yangi unvon qoshing yoki qidiruvni tozalang.
+                    {{ __('ui.pages.ranks.index.empty') }}
                 </div>
             @endif
 

@@ -1,21 +1,21 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Yangi foydalanuvchi')
+@section('title', __('ui.pages.users.create.title'))
 
 @section('content')
     <div class="page-section">
         <div class="page-header">
             <div>
                 <p class="eyebrow">{{ __('ui.common.eyebrows.crud', ['module' => __('ui.sidebar.users')]) }}</p>
-                <h1 class="page-title">Yangi foydalanuvchi</h1>
-                <p class="page-subtitle">Telefon raqami, rol, bo'lim va unvonni ko'rsatib yangi foydalanuvchi yarating.</p>
+                <h1 class="page-title">{{ __('ui.pages.users.create.title') }}</h1>
+                <p class="page-subtitle">{{ __('ui.pages.users.create.subtitle') }}</p>
             </div>
         </div>
 
         @include('users._form', [
             'action' => route('users.store'),
             'method' => 'POST',
-            'submitLabel' => 'Saqlash',
+            'submitLabel' => __('ui.common.actions.save'),
         ])
     </div>
 @endsection

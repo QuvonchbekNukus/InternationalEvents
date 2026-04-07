@@ -7,23 +7,23 @@
 
     <div class="form-grid">
         <label class="field">
-            <span class="field-label">Nomi (UZ)</span>
-            <input type="text" name="name_uz" value="{{ old('name_uz', $department->name_uz) }}" placeholder="Xalqaro aloqalar boshqarmasi" required>
+            <span class="field-label">{{ __('ui.pages.departments.form.labels.name_uz') }}</span>
+            <input type="text" name="name_uz" value="{{ old('name_uz', $department->name_uz) }}" placeholder="{{ __('ui.pages.departments.form.placeholders.name_uz') }}" required>
             @error('name_uz')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Nomi (RU)</span>
-            <input type="text" name="name_ru" value="{{ old('name_ru', $department->name_ru) }}" placeholder="Управление международных связей" required>
+            <span class="field-label">{{ __('ui.pages.departments.form.labels.name_ru') }}</span>
+            <input type="text" name="name_ru" value="{{ old('name_ru', $department->name_ru) }}" placeholder="{{ __('ui.pages.departments.form.placeholders.name_ru') }}" required>
             @error('name_ru')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>
 
         <label class="field">
-            <span class="field-label">Kod</span>
+            <span class="field-label">{{ __('ui.pages.departments.form.labels.code') }}</span>
             <input type="text" name="code" value="{{ old('code', $department->code) }}" placeholder="XAB">
             @error('code')
                 <span class="field-error">{{ $message }}</span>
@@ -31,8 +31,8 @@
         </label>
 
         <label class="field field--span-2">
-            <span class="field-label">Tavsif</span>
-            <textarea name="description" placeholder="Bo'limning vazifasi va yo'nalishi">{{ old('description', $department->description) }}</textarea>
+            <span class="field-label">{{ __('ui.pages.departments.form.labels.description') }}</span>
+            <textarea name="description" placeholder="{{ __('ui.pages.departments.form.placeholders.description') }}">{{ old('description', $department->description) }}</textarea>
             @error('description')
                 <span class="field-error">{{ $message }}</span>
             @enderror
