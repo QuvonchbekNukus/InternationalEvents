@@ -218,14 +218,14 @@
                 </div>
 
                 <div class="dashboard-calendar-card__toolbar">
-                    <div class="dashboard-calendar-card__filter-layout" aria-label="Tadbirlar moduli filterlari">
+                    <div class="dashboard-calendar-card__filter-layout" aria-label="{{ __('ui.dashboard.calendar.filters_layout_aria') }}">
                         <div class="dashboard-calendar-card__filter-group">
                             <div class="dashboard-calendar-card__filter-head">
                                 <div>
-                                    <p class="dashboard-calendar-card__filter-label">Turlar</p>
+                                    <p class="dashboard-calendar-card__filter-label">{{ __('ui.dashboard.calendar.types_label') }}</p>
                                 </div>
                             </div>
-                            <div class="dashboard-calendar-card__filters dashboard-calendar-card__filters--type" role="group" aria-label="Turlar bo'yicha filterlar">
+                            <div class="dashboard-calendar-card__filters dashboard-calendar-card__filters--type" role="group" aria-label="{{ __('ui.dashboard.calendar.types_filters_aria') }}">
                                 @foreach ($eventCalendar['filters']['types'] ?? [] as $filter)
                                     <button
                                         class="dashboard-calendar-card__filter dashboard-calendar-card__filter--type"

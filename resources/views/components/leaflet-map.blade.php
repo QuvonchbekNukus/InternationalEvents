@@ -9,8 +9,8 @@
     'maxZoom' => 18,
     'markers' => [],
     'chips' => [],
-    'tileUrl' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    'tileAttribution' => '&copy; OpenStreetMap contributors',
+    'tileUrl' => '',
+    'tileAttribution' => '',
 ])
 
 @php

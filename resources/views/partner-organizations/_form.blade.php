@@ -191,8 +191,6 @@
 
 @once
     @push('scripts')
-        <script src="https://cdn.jsdelivr.net/npm/tinymce@8.3.2/tinymce.min.js" referrerpolicy="origin"></script>
-        <script src="https://unpkg.com/docx@9.6.1/dist/index.umd.cjs"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const editorFields = document.querySelectorAll('[data-partnership-history-field]');

@@ -57,8 +57,6 @@ class PartnerContact extends Model
     {
         return [
             'birthday' => 'date',
-            'email' => 'encrypted',
-            'phone' => 'encrypted',
             'is_primary' => 'boolean',
         ];
     }

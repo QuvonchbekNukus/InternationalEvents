@@ -64,8 +64,10 @@ function buildMap(block) {
     const minZoom = Number.isFinite(Number(config.minZoom)) ? Number(config.minZoom) : 2;
     const maxZoom = Number.isFinite(Number(config.maxZoom)) ? Number(config.maxZoom) : 18;
     const markers = Array.isArray(config.markers) ? config.markers : [];
-    const tileUrl = config.tileUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const tileAttribution = config.tileAttribution || '&copy; OpenStreetMap contributors';
+    const tileUrl = typeof config.tileUrl === 'string' && config.tileUrl.trim() !== ''
+        ? config.tileUrl
+        : null;
+    const tileAttribution = typeof config.tileAttribution === 'string' ? config.tileAttribution : '';
 
     const map = L.map(canvas, {
         center,
@@ -76,10 +78,12 @@ function buildMap(block) {
         attributionControl: true,
     });
 
-    L.tileLayer(tileUrl, {
-        attribution: tileAttribution,
-        maxZoom,
-    }).addTo(map);
+    if (tileUrl) {
+        L.tileLayer(tileUrl, {
+            attribution: tileAttribution,
+            maxZoom,
+        }).addTo(map);
+    }
 
     const bounds = [];
 
