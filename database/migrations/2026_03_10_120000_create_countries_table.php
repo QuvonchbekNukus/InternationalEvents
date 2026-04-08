@@ -19,12 +19,10 @@ return new class extends Migration
             $table->string('iso3', 3)->nullable()->unique();
             $table->string('region_ru')->nullable();
             $table->string('region_uz')->nullable();
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
-            $table->decimal('default_zoom', 4, 1)->nullable();
             $table->enum('cooperation_status', ['faol', 'rejada', 'tugatilgan'])->default('faol');
             $table->string('boundary_geojson_path')->nullable();
             $table->string('flag_path')->nullable();
+            $table->text('partnership_history')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

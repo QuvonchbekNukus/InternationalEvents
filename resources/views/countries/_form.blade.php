@@ -55,22 +55,6 @@
         </label>
 
         <label class="field">
-            <span class="field-label">Latitude</span>
-            <input type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $country->latitude) }}" placeholder="48.0196000">
-            @error('latitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
-            <span class="field-label">Longitude</span>
-            <input type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $country->longitude) }}" placeholder="66.9237000">
-            @error('longitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
             <span class="field-label">{{ __('ui.pages.countries.form.labels.cooperation_status') }}</span>
             <select name="cooperation_status" required>
                 @foreach ($statuses as $statusValue => $statusLabel)
@@ -78,6 +62,14 @@
                 @endforeach
             </select>
             @error('cooperation_status')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+        </label>
+
+        <label class="field field--span-2">
+            <span class="field-label">{{ __('ui.pages.countries.form.labels.partnership_history') }}</span>
+            <textarea name="partnership_history" placeholder="{{ __('ui.pages.countries.form.placeholders.partnership_history') }}">{{ old('partnership_history', $country->partnership_history) }}</textarea>
+            @error('partnership_history')
                 <span class="field-error">{{ $message }}</span>
             @enderror
         </label>

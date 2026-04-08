@@ -150,22 +150,6 @@
             @enderror
         </label>
 
-        <label class="field">
-            <span class="field-label">Latitude</span>
-            <input type="number" step="0.0000001" name="latitude" value="{{ old('latitude', $visit->latitude) }}" placeholder="41.3110810">
-            @error('latitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
-        <label class="field">
-            <span class="field-label">Longitude</span>
-            <input type="number" step="0.0000001" name="longitude" value="{{ old('longitude', $visit->longitude) }}" placeholder="69.2405620">
-            @error('longitude')
-                <span class="field-error">{{ $message }}</span>
-            @enderror
-        </label>
-
         <label class="field field--span-2">
             <span class="field-label">{{ __('ui.pages.visits.form.labels.purpose_uz') }}</span>
             <textarea name="purpose_uz" placeholder="{{ __('ui.pages.visits.form.placeholders.purpose_uz') }}">{{ old('purpose_uz', $visit->purpose_uz) }}</textarea>

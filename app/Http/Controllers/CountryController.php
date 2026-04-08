@@ -37,7 +37,8 @@ class CountryController extends Controller implements HasMiddleware
                         ->orWhere('iso2', 'like', "%{$search}%")
                         ->orWhere('iso3', 'like', "%{$search}%")
                         ->orWhere('region_ru', 'like', "%{$search}%")
-                        ->orWhere('region_uz', 'like', "%{$search}%");
+                        ->orWhere('region_uz', 'like', "%{$search}%")
+                        ->orWhere('partnership_history', 'like', "%{$search}%");
                 });
             })
             ->when($selectedStatus !== '', fn ($query) => $query->where('cooperation_status', $selectedStatus))
@@ -169,20 +170,15 @@ class CountryController extends Controller implements HasMiddleware
             'iso3' => ['nullable', 'string', 'size:3', Rule::unique('countries', 'iso3')->ignore($country?->id)],
             'region_ru' => ['nullable', 'string', 'max:255'],
             'region_uz' => ['nullable', 'string', 'max:255'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'cooperation_status' => ['required', 'string', Rule::in(Country::STATUSES)],
             'boundary_geojson_path' => ['nullable', 'string', 'max:255'],
+            'partnership_history' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
 
         $validated['iso2'] = isset($validated['iso2']) ? strtoupper((string) $validated['iso2']) : null;
         $validated['iso3'] = isset($validated['iso3']) ? strtoupper((string) $validated['iso3']) : null;
         $validated['flag_path'] = null;
-
-        if ($country === null) {
-            $validated['default_zoom'] = Country::DEFAULT_MAP_ZOOM;
-        }
 
         return $validated;
     }

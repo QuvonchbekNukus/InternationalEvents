@@ -28,9 +28,6 @@ class Country extends Model
         'tugatilgan' => 'Yakunlangan',
     ];
 
-    /** Xarita uchun standart masshtab (forma orqali o‘zgartirilmaydi). */
-    public const DEFAULT_MAP_ZOOM = 5;
-
     /**
      * The attributes that are mass assignable.
      *
@@ -43,28 +40,12 @@ class Country extends Model
         'iso3',
         'region_ru',
         'region_uz',
-        'latitude',
-        'longitude',
-        'default_zoom',
         'cooperation_status',
         'boundary_geojson_path',
         'flag_path',
+        'partnership_history',
         'notes',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'latitude' => 'float',
-            'longitude' => 'float',
-            'default_zoom' => 'integer',
-        ];
-    }
 
     public function getDisplayNameAttribute(): string
     {

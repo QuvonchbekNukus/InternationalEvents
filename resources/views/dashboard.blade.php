@@ -352,7 +352,8 @@
                                                                 class="event-calendar-compact__span event-calendar-compact__span--{{ $segment['tone'] }} {{ $segment['type'] }}-span {{ $segment['starts_before'] ? 'is-continued-left' : 'is-start' }} {{ $segment['ends_after'] ? 'is-continued-right' : 'is-end' }}"
                                                                 href="{{ $segment['url'] }}"
                                                                 title="{{ $segment['tooltip'] }}"
-                                                                style="grid-column: {{ $segment['start_column'] }} / span {{ $segment['span'] }}"
+                                                                data-start-column="{{ $segment['start_column'] }}"
+                                                                data-span-size="{{ $segment['span'] }}"
                                                                 data-calendar-span
                                                                 data-item-id="{{ $segment['id'] }}"
                                                                 data-type="{{ $segment['type'] }}"
@@ -457,17 +458,6 @@
             </section>
         @endif
 
-        <x-dashboard-geojson-map
-            :eyebrow="$dashboardGeoJsonMap['eyebrow']"
-            :title="$dashboardGeoJsonMap['title']"
-            :subtitle="$dashboardGeoJsonMap['subtitle']"
-            :height="$dashboardGeoJsonMap['height']"
-            :center="$dashboardGeoJsonMap['center']"
-            :zoom="$dashboardGeoJsonMap['zoom']"
-            :chips="$dashboardGeoJsonMap['chips']"
-            :list-url="route('dashboard.map.countries.index')"
-        />
-
         <div class="stats-grid dashboard-stats-grid">
             @foreach ($resourceCards as $card)
                 @if (auth()->user()?->can($card['permission']))
@@ -486,6 +476,17 @@
                 @endif
             @endforeach
         </div>
+
+        <x-dashboard-geojson-map
+            :eyebrow="$dashboardGeoJsonMap['eyebrow']"
+            :title="$dashboardGeoJsonMap['title']"
+            :subtitle="$dashboardGeoJsonMap['subtitle']"
+            :height="$dashboardGeoJsonMap['height']"
+            :center="$dashboardGeoJsonMap['center']"
+            :zoom="$dashboardGeoJsonMap['zoom']"
+            :chips="$dashboardGeoJsonMap['chips']"
+            :list-url="route('dashboard.map.countries.index')"
+        />
 
     </div>
 @endsection
@@ -748,6 +749,8 @@
                     link.href = segment.url || '#';
                     link.title = segment.tooltip || '';
                     link.style.gridColumn = `${segment.start_column} / span ${segment.span}`;
+                    link.dataset.startColumn = String(segment.start_column ?? '');
+                    link.dataset.spanSize = String(segment.span ?? '');
                     link.dataset.calendarSpan = '';
                     link.dataset.itemId = resolveCalendarItemId(segment);
                     link.dataset.type = itemType;
@@ -884,6 +887,18 @@
                     link.append(arrow);
 
                     return link;
+                };
+
+                const applySpanGridStyles = (container) => {
+                    const root = container instanceof Element ? container : document;
+                    root.querySelectorAll('[data-calendar-span]').forEach((span) => {
+                        const startColumn = Number(span.dataset.startColumn || '');
+                        const spanSize = Number(span.dataset.spanSize || '');
+
+                        if (Number.isInteger(startColumn) && startColumn > 0 && Number.isInteger(spanSize) && spanSize > 0) {
+                            span.style.gridColumn = `${startColumn} / span ${spanSize}`;
+                        }
+                    });
                 };
 
                 document.querySelectorAll('[data-calendar-card]').forEach((calendarCard) => {
@@ -1039,6 +1054,7 @@
                     const syncInteractiveRefs = () => {
                         dayButtons = Array.from(module.querySelectorAll('[data-calendar-day]'));
                         spanLanes = Array.from(module.querySelectorAll('[data-calendar-lane]'));
+                        applySpanGridStyles(module);
                     };
 
                     const renderCalendarFrame = () => {

@@ -298,8 +298,6 @@ class VisitController extends Controller implements HasMiddleware
             'partner_organization_id' => ['nullable', 'integer', 'exists:partner_organizations,id'],
             'city' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:255'],
-            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'start_date' => ['required', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
             'direction' => ['nullable', 'string', Rule::in(Visit::DIRECTIONS)],

@@ -20,8 +20,6 @@ return new class extends Migration
             $table->foreignId('partner_organization_id')->nullable()->constrained()->nullOnDelete();
             $table->string('city')->nullable();
             $table->string('address')->nullable();
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
             $table->date('start_date');
             $table->date('end_date')->nullable();
             $table->enum('direction', ['incoming', 'outgoing'])->nullable();

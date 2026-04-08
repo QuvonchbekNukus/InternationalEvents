@@ -56,8 +56,6 @@ class Visit extends Model
         'partner_organization_id',
         'city',
         'address',
-        'latitude',
-        'longitude',
         'start_date',
         'end_date',
         'direction',
@@ -81,8 +79,6 @@ class Visit extends Model
     protected function casts(): array
     {
         return [
-            'latitude' => 'float',
-            'longitude' => 'float',
             'start_date' => 'date',
             'end_date' => 'date',
         ];

@@ -53,7 +53,7 @@
                             <th>{{ __('ui.pages.countries.index.headers.country') }}</th>
                             <th>{{ __('ui.pages.countries.index.headers.codes') }}</th>
                             <th>{{ __('ui.pages.countries.index.headers.region') }}</th>
-                            <th>{{ __('ui.pages.countries.index.headers.coordinates') }}</th>
+                            <th>{{ __('ui.pages.countries.index.headers.partnership_history') }}</th>
                             <th>{{ __('ui.pages.countries.index.headers.status') }}</th>
                             <th>{{ __('ui.pages.countries.index.headers.files') }}</th>
                             <th></th>
@@ -86,9 +86,8 @@
                                 </td>
                                 <td>
                                     <span class="row-title">
-                                        {{ $country->latitude !== null && $country->longitude !== null ? number_format($country->latitude, 4).', '.number_format($country->longitude, 4) : __('ui.pages.countries.index.values.coordinates_missing') }}
+                                        {{ $country->partnership_history ? \Illuminate\Support\Str::limit($country->partnership_history, 110) : __('ui.pages.countries.index.values.partnership_history_missing') }}
                                     </span>
-                                    <span class="row-subtitle">{{ $country->default_zoom !== null ? __('ui.pages.countries.index.values.zoom').': '.(int) $country->default_zoom : __('ui.pages.countries.index.values.zoom_missing') }}</span>
                                 </td>
                                 <td>
                                     <span class="status-pill {{ $statusClass }}">
@@ -116,7 +115,7 @@
                                         @endcan
 
                                         @can('delete countries')
-                                            <form method="POST" action="{{ route('countries.destroy', $country) }}" onsubmit="return confirm(@js(__('ui.pages.countries.index.confirm_delete')));">
+                                            <form method="POST" action="{{ route('countries.destroy', $country) }}" data-confirm-message="{{ __('ui.pages.countries.index.confirm_delete') }}" onsubmit="return confirm(this.dataset.confirmMessage);">
                                                 @csrf
                                                 @method('DELETE')
 

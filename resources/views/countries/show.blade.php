@@ -9,15 +9,6 @@
             'tugatilgan' => 'is-completed',
             default => 'is-active',
         };
-        $countryHasCoordinates = $country->latitude !== null && $country->longitude !== null;
-        $countryMapZoom = (int) ($country->default_zoom ?? \App\Models\Country::DEFAULT_MAP_ZOOM);
-        $countryMapDescription = implode(' | ', array_filter([
-            $country->display_region,
-            $statuses[$country->cooperation_status] ?? $country->cooperation_status,
-            $countryHasCoordinates
-                ? number_format($country->latitude, 4).', '.number_format($country->longitude, 4)
-                : null,
-        ]));
     @endphp
 
     <div class="page-section">
@@ -70,11 +61,9 @@
                         <strong>{{ $country->iso2 ?: '--' }} / {{ $country->iso3 ?: '---' }}</strong>
                     </article>
 
-                    <article class="detail-list__item">
-                        <span class="detail-list__label">Koordinatalar</span>
-                        <strong>
-                            {{ $country->latitude !== null && $country->longitude !== null ? number_format($country->latitude, 4).', '.number_format($country->longitude, 4) : "Koordinatalar kiritilmagan" }}
-                        </strong>
+                    <article class="detail-list__item detail-list__item--full">
+                        <span class="detail-list__label">Hamkorlik tarixi</span>
+                        <p class="detail-note detail-note--preserve-lines">{{ $country->partnership_history ?: "Hamkorlik tarixi kiritilmagan." }}</p>
                     </article>
                 </div>
             </section>
@@ -120,12 +109,12 @@
             </section>
         </div>
 
-        <div class="stats-grid">
+        <div class="stats-grid dashboard-stats-grid">
             @if ($relatedAccess['partner_organizations'])
-                <article class="stat-card">
+                <article class="stat-card dashboard-stat-card dashboard-stat-card--azure">
                     <div class="stat-card__head">
-                        <span class="stat-icon">
-                            <i class="material-icons" aria-hidden="true">business</i>
+                        <span class="stat-icon app-icon-box app-icon-box--lg">
+                            <i class="material-icons app-icon app-icon--lg" aria-hidden="true">business</i>
                         </span>
                     </div>
                     <strong class="stat-value">{{ $partnerOrganizations->count() }}</strong>
@@ -135,10 +124,10 @@
             @endif
 
             @if ($relatedAccess['agreements'])
-                <article class="stat-card">
+                <article class="stat-card dashboard-stat-card dashboard-stat-card--emerald">
                     <div class="stat-card__head">
-                        <span class="stat-icon">
-                            <i class="material-icons" aria-hidden="true">description</i>
+                        <span class="stat-icon app-icon-box app-icon-box--lg">
+                            <i class="material-icons app-icon app-icon--lg" aria-hidden="true">description</i>
                         </span>
                     </div>
                     <strong class="stat-value">{{ $agreements->count() }}</strong>
@@ -148,10 +137,10 @@
             @endif
 
             @if ($relatedAccess['events'])
-                <article class="stat-card">
+                <article class="stat-card dashboard-stat-card dashboard-stat-card--amber">
                     <div class="stat-card__head">
-                        <span class="stat-icon">
-                            <i class="material-icons" aria-hidden="true">event</i>
+                        <span class="stat-icon app-icon-box app-icon-box--lg">
+                            <i class="material-icons app-icon app-icon--lg" aria-hidden="true">event</i>
                         </span>
                     </div>
                     <strong class="stat-value">{{ $events->count() }}</strong>
@@ -161,10 +150,10 @@
             @endif
 
             @if ($relatedAccess['visits'])
-                <article class="stat-card">
+                <article class="stat-card dashboard-stat-card dashboard-stat-card--cyan">
                     <div class="stat-card__head">
-                        <span class="stat-icon">
-                            <i class="material-icons" aria-hidden="true">flight_takeoff</i>
+                        <span class="stat-icon app-icon-box app-icon-box--lg">
+                            <i class="material-icons app-icon app-icon--lg" aria-hidden="true">flight_takeoff</i>
                         </span>
                     </div>
                     <strong class="stat-value">{{ $visits->count() }}</strong>
@@ -174,10 +163,10 @@
             @endif
 
             @if ($relatedAccess['documents'])
-                <article class="stat-card">
+                <article class="stat-card dashboard-stat-card dashboard-stat-card--indigo">
                     <div class="stat-card__head">
-                        <span class="stat-icon">
-                            <i class="material-icons" aria-hidden="true">folder</i>
+                        <span class="stat-icon app-icon-box app-icon-box--lg">
+                            <i class="material-icons app-icon app-icon--lg" aria-hidden="true">folder</i>
                         </span>
                     </div>
                     <strong class="stat-value">{{ $documents->count() }}</strong>
@@ -391,38 +380,5 @@
             </section>
         @endif
 
-        @if ($countryHasCoordinates)
-            <x-leaflet-map
-                eyebrow="Geolokatsiya"
-                title="{{ $country->display_name }} xaritada"
-                subtitle="Davlat uchun kiritilgan koordinatalar xaritada marker bilan ko'rsatildi."
-                :height="400"
-                :center="[$country->latitude, $country->longitude]"
-                :zoom="$countryMapZoom"
-                :markers="[[
-                    'lat' => $country->latitude,
-                    'lng' => $country->longitude,
-                    'title' => $country->display_name,
-                    'description' => $countryMapDescription,
-                    'openPopup' => true,
-                ]]"
-                :chips="array_values(array_filter([
-                    $country->iso2 ? 'ISO2: '.$country->iso2 : null,
-                    $country->iso3 ? 'ISO3: '.$country->iso3 : null,
-                    $country->display_region,
-                ]))"
-            />
-        @else
-            <section class="content-card">
-                <div class="section-heading">
-                    <div>
-                        <p class="eyebrow">Geolokatsiya</p>
-                        <h2 class="section-title">Davlat xaritada</h2>
-                    </div>
-                </div>
-
-                <p class="detail-empty">Davlat uchun latitude va longitude kiritilmagani sababli xarita ko'rsatilmadi.</p>
-            </section>
-        @endif
     </div>
 @endsection
