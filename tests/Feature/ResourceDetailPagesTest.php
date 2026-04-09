@@ -45,7 +45,25 @@ class ResourceDetailPagesTest extends TestCase
             'iso3' => 'TCT',
             'region_uz' => 'Central Asia',
             'cooperation_status' => 'faol',
-            'partnership_history' => "Hamkorlik tarixi davlat darajasida ham yuritiladi.",
+            'partnership_history' => null,
+        ]);
+
+        $partnershipHistoryDocument = Document::query()->create([
+            'title_uz' => 'Test Country Partnership History',
+            'title_ru' => 'Test Country Partnership History RU',
+            'file_name' => 'tct_ph.docx',
+            'file_path' => 'countries/tct/tct_ph.docx',
+            'file_ext' => 'docx',
+            'file_size' => 1536,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'country_id' => $country->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $country->update([
+            'partnership_history' => $partnershipHistoryDocument->id,
         ]);
 
         $partnerOrganization = PartnerOrganization::query()->create([
@@ -56,7 +74,26 @@ class ResourceDetailPagesTest extends TestCase
             'city' => 'Tashkent',
             'website' => 'example.test',
             'status' => 'faol',
-            'partnership_history' => "Hamkorlik 2022-yildan boshlangan.\nQo'shma forumlar muntazam o'tkaziladi.",
+            'partnership_history' => null,
+        ]);
+
+        $organizationPartnershipHistoryDocument = Document::query()->create([
+            'title_uz' => 'Test Organization Partnership History',
+            'title_ru' => 'Test Organization Partnership History RU',
+            'file_name' => 'to_ph.docx',
+            'file_path' => 'partner organizations/to/to_ph.docx',
+            'file_ext' => 'docx',
+            'file_size' => 1536,
+            'mime_type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'country_id' => $country->id,
+            'partner_organization_id' => $partnerOrganization->id,
+            'uploaded_by' => $user->id,
+            'status' => 'faol',
+            'is_confidential' => false,
+        ]);
+
+        $partnerOrganization->update([
+            'partnership_history' => $organizationPartnershipHistoryDocument->id,
         ]);
 
         $organizationInfoDocument = Document::query()->create([
@@ -199,7 +236,7 @@ class ResourceDetailPagesTest extends TestCase
             ->assertSee('Annual Forum')
             ->assertSee('Delegation Visit')
             ->assertSee('Overview File')
-            ->assertSee("Hamkorlik tarixi davlat darajasida ham yuritiladi.");
+            ->assertSee('tct_ph.docx');
 
         $this->actingAs($user)
             ->get(route('agreements.show', $agreement))
@@ -221,7 +258,7 @@ class ResourceDetailPagesTest extends TestCase
             ->assertSee('Annual Forum')
             ->assertSee('Delegation Visit')
             ->assertSee('organization-info.pdf')
-            ->assertSee('Hamkorlik 2022-yildan boshlangan.')
+            ->assertSee('to_ph.docx')
             ->assertSee('Foto')
             ->assertSee('CV');
 

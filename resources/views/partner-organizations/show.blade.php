@@ -147,8 +147,16 @@
                     </div>
                 </div>
 
-                @if ($partnerOrganization->partnership_history)
-                    <div class="detail-note detail-note--preserve-lines">{{ $partnerOrganization->partnership_history }}</div>
+                @if ($partnerOrganization->partnershipHistoryDocument)
+                    <div class="detail-actions-inline">
+                        <strong>{{ $partnerOrganization->partnershipHistoryDocument->file_name }}</strong>
+                        @if (auth()->user()?->can('view documents') || auth()->user()?->can('view own documents'))
+                            <a class="action-pill" href="{{ route('documents.download', $partnerOrganization->partnershipHistoryDocument) }}">
+                                <i class="material-icons" aria-hidden="true">file_download</i>
+                                <span>{{ __('ui.common.actions.download_file') }}</span>
+                            </a>
+                        @endif
+                    </div>
                 @else
                     <p class="detail-empty">{{ __('ui.pages.partner_organizations.show.values.partnership_history_missing') }}</p>
                 @endif

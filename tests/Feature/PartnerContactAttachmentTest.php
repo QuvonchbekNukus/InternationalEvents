@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -70,8 +71,8 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertSame($partnerOrganization->id, $partnerContact->photoDocument?->partner_organization_id);
         $this->assertSame($partnerOrganization->id, $partnerContact->cvDocument?->partner_organization_id);
 
-        Storage::disk('documents')->assertExists($partnerContact->photoDocument->file_path);
-        Storage::disk('documents')->assertExists($partnerContact->cvDocument->file_path);
+        $this->assertTrue(Storage::disk('documents')->exists($partnerContact->photoDocument->file_path));
+        $this->assertTrue(Storage::disk('documents')->exists($partnerContact->cvDocument->file_path));
 
         $this->actingAs($user)
             ->get(route('partner-contacts.attachments.preview', ['partnerContact' => $partnerContact, 'type' => 'photo']))
@@ -166,10 +167,10 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertSame('Yangilangan Kontakt fotosurati', $photoDocument->title_uz);
         $this->assertSame('Yangilangan Kontakt CV', $cvDocument->title_uz);
 
-        Storage::disk('documents')->assertMissing('2026/03/photo-old.jpg');
-        Storage::disk('documents')->assertMissing('2026/03/cv-old.pdf');
-        Storage::disk('documents')->assertExists($photoDocument->file_path);
-        Storage::disk('documents')->assertExists($cvDocument->file_path);
+        $this->assertFalse(Storage::disk('documents')->exists('2026/03/photo-old.jpg'));
+        $this->assertFalse(Storage::disk('documents')->exists('2026/03/cv-old.pdf'));
+        $this->assertTrue(Storage::disk('documents')->exists($photoDocument->file_path));
+        $this->assertTrue(Storage::disk('documents')->exists($cvDocument->file_path));
         $this->assertMatchesRegularExpression('/^\d{4}\/\d{2}\/.+$/', $photoDocument->file_path);
         $this->assertMatchesRegularExpression('/^\d{4}\/\d{2}\/.+$/', $cvDocument->file_path);
     }
@@ -237,8 +238,59 @@ class PartnerContactAttachmentTest extends TestCase
         $this->assertSame($cvDocument->id, $partnerContact->cv);
         $this->assertDatabaseMissing('documents', ['id' => $photoDocument->id]);
         $this->assertDatabaseHas('documents', ['id' => $cvDocument->id]);
-        Storage::disk('documents')->assertMissing('2026/04/contact-photo-delete.jpg');
-        Storage::disk('documents')->assertExists('2026/04/contact-cv-keep.pdf');
+        $this->assertFalse(Storage::disk('documents')->exists('2026/04/contact-photo-delete.jpg'));
+        $this->assertTrue(Storage::disk('documents')->exists('2026/04/contact-cv-keep.pdf'));
+    }
+
+    public function test_partner_contact_birthday_change_is_logged_in_activity_log(): void
+    {
+        $user = $this->authorizedUser([
+            'edit partner contacts',
+        ]);
+
+        $partnerOrganization = $this->createPartnerOrganization();
+
+        $partnerContact = PartnerContact::query()->create([
+            'partner_organization_id' => $partnerOrganization->id,
+            'full_name_ru' => 'Контакт RU',
+            'full_name_uz' => 'Kontakt UZ',
+            'birthday' => '1990-01-01',
+            'is_primary' => false,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('partner-contacts.update', $partnerContact), [
+            '_method' => 'PUT',
+            'partner_organization_id' => $partnerOrganization->id,
+            'full_name_ru' => 'Контакт RU',
+            'full_name_uz' => 'Kontakt UZ',
+            'birthday' => '1991-02-02',
+            'position_ru' => null,
+            'position_uz' => null,
+            'email' => null,
+            'phone' => null,
+            'description' => null,
+            'is_primary' => '0',
+        ]);
+
+        $response->assertRedirect(route('partner-contacts.index'));
+
+        $activity = Activity::query()
+            ->where('event', 'updated')
+            ->where('subject_type', PartnerContact::class)
+            ->where('subject_id', $partnerContact->id)
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity);
+        $this->assertSame($user->id, $activity->causer_id);
+        $this->assertSame(User::class, $activity->causer_type);
+        $attributes = $activity->properties->get('attributes', []);
+        $old = $activity->properties->get('old', []);
+        $this->assertArrayHasKey('birthday', $attributes);
+        $this->assertArrayHasKey('birthday', $old);
+        $this->assertNotSame('', (string) $attributes['birthday']);
+        $this->assertNotSame('', (string) $old['birthday']);
+        $this->assertNotSame(substr((string) $old['birthday'], 0, 10), substr((string) $attributes['birthday'], 0, 10));
     }
 
     /**

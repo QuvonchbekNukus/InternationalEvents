@@ -1,0 +1,39 @@
+@import "quill/dist/quill.snow.css";
+
+.country-ph-quill .ql-toolbar.ql-snow,
+.country-ph-quill .ql-container.ql-snow {
+    border-color: rgba(15, 23, 42, 0.18);
+    border-radius: 12px;
+}
+
+.country-ph-quill .ql-toolbar.ql-snow {
+    background: #f8fafc;
+    margin-bottom: 8px;
+}
+
+.country-ph-quill .ql-container.ql-snow {
+    min-height: 220px;
+    background: #fff;
+}
+
+.country-ph-quill .ql-editor {
+    min-height: 180px;
+    font-size: 0.95rem;
+    line-height: 1.65;
+}
+
+.country-notes-field {
+    margin-top: 8px;
+}
+
+.country-notes-field__label {
+    margin-bottom: 8px;
+}
+
+.country-notes-field__textarea {
+    min-height: 190px !important;
+    padding: 16px !important;
+    line-height: 1.65 !important;
+    resize: vertical;
+}
+

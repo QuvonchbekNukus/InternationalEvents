@@ -85,9 +85,16 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="row-title">
-                                        {{ $country->partnership_history ? \Illuminate\Support\Str::limit($country->partnership_history, 110) : __('ui.pages.countries.index.values.partnership_history_missing') }}
-                                    </span>
+                                    @if ($country->partnershipHistoryDocument)
+                                        <span class="row-title">{{ $country->partnershipHistoryDocument->file_name }}</span>
+                                        @if (auth()->user()?->can('view documents') || auth()->user()?->can('view own documents'))
+                                            <a class="row-subtitle row-title-link" href="{{ route('documents.download', $country->partnershipHistoryDocument) }}">
+                                                {{ __('ui.common.actions.download_file') }}
+                                            </a>
+                                        @endif
+                                    @else
+                                        <span class="row-title">{{ __('ui.pages.countries.index.values.partnership_history_missing') }}</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="status-pill {{ $statusClass }}">

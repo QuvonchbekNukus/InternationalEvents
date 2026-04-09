@@ -164,8 +164,8 @@
             <section class="content-card detail-card detail-card--full">
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Biriktirilgan fayllar</p>
-                        <h2 class="section-title">Kelishuv hujjatlari</h2>
+                        <p class="eyebrow">{{ __('ui.details.agreements.attachments_eyebrow') }}</p>
+                        <h2 class="section-title">{{ __('ui.details.agreements.attachments_title') }}</h2>
                     </div>
                 </div>
 
@@ -177,7 +177,7 @@
                                 <span>
                                     {{ $document->file_name }}
                                     {{ ' | ' }}
-                                    {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                    {{ strtoupper($document->file_ext ?: __('ui.details.agreements.file_ext_fallback')) }}
                                     @if ($document->file_size_human)
                                         {{ ' | '.$document->file_size_human }}
                                     @endif
@@ -192,11 +192,11 @@
                                     <div class="detail-actions-inline">
                                         <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
                                             <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                            <span>Ochish</span>
+                                            <span>{{ __('ui.common.actions.open') }}</span>
                                         </a>
                                         <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
                                             <i class="material-icons" aria-hidden="true">file_download</i>
-                                            <span>Faylni olish</span>
+                                            <span>{{ __('ui.common.actions.download_file') }}</span>
                                         </a>
                                     </div>
                                 @endif
@@ -204,7 +204,7 @@
                         @endforeach
                     </div>
                 @else
-                    <p class="detail-empty">Kelishuv uchun hali fayl biriktirilmagan.</p>
+                    <p class="detail-empty">{{ __('ui.details.agreements.attachments_empty') }}</p>
                 @endif
             </section>
         </div>

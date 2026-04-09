@@ -177,15 +177,15 @@
 
                 <div class="section-heading">
                     <div>
-                        <p class="eyebrow">Biriktirilgan fayllar</p>
-                        <h2 class="section-title">Tadbir hujjatlari</h2>
+                        <p class="eyebrow">{{ __('ui.details.events.attachments_eyebrow') }}</p>
+                        <h2 class="section-title">{{ __('ui.details.events.attachments_title') }}</h2>
                     </div>
                 </div>
 
                 @if ($documents->isNotEmpty())
                     @if ($imageDocuments->isNotEmpty())
                         <div class="attachment-section">
-                            <p class="attachment-section__label">Rasm previewlari</p>
+                            <p class="attachment-section__label">{{ __('ui.details.events.attachments_images_label') }}</p>
 
                             <div class="document-gallery {{ $imageDocuments->count() === 1 ? 'document-gallery--single' : '' }}">
                                 @foreach ($imageDocuments as $document)
@@ -205,7 +205,7 @@
                                                 <span>
                                                     {{ $document->file_name }}
                                                     {{ ' | ' }}
-                                                    {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                                    {{ strtoupper($document->file_ext ?: __('ui.details.events.file_ext_fallback')) }}
                                                     @if ($document->file_size_human)
                                                         {{ ' | '.$document->file_size_human }}
                                                     @endif
@@ -221,11 +221,11 @@
                                             <div class="detail-actions-inline">
                                                 <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
                                                     <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                                    <span>Ochish</span>
+                                                    <span>{{ __('ui.common.actions.open') }}</span>
                                                 </a>
                                                 <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
                                                     <i class="material-icons" aria-hidden="true">file_download</i>
-                                                    <span>Faylni olish</span>
+                                                    <span>{{ __('ui.common.actions.download_file') }}</span>
                                                 </a>
                                             </div>
                                         </div>
@@ -237,7 +237,7 @@
 
                     @if ($otherDocuments->isNotEmpty())
                         <div class="attachment-section">
-                            <p class="attachment-section__label">Boshqa biriktirmalar</p>
+                            <p class="attachment-section__label">{{ __('ui.details.events.attachments_other_label') }}</p>
 
                             <div class="stack-list">
                                 @foreach ($otherDocuments as $document)
@@ -246,7 +246,7 @@
                                         <span>
                                             {{ $document->file_name }}
                                             {{ ' | ' }}
-                                            {{ strtoupper($document->file_ext ?: 'fayl') }}
+                                            {{ strtoupper($document->file_ext ?: __('ui.details.events.file_ext_fallback')) }}
                                             @if ($document->file_size_human)
                                                 {{ ' | '.$document->file_size_human }}
                                             @endif
@@ -261,11 +261,11 @@
                                             <div class="detail-actions-inline">
                                                 <a class="action-pill" href="{{ $document->file_url }}" target="_blank" rel="noopener">
                                                     <i class="material-icons" aria-hidden="true">open_in_new</i>
-                                                    <span>Ochish</span>
+                                                    <span>{{ __('ui.common.actions.open') }}</span>
                                                 </a>
                                                 <a class="action-pill" href="{{ $document->file_url }}" download="{{ $document->file_name }}">
                                                     <i class="material-icons" aria-hidden="true">file_download</i>
-                                                    <span>Faylni olish</span>
+                                                    <span>{{ __('ui.common.actions.download_file') }}</span>
                                                 </a>
                                             </div>
                                         @endif
@@ -275,7 +275,7 @@
                         </div>
                     @endif
                 @else
-                    <p class="detail-empty">Tadbir uchun hali fayl biriktirilmagan.</p>
+                    <p class="detail-empty">{{ __('ui.details.events.attachments_empty') }}</p>
                 @endif
             </section>
         </div>

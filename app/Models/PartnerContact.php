@@ -36,19 +36,6 @@ class PartnerContact extends Model
     ];
 
     /**
-     * Attributes excluded from audit details.
-     *
-     * @var list<string>
-     */
-    protected array $activityLogExcept = [
-        'birthday',
-        'photo',
-        'cv',
-        'email',
-        'phone',
-    ];
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

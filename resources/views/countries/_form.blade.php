@@ -66,21 +66,40 @@
             @enderror
         </label>
 
-        <label class="field field--span-2">
+        <div class="field field--span-2">
             <span class="field-label">{{ __('ui.pages.countries.form.labels.partnership_history') }}</span>
-            <textarea name="partnership_history" placeholder="{{ __('ui.pages.countries.form.placeholders.partnership_history') }}">{{ old('partnership_history', $country->partnership_history) }}</textarea>
-            @error('partnership_history')
+            @php($partnershipHistoryInitial = old('partnership_history_content', $partnershipHistoryContent ?? ''))
+            <div class="country-ph-quill" data-country-ph-quill>
+                <div data-country-ph-quill-toolbar>
+                    <span class="ql-formats">
+                        <button type="button" class="ql-bold" aria-label="Bold"></button>
+                        <button type="button" class="ql-italic" aria-label="Italic"></button>
+                        <button type="button" class="ql-underline" aria-label="Underline"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button type="button" class="ql-list" value="ordered" aria-label="Ordered list"></button>
+                        <button type="button" class="ql-list" value="bullet" aria-label="Bullet list"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button type="button" class="ql-clean" aria-label="Clear formatting"></button>
+                    </span>
+                </div>
+                <div data-country-ph-quill-editor aria-label="{{ __('ui.pages.countries.form.labels.partnership_history') }}"></div>
+                <textarea name="partnership_history_content" data-country-ph-quill-input hidden>{{ $partnershipHistoryInitial }}</textarea>
+            </div>
+            <span class="field-help">Word fayl avtomatik yaratiladi va yangilanadi: `ISO3_ph.docx`</span>
+            @error('partnership_history_content')
                 <span class="field-error">{{ $message }}</span>
             @enderror
-        </label>
+        </div>
 
-        <label class="field field--span-2">
-            <span class="field-label">{{ __('ui.pages.countries.form.labels.notes') }}</span>
-            <textarea name="notes" placeholder="{{ __('ui.pages.countries.form.placeholders.notes') }}">{{ old('notes', $country->notes) }}</textarea>
+        <div class="field field--span-2 country-notes-field">
+            <span class="field-label country-notes-field__label" style="display:block; margin-top: 18px; margin-bottom: 10px;">{{ __('ui.pages.countries.form.labels.notes') }}</span>
+            <textarea class="country-notes-field__textarea" name="notes" placeholder="{{ __('ui.pages.countries.form.placeholders.notes') }}" style="margin-top: 10px; min-height: 210px; padding-top: 34px;">{{ old('notes', $country->notes) }}</textarea>
             @error('notes')
                 <span class="field-error">{{ $message }}</span>
             @enderror
-        </label>
+        </div>
     </div>
 
     <div class="form-actions">
@@ -91,3 +110,9 @@
         </button>
     </div>
 </form>
+
+@once
+    @push('head')
+        @vite(['resources/css/countries/ph-editor.css', 'resources/js/countries/ph-editor.js'])
+    @endpush
+@endonce

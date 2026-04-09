@@ -29,7 +29,7 @@ class PartnerOrganizationSeeder extends Seeder
                 'website' => 'gov.kz/memleket/entities/qriim',
                 'status' => 'faol',
                 'notes' => 'Huquq-tartibot va delegatsiyalar almashinuvi boyicha hamkor.',
-                'partnership_history' => "2019-yildan buyon protokol uchrashuvlari, o'quv tashriflari va tajriba almashinuvi yo'nalishlarida muntazam hamkorlik olib boriladi.",
+                'partnership_history' => null,
             ],
             [
                 'country_iso3' => 'KGZ',
@@ -42,7 +42,7 @@ class PartnerOrganizationSeeder extends Seeder
                 'website' => 'kyrgyzembassy.uz',
                 'status' => 'faol',
                 'notes' => 'Protokol tadbirlari va rasmiy tashriflarni muvofiqlashtiradi.',
-                'partnership_history' => "Elchixona bilan rasmiy uchrashuvlar, delegatsiyalar tashrifi va ikki tomonlama tadbirlar bo'yicha doimiy ishchi aloqalar shakllangan.",
+                'partnership_history' => null,
             ],
             [
                 'country_iso3' => 'TUR',
@@ -55,7 +55,7 @@ class PartnerOrganizationSeeder extends Seeder
                 'website' => 'jsga.edu.tr',
                 'status' => 'faol',
                 'notes' => 'Talim, trening va malaka oshirish yonalishida hamkorlik qiladi.',
-                'partnership_history' => "Akademiya bilan malaka oshirish, o'quv kurslari va qo'shma seminarlar doirasida tajriba almashish ishlari olib borilgan.",
+                'partnership_history' => null,
             ],
             [
                 'country_iso3' => 'CHN',
@@ -68,7 +68,7 @@ class PartnerOrganizationSeeder extends Seeder
                 'website' => 'ppsuc.edu.cn',
                 'status' => 'rejada',
                 'notes' => 'Qoshma seminar va akademik almashinuv rejalashtirilgan.',
-                'partnership_history' => "Hamkorlik bo'yicha dastlabki muzokaralar o'tkazilgan, akademik almashinuv va maxsus seminarlarni yo'lga qo'yish rejalashtirilgan.",
+                'partnership_history' => null,
             ],
             [
                 'country_iso3' => 'RUS',
@@ -81,7 +81,7 @@ class PartnerOrganizationSeeder extends Seeder
                 'website' => 'rosguard.gov.ru',
                 'status' => 'tugallangan',
                 'notes' => 'Ayrim qoshma dasturlar yakunlangan va arxivda saqlanadi.',
-                'partnership_history' => "Oldingi yillarda qo'shma dasturlar va delegatsion uchrashuvlar o'tkazilgan, hozirda hamkorlik natijalari arxiv materiallari ko'rinishida saqlanmoqda.",
+                'partnership_history' => null,
             ],
         ];
 

@@ -6,6 +6,7 @@ use App\Models\Concerns\DeletesOwnedDocuments;
 use App\Models\Concerns\LogsModelActivity;
 use App\Models\Concerns\ResolvesLocalizedAttributes;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
@@ -46,6 +47,16 @@ class Country extends Model
         'partnership_history',
         'notes',
     ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'partnership_history' => 'integer',
+        ];
+    }
 
     public function getDisplayNameAttribute(): string
     {
@@ -96,6 +107,11 @@ class Country extends Model
     public function documents(): HasMany
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function partnershipHistoryDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'partnership_history');
     }
 
     protected function ownedDocumentsQuery()

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('cooperation_status', ['faol', 'rejada', 'tugatilgan'])->default('faol');
             $table->string('boundary_geojson_path')->nullable();
             $table->string('flag_path')->nullable();
-            $table->text('partnership_history')->nullable();
+            $table->integer('partnership_history')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

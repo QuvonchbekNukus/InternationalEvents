@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\Document;
 use App\Models\OrganizationType;
 use App\Models\PartnerOrganization;
+use App\Services\PartnerOrganizationPartnershipHistoryWordService;
 use App\Services\UploadedFileProcessor;
 use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
@@ -50,7 +51,6 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                         ->orWhere('city', 'like', "%{$search}%")
                         ->orWhere('website', 'like', "%{$search}%")
                         ->orWhere('notes', 'like', "%{$search}%")
-                        ->orWhere('partnership_history', 'like', "%{$search}%")
                         ->orWhereHas('country', fn ($countryQuery) => $countryQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%")
@@ -58,6 +58,10 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
                         ->orWhereHas('organizationType', fn ($typeQuery) => $typeQuery
                             ->where('name_uz', 'like', "%{$search}%")
                             ->orWhere('name_ru', 'like', "%{$search}%"));
+
+                    if (is_numeric($search)) {
+                        $partnerOrganizationQuery->orWhere('partnership_history', (int) $search);
+                    }
                 });
             })
             ->when($selectedCountry !== '', fn ($query) => $query->where('country_id', (int) $selectedCountry))
@@ -87,6 +91,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'partnerOrganization' => new PartnerOrganization([
                 'status' => 'faol',
             ]),
+            'partnershipHistoryContent' => old('partnership_history_content', ''),
             ...$this->formOptions(),
         ]);
     }
@@ -97,6 +102,7 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'country:id,name_uz,name_ru,iso2,iso3',
             'organizationType:id,name_uz,name_ru',
             'organizationInfoDocument:id,title_uz,title_ru,file_name,file_ext,file_size,file_path,mime_type,created_at',
+            'partnershipHistoryDocument:id,file_name,file_path',
         ]);
 
         $canViewPartnerContacts = (bool) $request->user()?->can('view partner contacts');
@@ -141,10 +147,14 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validatedData($request);
+        $partnershipHistoryContent = (string) $request->input('partnership_history_content', '');
 
-        $partnerOrganization = DB::transaction(function () use ($request, $validated) {
+        $partnerOrganization = DB::transaction(function () use ($request, $validated, $partnershipHistoryContent) {
             $partnerOrganization = PartnerOrganization::query()->create($validated);
             $this->syncOrganizationInfoDocument($request, $partnerOrganization->refresh(), (int) $request->user()->id);
+            $documentId = app(PartnerOrganizationPartnershipHistoryWordService::class)
+                ->upsertForPartnerOrganization($partnerOrganization->refresh(), $partnershipHistoryContent, (int) $request->user()->id);
+            $partnerOrganization->forceFill(['partnership_history' => $documentId])->save();
 
             return $partnerOrganization->refresh();
         });
@@ -160,6 +170,10 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
 
         return view('partner-organizations.edit', [
             'partnerOrganization' => $partnerOrganization,
+            'partnershipHistoryContent' => old(
+                'partnership_history_content',
+                app(PartnerOrganizationPartnershipHistoryWordService::class)->readPartnershipHistoryContent($partnerOrganization)
+            ),
             ...$this->formOptions(),
         ]);
     }
@@ -167,10 +181,14 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
     public function update(Request $request, PartnerOrganization $partnerOrganization): RedirectResponse
     {
         $validated = $this->validatedData($request);
+        $partnershipHistoryContent = (string) $request->input('partnership_history_content', '');
 
-        DB::transaction(function () use ($request, $partnerOrganization, $validated) {
+        DB::transaction(function () use ($request, $partnerOrganization, $validated, $partnershipHistoryContent) {
             $partnerOrganization->update($validated);
             $this->syncOrganizationInfoDocument($request, $partnerOrganization->refresh(), (int) $request->user()->id);
+            $documentId = app(PartnerOrganizationPartnershipHistoryWordService::class)
+                ->upsertForPartnerOrganization($partnerOrganization->refresh(), $partnershipHistoryContent, (int) $request->user()->id);
+            $partnerOrganization->forceFill(['partnership_history' => $documentId])->save();
         });
 
         return redirect()
@@ -229,11 +247,12 @@ class PartnerOrganizationController extends Controller implements HasMiddleware
             'website' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'string', Rule::in(PartnerOrganization::STATUSES)],
             'notes' => ['nullable', 'string'],
-            'partnership_history' => ['nullable', 'string'],
+            'partnership_history_content' => ['nullable', 'string'],
             'organization_info_file' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:51200'],
         ]);
 
         unset($validated['organization_info_file']);
+        unset($validated['partnership_history_content']);
 
         return $validated;
     }

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Services\CountryPartnershipHistoryWordService;
 use App\Support\LocaleLabels;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -29,6 +31,7 @@ class CountryController extends Controller implements HasMiddleware
         $selectedStatus = trim((string) $request->string('status'));
 
         $countries = Country::query()
+            ->with('partnershipHistoryDocument:id,file_name')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($countryQuery) use ($search) {
                     $countryQuery
@@ -37,8 +40,11 @@ class CountryController extends Controller implements HasMiddleware
                         ->orWhere('iso2', 'like', "%{$search}%")
                         ->orWhere('iso3', 'like', "%{$search}%")
                         ->orWhere('region_ru', 'like', "%{$search}%")
-                        ->orWhere('region_uz', 'like', "%{$search}%")
-                        ->orWhere('partnership_history', 'like', "%{$search}%");
+                        ->orWhere('region_uz', 'like', "%{$search}%");
+
+                    if (is_numeric($search)) {
+                        $countryQuery->orWhere('partnership_history', (int) $search);
+                    }
                 });
             })
             ->when($selectedStatus !== '', fn ($query) => $query->where('cooperation_status', $selectedStatus))
@@ -62,13 +68,14 @@ class CountryController extends Controller implements HasMiddleware
             'country' => new Country([
                 'cooperation_status' => 'faol',
             ]),
+            'partnershipHistoryContent' => old('partnership_history_content', ''),
             'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
         ]);
     }
 
     public function show(Request $request, Country $country): View
     {
-        $country->loadMissing([]);
+        $country->loadMissing(['partnershipHistoryDocument:id,file_name,file_path']);
 
         $canViewPartnerOrganizations = (bool) $request->user()?->can('view partner organizations');
         $canViewAgreements = (bool) $request->user()?->can('view agreements')
@@ -108,7 +115,17 @@ class CountryController extends Controller implements HasMiddleware
 
     public function store(Request $request): RedirectResponse
     {
-        $country = Country::create($this->validatedData($request));
+        $validated = $this->validatedData($request);
+        $partnershipHistoryContent = (string) $request->input('partnership_history_content', '');
+
+        $country = DB::transaction(function () use ($validated, $partnershipHistoryContent, $request) {
+            $country = Country::query()->create($validated);
+            $documentId = app(CountryPartnershipHistoryWordService::class)
+                ->upsertForCountry($country, $partnershipHistoryContent, (int) $request->user()->id);
+            $country->forceFill(['partnership_history' => $documentId])->save();
+
+            return $country->fresh();
+        });
 
         return redirect()
             ->route('countries.index')
@@ -119,13 +136,27 @@ class CountryController extends Controller implements HasMiddleware
     {
         return view('countries.edit', [
             'country' => $country,
+            'partnershipHistoryContent' => old(
+                'partnership_history_content',
+                app(CountryPartnershipHistoryWordService::class)->readPartnershipHistoryContent($country)
+            ),
             'statuses' => LocaleLabels::map(Country::STATUS_TRANSLATION_KEY, Country::STATUSES),
         ]);
     }
 
     public function update(Request $request, Country $country): RedirectResponse
     {
-        $country->update($this->validatedData($request, $country));
+        $validated = $this->validatedData($request, $country);
+        $partnershipHistoryContent = (string) $request->input('partnership_history_content', '');
+
+        $country = DB::transaction(function () use ($validated, $country, $partnershipHistoryContent, $request) {
+            $country->update($validated);
+            $documentId = app(CountryPartnershipHistoryWordService::class)
+                ->upsertForCountry($country->fresh(), $partnershipHistoryContent, (int) $request->user()->id);
+            $country->forceFill(['partnership_history' => $documentId])->save();
+
+            return $country->fresh();
+        });
 
         return redirect()
             ->route('countries.index')
@@ -172,13 +203,14 @@ class CountryController extends Controller implements HasMiddleware
             'region_uz' => ['nullable', 'string', 'max:255'],
             'cooperation_status' => ['required', 'string', Rule::in(Country::STATUSES)],
             'boundary_geojson_path' => ['nullable', 'string', 'max:255'],
-            'partnership_history' => ['nullable', 'string'],
+            'partnership_history_content' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ]);
 
         $validated['iso2'] = isset($validated['iso2']) ? strtoupper((string) $validated['iso2']) : null;
         $validated['iso3'] = isset($validated['iso3']) ? strtoupper((string) $validated['iso3']) : null;
         $validated['flag_path'] = null;
+        unset($validated['partnership_history_content']);
 
         return $validated;
     }

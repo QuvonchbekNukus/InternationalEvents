@@ -23,7 +23,7 @@ class CountrySeeder extends Seeder
                 'cooperation_status' => 'faol',
                 'boundary_geojson_path' => null,
                 'flag_path' => null,
-                'partnership_history' => "Mintaqaviy hamkorlik, qo'shma tadbirlar va delegatsiyalar almashinuvi muntazam olib borilgan.",
+                'partnership_history' => null,
                 'notes' => "Markaziy Osiyodagi muhim hamkor davlatlardan biri.",
             ],
             [
@@ -36,7 +36,7 @@ class CountrySeeder extends Seeder
                 'cooperation_status' => 'faol',
                 'boundary_geojson_path' => null,
                 'flag_path' => null,
-                'partnership_history' => "Mintaqaviy xavfsizlik, malaka oshirish va tajriba almashinuvi yo'nalishida faol hamkorlik mavjud.",
+                'partnership_history' => null,
                 'notes' => "Mintaqaviy hamkorlik va tajriba almashinuvi yo'nalishida faol hamkor.",
             ],
             [
@@ -49,7 +49,7 @@ class CountrySeeder extends Seeder
                 'cooperation_status' => 'faol',
                 'boundary_geojson_path' => null,
                 'flag_path' => null,
-                'partnership_history' => "Xalqaro seminarlar, rasmiy uchrashuvlar va delegatsiyalar almashinuvi doirasida uzoq muddatli hamkorlik shakllangan.",
+                'partnership_history' => null,
                 'notes' => "Xalqaro tadbirlar va delegatsiyalar almashinuviga oid hamkorlik yo'lga qo'yilgan.",
             ],
             [
@@ -62,7 +62,7 @@ class CountrySeeder extends Seeder
                 'cooperation_status' => 'rejada',
                 'boundary_geojson_path' => null,
                 'flag_path' => null,
-                'partnership_history' => "Texnik hamkorlik bo'yicha dastlabki muloqotlar o'tkazilgan, qo'shma loyihalar bo'yicha reja ishlab chiqilmoqda.",
+                'partnership_history' => null,
                 'notes' => "Texnik hamkorlik va rejalashtirilgan uchrashuvlar bosqichida.",
             ],
             [
@@ -75,7 +75,7 @@ class CountrySeeder extends Seeder
                 'cooperation_status' => 'tugatilgan',
                 'boundary_geojson_path' => null,
                 'flag_path' => null,
-                'partnership_history' => "Oldingi yillarda o'tkazilgan hamkorlik dasturlari yakunlangan, muhim materiallar arxivda saqlanadi.",
+                'partnership_history' => null,
                 'notes' => "Ayrim hamkorlik bosqichlari yakunlangan va arxiv uchun saqlanadi.",
             ],
         ];

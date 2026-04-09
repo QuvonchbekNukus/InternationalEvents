@@ -27,13 +27,6 @@
         </div>
     </div>
 
-    <div class="topbar-center">
-        <label class="topbar-search" aria-label="{{ __('ui.nav.search_label') }}">
-            <i class="material-icons app-icon app-icon--md topbar-icon" aria-hidden="true">search</i>
-            <input type="text" placeholder="{{ __('ui.nav.search_placeholder') }}" />
-        </label>
-    </div>
-
     <div class="topbar-right">
         <div class="topbar-actions">
             <form class="topbar-locale-form" method="POST" action="{{ route('locale.switch') }}">

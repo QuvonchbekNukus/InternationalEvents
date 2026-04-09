@@ -50,6 +50,16 @@ class PartnerOrganization extends Model
         'partnership_history',
     ];
 
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'partnership_history' => 'integer',
+        ];
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
@@ -63,6 +73,11 @@ class PartnerOrganization extends Model
     public function organizationInfoDocument(): BelongsTo
     {
         return $this->belongsTo(Document::class, 'organization_info_document_id');
+    }
+
+    public function partnershipHistoryDocument(): BelongsTo
+    {
+        return $this->belongsTo(Document::class, 'partnership_history');
     }
 
     public function partnerContacts(): HasMany
